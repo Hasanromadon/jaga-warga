@@ -4,7 +4,7 @@ import { useAuthContext } from '../../context/AuthProvider';
 import BillsList from '../../components/BillsList';
 import ConfirmBillList from '../../components/ConfirmBillList';
 import AddBillForm from '../../components/AddBillForm';
-import ResidentForm from '../../components/ResidentForm';
+import ResidentList from '../../components/ResidentList';
 import HistoryList from '../../components/HistoryList';
 import { Tabs, TabsContent } from '../../components/ui/tabs';
 import { BadgeCheck, PlusCircle, Users, Clock } from 'lucide-react';
@@ -45,7 +45,7 @@ export default function DashboardPage() {
       key: 'warga',
       label: 'Warga',
       icon: Users,
-      content: <ResidentForm onSave={() => {}} />,
+      content: <ResidentList />,
     },
     {
       key: 'history',

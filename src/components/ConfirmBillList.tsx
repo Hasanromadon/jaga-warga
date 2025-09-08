@@ -3,9 +3,12 @@
 import { BadgeCheck, XCircle, Download } from 'lucide-react';
 import { EmptyBillIllustration } from './svg/EmptyBillIllustration';
 import { Button } from './ui/button';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card';
+import { Card, } from './ui/card';
 import { ModalConfirmation } from './ui/modal-confirmation';
 import { Dialog, DialogContent } from './ui/dialog';
+import { SearchInput } from './custom/search-input';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 function PreviewImageModal({ open, src, onClose }: { open: boolean; src: string|null; onClose: () => void }) {
   return (
@@ -40,22 +43,6 @@ function PreviewImageModal({ open, src, onClose }: { open: boolean; src: string|
     </Dialog>
   );
 }
-import { Input } from './ui/input';
-import { useState } from 'react';
-// Reusable search input component
-function SearchInput({ value, onChange }: { value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
-  return (
-    <Input
-      type="text"
-      placeholder="Cari nama/blok/nomor/bulan/tahun..."
-      value={value}
-      onChange={onChange}
-      className="bg-white transition-colors placeholder:text-blue-400 placeholder:font-medium"
-    />
-  );
-}
-import { toast } from 'react-hot-toast';
-
 
 export default function ConfirmBillList() {
   // Dummy data for UI/UX preview
