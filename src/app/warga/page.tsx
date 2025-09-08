@@ -6,7 +6,8 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../components/ui/select";
 import { Label } from "../../components/ui/label";
 import toast, { Toaster } from "react-hot-toast";
-import { UploadCloud, Search, BadgeCheck, XCircle, Home, Calendar, Loader2 } from "lucide-react";
+import {  Search,  Home, Calendar, Loader2, ChevronDown } from "lucide-react";
+import { BillDetail } from "../../components/custom/bill-detail";
 import Image from "next/image";
 
 
@@ -29,6 +30,7 @@ export default function WargaPage() {
   const [bukti, setBukti] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState(false);
+    const [showForm, setShowForm] = useState(true);
 
   const handleCari = async () => {
     setLoading(true);
@@ -50,7 +52,8 @@ export default function WargaPage() {
         toast.error("Tagihan tidak ditemukan.");
       } else {
         const data = snap.docs[0].data();
-        setBill({ id: snap.docs[0].id, ...data } as Bill);
+          setBill({ id: snap.docs[0].id, ...data } as Bill);
+          setShowForm(false);
       }
     } catch (e) {
       setError("Gagal mencari tagihan.");
@@ -93,100 +96,83 @@ export default function WargaPage() {
         <h1 className="text-xl font-bold text-blue-900 mb-1 text-center">Cek Tagihan IPL</h1>
         <p className="text-xs text-blue-700 text-center mb-2">Masukkan data rumah Anda untuk melihat status tagihan IPL</p>
       </div>
-      <Card className="w-full max-w-sm shadow-xl border-0">
-        <CardContent className="pt-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label className="text-xs font-semibold flex items-center gap-1"><Home className="w-4 h-4" />Blok Rumah</Label>
-              <Select value={blok} onValueChange={setBlok}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Pilih Blok" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BLOK_LIST.map(b => (
-                    <SelectItem key={b} value={b}>{b}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold flex items-center gap-1">Nomor Rumah</label>
-              <Input placeholder="Nomor Rumah" value={nomor} onChange={e => setNomor(e.target.value)} inputMode="numeric" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label className="text-xs font-semibold flex items-center gap-1"><Calendar className="w-4 h-4" />Bulan</Label>
-              <Select value={bulan} onValueChange={setBulan}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Pilih Bulan" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BULAN_LIST.map(b => (
-                    <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label className="text-xs font-semibold flex items-center gap-1">Tahun</Label>
-              <Select value={tahun} onValueChange={setTahun}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Pilih Tahun" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TAHUN_LIST.map(t => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={handleCari} disabled={loading || !blok || !nomor || !bulan || !tahun} className="w-full mt-2 flex items-center justify-center gap-2">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />} Cek Tagihan
-            </Button>
-            {/* Error handled by toast, no need for Alert here */}
-            <div className="text-xs text-blue-500 mt-2 text-center">
-              Pastikan blok, nomor rumah, bulan, dan tahun sudah benar sebelum menekan <b>Cek Tagihan</b>.<br />
-              Jika masih ada kendala, hubungi admin IPL (<b>Pak Budi</b>): <a href="https://wa.me/6281234567890" className="underline text-blue-700" target="_blank" rel="noopener noreferrer">0812-3456-7890</a>
-            </div>
-          </div>
-          {bill && (
-            <div className="mt-6 space-y-3 rounded-lg bg-blue-50 p-4 border border-blue-100 shadow-sm">
-              <div className="flex items-center gap-2 text-base font-semibold text-blue-900">
-                <Home className="w-5 h-5 text-blue-600" />
-                {bill.nama} ({bill.blokRumah}/{bill.nomorRumah})
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="w-4 h-4 text-blue-500" />
-                {BULAN_LIST.find(b => b.value === bill.bulan)?.label}/{bill.tahun}
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="font-semibold">Nominal:</span>
-                <span className="text-blue-700">Rp{bill.nominal}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="font-semibold">Status:</span>
-                {bill.status === "lunas" ? (
-                  <span className="flex items-center gap-1 text-green-600"><BadgeCheck className="w-4 h-4" /> Lunas</span>
-                ) : bill.status === "pending" ? (
-                  <span className="flex items-center gap-1 text-yellow-600"><UploadCloud className="w-4 h-4" /> Menunggu Verifikasi</span>
-                ) : (
-                  <span className="flex items-center gap-1 text-red-600"><XCircle className="w-4 h-4" /> Belum Bayar</span>
-                )}
-              </div>
-              {bill.status !== "lunas" && (
-                <div className="mt-4 flex flex-col gap-2">
-                  <label className="font-semibold">Upload Bukti Pembayaran</label>
-                  <Input type="file" accept="image/*,application/pdf" onChange={e => setBukti(e.target.files?.[0] || null)} />
-                  <Button onClick={handleUpload} disabled={uploading || !bukti} className="w-full flex items-center justify-center gap-2">
-                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />} Konfirmasi Pembayaran
+        <Card className="w-full max-w-sm shadow-xl border-0">
+          <CardContent className="pt-6">
+            <div className="flex flex-col gap-4">
+              {bill && (
+                <button
+                  className="w-full text-left font-semibold text-blue-900 bg-blue-50 rounded-lg px-3 py-2 mb-2 border border-blue-100 transition flex items-center justify-between"
+                  onClick={() => setShowForm(v => !v)}
+                  type="button"
+                  aria-expanded={showForm}
+                >
+                  <span>Cek Tagihan Rumah</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${!showForm ? 'rotate-180' : ''}`} />
+                </button>
+              )}
+              {(showForm || !bill) && (
+                <div className="flex flex-col gap-2 animate-fade-in">
+                  <Label className="text-xs font-semibold flex items-center gap-1"><Home className="w-4 h-4" />Blok Rumah</Label>
+                  <Select value={blok} onValueChange={setBlok}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pilih Blok" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BLOK_LIST.map(b => (
+                        <SelectItem key={b} value={b}>{b}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <label className="text-xs font-semibold flex items-center gap-1">Nomor Rumah</label>
+                  <Input placeholder="Nomor Rumah" value={nomor} onChange={e => setNomor(e.target.value)} inputMode="numeric" />
+                  <Label className="text-xs font-semibold flex items-center gap-1"><Calendar className="w-4 h-4" />Bulan</Label>
+                  <Select value={bulan} onValueChange={setBulan}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pilih Bulan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BULAN_LIST.map(b => (
+                        <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Label className="text-xs font-semibold flex items-center gap-1">Tahun</Label>
+                  <Select value={tahun} onValueChange={setTahun}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pilih Tahun" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TAHUN_LIST.map(t => (
+                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleCari} disabled={loading || !blok || !nomor || !bulan || !tahun} className="w-full mt-2 flex items-center justify-center gap-2">
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />} Cek Tagihan
                   </Button>
-                  {/* Success handled by toast, no need for Alert here */}
+                  {/* Error handled by toast, no need for Alert here */}
+                  <div className="text-xs text-blue-500 mt-2 text-center">
+                    Pastikan blok, nomor rumah, bulan, dan tahun sudah benar sebelum menekan <b>Cek Tagihan</b>.<br />
+                    Jika masih ada kendala, hubungi admin IPL (<b>Pak Budi</b>): <a href="https://wa.me/6281234567890" className="underline text-blue-700" target="_blank" rel="noopener noreferrer">0812-3456-7890</a>
+                  </div>
                 </div>
               )}
+              {bill && (
+                <BillDetail bill={bill} uploading={uploading} bukti={bukti} setBukti={setBukti} handleUpload={handleUpload} />
+              ) }
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
       <Toaster position="top-center" />
     </main>
   );
 }
+
+// : (
+//                 <div className="mt-8 flex flex-col items-center gap-2 animate-fade-in">
+//                   <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center mb-2">
+//                     <Home className="w-12 h-12 text-blue-200" />
+//                   </div>
+//                   <div className="text-blue-400 font-semibold text-sm text-center">Belum ada data tagihan ditemukan.<br/>Silakan cari tagihan Anda.</div>
+//                 </div>
+//               )
