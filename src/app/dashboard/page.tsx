@@ -8,6 +8,7 @@ import ResidentForm from '../../components/ResidentForm';
 import HistoryList from '../../components/HistoryList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { BadgeCheck, PlusCircle, Users, Clock } from 'lucide-react';
+import { useMemo } from 'react';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -25,16 +26,13 @@ export default function DashboardPage() {
   //   );
   // }
 
+  // Dummy pending count for badge (should be from backend in real app)
+  const pendingCount = 2;
   return (
     <main className="min-h-screen bg-gradient-to-b from-blue-100 to-white flex flex-col items-center p-4">
-      <div className="w-full max-w-sm flex flex-col items-center mt-6 mb-4">
-        <h1 className="text-xl font-bold text-blue-900 mb-1 text-center">Dashboard Admin</h1>
-        <p className="text-xs text-blue-700 text-center mb-2">Kelola tagihan, konfirmasi pembayaran, dan data warga.</p>
-      </div>
       <div className="w-full max-w-sm pb-20">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsContent value="konfirmasi">
-            <h2 className="font-semibold mb-2 text-blue-900 flex items-center gap-2"><BadgeCheck className="w-4 h-4" />Konfirmasi Pembayaran</h2>
             <ConfirmBillList />
           </TabsContent>
           <TabsContent value="tambah">
@@ -57,7 +55,12 @@ export default function DashboardPage() {
               className={`group flex-1 flex flex-col items-center py-1.5 px-1 transition-all duration-200 border-b-2 ${tab==='konfirmasi' ? 'text-blue-700 border-blue-600 font-bold bg-blue-50/60' : 'text-blue-900 border-transparent hover:bg-blue-50/40'}`}
               style={{ minWidth: 0 }}
             >
-              <BadgeCheck className={`w-6 h-6 mb-0.5 transition-transform duration-200 ${tab==='konfirmasi' ? 'scale-110' : 'opacity-70 group-hover:scale-105'}`} />
+              <span className="relative">
+                <BadgeCheck className={`w-6 h-6 mb-0.5 transition-transform duration-200 ${tab==='konfirmasi' ? 'scale-110' : 'opacity-70 group-hover:scale-105'}`} />
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center border border-white shadow">{pendingCount}</span>
+                )}
+              </span>
               <span className="text-xs leading-tight">Konfirmasi</span>
             </button>
             <button

@@ -6,4 +6,7 @@ export type Bill = {
   nominal: number;
   status: string;
   buktiBayarURL?: string;
+  blokRumah?: string;
+  nomorRumah?: string;
+  nama?: string;
 };
