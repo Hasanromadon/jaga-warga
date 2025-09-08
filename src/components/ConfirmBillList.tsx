@@ -1,8 +1,45 @@
 "use client";
 // import { useBills } from '../hooks/useBills';
-import { BadgeCheck, XCircle } from 'lucide-react';
+import { BadgeCheck, XCircle, Download } from 'lucide-react';
 import { EmptyBillIllustration } from './svg/EmptyBillIllustration';
 import { Button } from './ui/button';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card';
+import { ModalConfirmation } from './ui/modal-confirmation';
+import { Dialog, DialogContent } from './ui/dialog';
+
+function PreviewImageModal({ open, src, onClose }: { open: boolean; src: string|null; onClose: () => void }) {
+  return (
+    <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
+      <DialogContent className="max-w-md p-4 flex flex-col items-center">
+        <div className="w-full flex flex-col items-center">
+          <div className="font-semibold text-base mb-2 text-blue-900">Preview Bukti Pembayaran</div>
+          {src && (
+            <img src={src} alt="Bukti Pembayaran" className="max-h-[70vh] max-w-full rounded border shadow-lg mb-4" />
+          )}
+          <div className="flex flex-row gap-4 justify-center w-full mb-1">
+            <a
+              href={src || undefined}
+              download
+              className="inline-flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Download"
+            >
+              <Download className="w-6 h-6" />
+            </a>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 text-sm font-medium"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 import { Input } from './ui/input';
 import { useState } from 'react';
 // Reusable search input component
@@ -13,7 +50,7 @@ function SearchInput({ value, onChange }: { value: string; onChange: (e: React.C
       placeholder="Cari nama/blok/nomor/bulan/tahun..."
       value={value}
       onChange={onChange}
-      className="bg-white transition-colors"
+      className="bg-white transition-colors placeholder:text-blue-400 placeholder:font-medium"
     />
   );
 }
@@ -29,10 +66,11 @@ export default function ConfirmBillList() {
       tahun: '2024',
       blokRumah: 'A',
       nomorRumah: '12',
-      nama: 'Budi',
-      nominal: 150000,
-      status: 'pending',
-      buktiBayarURL: 'https://via.placeholder.com/150',
+  nama: 'Budi',
+  nominal: 150000,
+  status: 'pending',
+  tanggalPengajuan: '2024-05-03',
+  buktiBayarURL: 'https://placehold.co/300x200?text=Bukti+Budi',
     },
     {
       id: '2',
@@ -40,10 +78,11 @@ export default function ConfirmBillList() {
       tahun: '2024',
       blokRumah: 'B',
       nomorRumah: '7',
-      nama: 'Siti',
-      nominal: 150000,
-      status: 'pending',
-      buktiBayarURL: '',
+  nama: 'Siti Aisha Nur Rahma',
+  nominal: 150000,
+  status: 'pending',
+  tanggalPengajuan: '2024-05-04',
+  buktiBayarURL: '',
     },
     {
       id: '3',
@@ -51,10 +90,11 @@ export default function ConfirmBillList() {
       tahun: '2024',
       blokRumah: 'C',
       nomorRumah: '21',
-      nama: 'Agus',
-      nominal: 150000,
-      status: 'approved',
-      buktiBayarURL: 'https://via.placeholder.com/150',
+  nama: 'Agus',
+  nominal: 150000,
+  status: 'approved',
+  tanggalPengajuan: '2024-05-05',
+  buktiBayarURL: 'https://placehold.co/300x200?text=Bukti+Agus',
     },
   ];
   const isLoading = false;
@@ -63,7 +103,9 @@ export default function ConfirmBillList() {
   const [rejectReason, setRejectReason] = useState('');
   const [search, setSearch] = useState('');
   const [loadingId, setLoadingId] = useState<string|null>(null);
+  const [modal, setModal] = useState<null | { type: 'approve' | 'reject'; billId: string }>(null);
 
+    const [previewImage, setPreviewImage] = useState<string|null>(null);
   // Filter bills by search (by nama, blok, nomor, bulan, tahun)
   const filteredBills = bills.filter(bill => {
     const q = search.toLowerCase();
@@ -101,83 +143,113 @@ export default function ConfirmBillList() {
       <div className="sticky top-0 z-10 mb-2">
         <SearchInput value={search} onChange={e => setSearch(e.target.value)} />
       </div>
-      <div className="space-y-4">
+  <div className="space-y-2">
         {pendingBills.map(bill => (
-          <div
-            key={bill.id}
-            className="bg-white rounded-xl shadow border border-blue-50 p-4 flex flex-col gap-2 animate-fade-in"
-            style={{ transition: 'opacity 0.3s' }}
-          >
-            <div className="flex items-center gap-2 text-blue-900 font-semibold">
-              <span className="text-xs bg-blue-100 text-blue-700 rounded px-2 py-0.5">{bill.bulan}/{bill.tahun}</span>
-              <span className="text-xs bg-gray-100 text-gray-700 rounded px-2 py-0.5">{bill.blokRumah}/{bill.nomorRumah}</span>
-              <span className="text-xs bg-green-100 text-green-700 rounded px-2 py-0.5">{bill.nama || 'Warga'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span>Nominal:</span>
-              <span className="font-bold text-blue-700">Rp{bill.nominal}</span>
-            </div>
-            {bill.buktiBayarURL && (
-              <a href={bill.buktiBayarURL} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 underline">Lihat Bukti Pembayaran</a>
-            )}
-            {rejectingId === bill.id ? (
-              <div className="flex flex-col gap-2 mt-2">
-                <input
-                  className="border rounded px-2 py-1 text-xs"
-                  placeholder="Alasan penolakan..."
-                  value={rejectReason}
-                  onChange={e => setRejectReason(e.target.value)}
-                  autoFocus
-                />
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    disabled={loadingId === bill.id}
-                    onClick={async () => {
-                      setLoadingId(bill.id);
-                      setTimeout(() => {
-                        toast.success('Tagihan ditolak');
-                        setLoadingId(null);
-                        setRejectingId(null);
-                        setRejectReason('');
-                      }, 900);
-                    }}
-                  >
-                    {loadingId === bill.id ? 'Memproses...' : 'Tolak'}
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => setRejectingId(null)}>
-                    Batal
-                  </Button>
-                </div>
+          <Card key={bill.id} className="animate-fade-in border border-gray-200 bg-white/95 shadow-sm rounded-xl">
+            <div className="px-4 pt-3 pb-2">
+              <div className="flex flex-wrap gap-2 items-center w-full mb-4">
+                <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">{bill.bulan}/{bill.tahun}</span>
+                <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">{bill.blokRumah}/{bill.nomorRumah}</span>
+                <span className="ml-auto text-xs text-gray-400 font-normal">{bill.tanggalPengajuan && new Date(bill.tanggalPengajuan).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
               </div>
-            ) : (
-              <div className="flex gap-2 mt-2">
+              <div className="font-semibold text-blue-900 text-sm truncate mb-1" title={bill.nama || 'Warga'}>{bill.nama || 'Warga'}    </div>
+              <div className="flex items-center gap-2 text-sm mb-1">
+                <span className="text-gray-700">Nominal:</span>
+                <span className="font-bold text-blue-700 text-base">Rp{bill.nominal.toLocaleString('id-ID')}</span>
+              </div>
+              {bill.buktiBayarURL && (
+                <button
+                  type="button"
+                  className="text-xs text-blue-600 underline bg-transparent border-0 p-0 cursor-pointer hover:text-blue-800"
+                  onClick={() => setPreviewImage(bill.buktiBayarURL)}
+                >
+                  Lihat Bukti Pembayaran
+                </button>
+              )}
+              <div className="flex gap-2 mt-3 justify-end">
                 <Button
                   size="sm"
                   disabled={loadingId === bill.id}
-                  onClick={async () => {
-                    setLoadingId(bill.id);
-                    setTimeout(() => {
-                      toast.success('Tagihan disetujui');
-                      setLoadingId(null);
-                    }, 900);
-                  }}
+                  onClick={() => setModal({ type: 'approve', billId: bill.id })}
                   className="flex items-center gap-1"
                 >
-                  {loadingId === bill.id ? 'Memproses...' : (<><BadgeCheck className="w-4 h-4" /> Approve</>)}
+                  <BadgeCheck className="w-4 h-4" /> Approve
                 </Button>
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={() => { setRejectingId(bill.id); setRejectReason(''); }}
+                  onClick={() => { setModal({ type: 'reject', billId: bill.id }); setRejectReason(''); }}
                   className="flex items-center gap-1"
                 >
                   <XCircle className="w-4 h-4" /> Reject
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+      {/* Modal konfirmasi approve/reject */}
+      <ModalConfirmation
+        open={!!modal}
+        title={modal?.type === 'approve' ? 'Konfirmasi Approve Pembayaran' : 'Konfirmasi Penolakan Pembayaran'}
+        description={(() => {
+          if (!modal) return undefined;
+          const bill = pendingBills.find(b => b.id === modal.billId);
+          if (!bill) return undefined;
+          return (
+            <div className="text-left space-y-2">
+              <div className="grid grid-cols-[120px_1fr] gap-x-4 gap-y-1 text-sm items-center">
+                <span className="text-gray-500">Nama</span> <span className="font-medium text-blue-900 truncate" title={bill.nama}>{bill.nama}</span>
+                <span className="text-gray-500">Blok/No</span> <span>{bill.blokRumah}/{bill.nomorRumah}</span>
+                <span className="text-gray-500">Bulan/Tahun</span> <span>{bill.bulan}/{bill.tahun}</span>
+                <span className="text-gray-500">Tgl Pengajuan</span> <span>{bill.tanggalPengajuan && new Date(bill.tanggalPengajuan).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                <span className="text-gray-500">Nominal</span> <span className="font-bold text-blue-700">Rp{bill.nominal.toLocaleString('id-ID')}</span>
+                {bill.buktiBayarURL && <>
+                  <span className="text-gray-500">Bukti</span>
+                  <span className="inline-block">
+                    <button
+                      type="button"
+                      className="text-blue-600 underline p-0 bg-transparent border-0 cursor-pointer hover:text-blue-800 text-left"
+                      onClick={e => { e.preventDefault(); setPreviewImage(bill.buktiBayarURL); }}
+                    >
+                      Lihat Bukti Pembayaran
+                    </button>
+                  </span>
+                </>}
+              </div>
+              <div className="mt-2 text-sm text-gray-600">
+                {modal.type === 'approve'
+                  ? 'Apakah Anda yakin ingin menyetujui pembayaran tagihan ini? Data akan tercatat sebagai sudah lunas.'
+                  : 'Apakah Anda yakin ingin menolak pembayaran tagihan ini? Data akan tercatat sebagai ditolak.'}
+              </div>
+            </div>
+          );
+        })()}
+        confirmLabel={modal?.type === 'approve' ? 'Ya, Setujui' : 'Ya, Tolak'}
+        cancelLabel="Batal"
+        loading={!!loadingId}
+        rejectReason={modal?.type === 'reject' ? rejectReason : undefined}
+        onRejectReasonChange={modal?.type === 'reject' ? setRejectReason : undefined}
+        onCancel={() => {
+          setModal(null);
+          if (modal?.type === 'reject') setRejectingId(null);
+        }}
+        onConfirm={async () => {
+          if (!modal) return;
+          setLoadingId(modal.billId);
+          setTimeout(() => {
+            if (modal.type === 'approve') {
+              toast.success('Tagihan berhasil dikonfirmasi.');
+            } else {
+              toast.success('Tagihan berhasil ditolak.');
+              setRejectingId(null);
+              setRejectReason('');
+            }
+            setLoadingId(null);
+            setModal(null);
+          }, 900);
+        }}
+      />
+        {/* Modal khusus untuk preview bukti bayar */}
+  <PreviewImageModal open={!!previewImage} src={previewImage} onClose={() => setPreviewImage(null)} />
+          </Card>
         ))}
       </div>
     </div>
