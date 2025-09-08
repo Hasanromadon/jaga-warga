@@ -5,10 +5,11 @@ import BillsList from '../../components/BillsList';
 import ConfirmBillList from '../../components/ConfirmBillList';
 import AddBillForm from '../../components/AddBillForm';
 import ResidentList from '../../components/ResidentList';
-import HistoryList from '../../components/HistoryList';
+import LaporanList from '../../components/LaporanList';
 import { Tabs, TabsContent } from '../../components/ui/tabs';
 import { BadgeCheck, PlusCircle, Users, Clock } from 'lucide-react';
 import { useState } from 'react';
+import { useBills } from '../../hooks/useBills';
 
 export default function DashboardPage() {
   const { user, role } = useAuthContext();
@@ -26,7 +27,8 @@ export default function DashboardPage() {
 
   // Dummy pending count for badge (should be from backend in real app)
   const pendingCount = 2;
-  // Tab config array
+  // Get all bills for laporan tab (admin only)
+  const { data: allBills = [], isLoading: loadingBills, error: errorBills } = useBills();
   const tabs = [
     {
       key: 'konfirmasi',
@@ -48,10 +50,20 @@ export default function DashboardPage() {
       content: <ResidentList />,
     },
     {
-      key: 'history',
-      label: 'History',
+      key: 'laporan',
+      label: 'Laporan',
       icon: Clock,
-      content: <><h2 className="font-semibold mb-2 text-blue-900 flex items-center gap-2"><Clock className="w-4 h-4" />History Pembayaran</h2><HistoryList bills={[]} /></>,
+      content: (
+        <>
+          {loadingBills ? (
+            <div className="text-center text-blue-700 py-8">Memuat data laporan...</div>
+          ) : errorBills ? (
+            <div className="text-center text-red-600 py-8">Gagal memuat data laporan</div>
+          ) : (
+            <LaporanList bills={allBills} />
+          )}
+        </>
+      ),
     },
   ];
   return (
