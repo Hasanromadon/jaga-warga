@@ -1,9 +1,22 @@
 "use client";
 // import { useBills } from '../hooks/useBills';
 import { BadgeCheck, XCircle } from 'lucide-react';
+import { EmptyBillIllustration } from './svg/EmptyBillIllustration';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { useState } from 'react';
+// Reusable search input component
+function SearchInput({ value, onChange }: { value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
+  return (
+    <Input
+      type="text"
+      placeholder="Cari nama/blok/nomor/bulan/tahun..."
+      value={value}
+      onChange={onChange}
+      className="bg-white transition-colors"
+    />
+  );
+}
 import { toast } from 'react-hot-toast';
 
 
@@ -73,29 +86,20 @@ export default function ConfirmBillList() {
   if (pendingBills.length === 0)
     return (
       <div>
-        <div className="sticky top-0 z-10 bg-gradient-to-b from-blue-100 to-white mb-4 pb-2 pt-2">
-          <input
-            type="text"
-            className="w-full border rounded px-3 py-2 text-sm"
-            placeholder="Cari nama/blok/nomor/bulan/tahun..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+        <div className="sticky top-0 z-10 bg-gradient-to-b mb-4 pb-2 pt-2">
+          <SearchInput value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-        <div className="text-center py-8 text-blue-700">Tidak ada tagihan menunggu konfirmasi.</div>
+            <div className="flex flex-col items-center justify-center py-10 text-blue-700">
+              <EmptyBillIllustration />
+              <div className="mt-4 text-base font-semibold">Tidak ada tagihan menunggu konfirmasi.</div>
+            </div>
       </div>
     );
 
   return (
     <div>
-  <div className="sticky top-0 z-10 bg-white/90 backdrop-blur mb-4 pb-2 pt-2 shadow-sm">
-        <Input
-          type="text"
-          placeholder="Cari nama/blok/nomor/bulan/tahun..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="bg-blue-50 focus:bg-white transition-colors"
-        />
+      <div className="sticky top-0 z-10 mb-2">
+        <SearchInput value={search} onChange={e => setSearch(e.target.value)} />
       </div>
       <div className="space-y-4">
         {pendingBills.map(bill => (
