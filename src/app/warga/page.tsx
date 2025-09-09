@@ -102,10 +102,10 @@ export default function WargaPage() {
     <main className="min-h-screen bg-gradient-to-b from-blue-100 to-white flex flex-col items-center p-4">
       <div className="w-full max-w-sm flex flex-col items-center mt-6 mb-4">
         <div className="rounded-full bg-white shadow-lg p-3 mb-2 flex items-center justify-center">
-          <Image src="/logo.svg" alt="Logo IPL" width={56} height={56} className="rounded-full" />
+          <Image src="/logo.svg" alt="Logo Jaga Warga" width={56} height={56} className="rounded-full" />
         </div>
-        <h1 className="text-xl font-bold text-blue-900 mb-1 text-center">Cek Tagihan IPL</h1>
-        <p className="text-xs text-blue-700 text-center mb-2">Masukkan data rumah Anda untuk melihat status tagihan IPL</p>
+        <h1 className="text-xl font-bold text-blue-900 mb-1 text-center">Jaga Warga</h1>
+        <p className="text-xs text-blue-700 text-center mb-2">Masukkan data rumah Anda untuk melihat status tagihan di aplikasi Jaga Warga</p>
       </div>
         <Card className="w-full max-w-sm shadow-xl border-0">
           <CardContent className="pt-6 pb-2">
@@ -198,9 +198,9 @@ export default function WargaPage() {
                 <BillDetail bill={bill} uploading={uploading} bukti={bukti} setBukti={setBukti} handleUpload={handleUpload} />
               )}
             </div>
-               <div className="text-xs text-neutral-900 mt-10 text-center">
-                    <span className="block mb-1">Pastikan semua data sudah benar sebelum menekan <b>Cek Tagihan</b>.</span>
-                    <span className="block">Jika ada kendala, hubungi admin IPL (<b>Pak Budi</b>): <a href="https://wa.me/6281234567890" className="underline text-blue-700" target="_blank" rel="noopener noreferrer">0812-3456-7890</a></span>
+      <div className="text-xs text-neutral-900 mt-10 text-center">
+        <span className="block mb-1">Pastikan semua data sudah benar sebelum menekan <b>Cek Tagihan</b>.</span>
+        <span className="block">Jika ada kendala, hubungi admin Jaga Warga (<b>Pak Budi</b>): <a href="https://wa.me/6281234567890" className="underline text-blue-700" target="_blank" rel="noopener noreferrer">0812-3456-7890</a></span>
                   </div>
           </CardContent>
         </Card>
