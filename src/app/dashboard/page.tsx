@@ -6,7 +6,35 @@ import AddBillForm from '../../components/AddBillForm';
 import ResidentList from '../../components/ResidentList';
 import LaporanList from '../../components/LaporanList';
 import { Tabs, TabsContent } from '../../components/ui/tabs';
-import { BadgeCheck, PlusCircle, Users, Clock } from 'lucide-react';
+// Dual-tone SVG icons for bottom navigation
+const DualToneBadgeCheck = ({active}: {active?: boolean}) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill={active ? '#3973C4' : '#E0EDFF'} />
+    <path d="M8 12.5l2.5 2.5 5-5" stroke={active ? '#fff' : '#3973C4'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+const DualTonePlusCircle = ({active}: {active?: boolean}) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill={active ? '#3973C4' : '#E0EDFF'} />
+    <rect x="11" y="7" width="2" height="10" rx="1" fill={active ? '#fff' : '#3973C4'} />
+    <rect x="7" y="11" width="10" height="2" rx="1" fill={active ? '#fff' : '#3973C4'} />
+  </svg>
+);
+const DualToneUsers = ({active}: {active?: boolean}) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <ellipse cx="12" cy="10" rx="4" ry="4" fill={active ? '#3973C4' : '#E0EDFF'} />
+    <ellipse cx="12" cy="18" rx="7" ry="3" fill={active ? '#7BA7E7' : '#E0EDFF'} />
+    <ellipse cx="7" cy="13" rx="2" ry="2" fill={active ? '#7BA7E7' : '#E0EDFF'} />
+    <ellipse cx="17" cy="13" rx="2" ry="2" fill={active ? '#7BA7E7' : '#E0EDFF'} />
+  </svg>
+);
+const DualToneClock = ({active}: {active?: boolean}) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill={active ? '#3973C4' : '#E0EDFF'} />
+    <rect x="11" y="7" width="2" height="6" rx="1" fill={active ? '#fff' : '#3973C4'} />
+    <rect x="11" y="12" width="5" height="2" rx="1" fill={active ? '#fff' : '#3973C4'} />
+  </svg>
+);
 import { useState } from 'react';
 import { useBills } from '../../hooks/useBills';
 
@@ -32,26 +60,26 @@ export default function DashboardPage() {
     {
       key: 'konfirmasi',
       label: 'Konfirmasi',
-      icon: BadgeCheck,
+      icon: DualToneBadgeCheck,
       content: <ConfirmBillList />,
       badge: pendingCount > 0 ? pendingCount : undefined,
     },
     {
       key: 'tambah',
       label: 'Tambah',
-      icon: PlusCircle,
+      icon: DualTonePlusCircle,
       content: <AddBillForm />,
     },
     {
       key: 'warga',
       label: 'Warga',
-      icon: Users,
+      icon: DualToneUsers,
       content: <ResidentList />,
     },
     {
       key: 'laporan',
       label: 'Laporan',
-      icon: Clock,
+      icon: DualToneClock,
       content: (
         <>
           {loadingBills ? (
@@ -88,7 +116,7 @@ export default function DashboardPage() {
                   style={{ minWidth: 0 }}
                 >
                   <span className="relative">
-                    <Icon className={`w-6 h-6 mb-0.5 transition-transform duration-200 ${tab===t.key ? 'scale-110' : 'opacity-70 group-hover:scale-105'}`} />
+                    <Icon active={tab===t.key} />
                     {t.badge && (
                       <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center border border-white shadow">{t.badge}</span>
                     )}
