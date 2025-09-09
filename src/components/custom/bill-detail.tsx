@@ -2,7 +2,7 @@ import { BadgeCheck, UploadCloud, XCircle, Home, Loader2 } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { BULAN_LIST } from "../../constants";
-import type { Bill } from "../../types";
+import type { Bill } from "../../types/bill";
 import React from "react";
 
 interface BillDetailProps {
@@ -43,20 +43,27 @@ export function BillDetail({ bill, uploading, bukti, setBukti, handleUpload }: B
             <span className="flex items-center gap-1 text-green-600 text-xs font-semibold"><BadgeCheck className="w-4 h-4" /> Lunas</span>
           ) : bill.status === "pending" ? (
             <span className="flex items-center gap-1 text-yellow-600 text-xs font-semibold"><UploadCloud className="w-4 h-4" /> Menunggu Verifikasi</span>
+          ) : bill.status === "approved" ? (
+            <span className="flex items-center gap-1 text-blue-600 text-xs font-semibold"><UploadCloud className="w-4 h-4" /> Sudah Dibayar</span>
           ) : (
             <span className="flex items-center gap-1 text-red-600 text-xs font-semibold"><XCircle className="w-4 h-4" /> Belum Bayar</span>
           )}
         </div>
       </div>
       {/* Upload bukti */}
-      {bill.status !== "lunas" && (
+      {/* Show upload only if status is belum bayar (allow re-upload if needed) */}
+      {(bill.status === "belum bayar") && (
         <div className="mt-2 flex flex-col gap-1.5">
           <label className="font-semibold text-xs mb-1">Upload Bukti Pembayaran</label>
           <Input type="file" accept="image/*,application/pdf" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBukti(e.target.files?.[0] || null)} className="text-xs px-2 py-1" />
           <Button onClick={handleUpload} disabled={uploading || !bukti} className="w-full flex items-center justify-center gap-2 text-xs h-9 mt-1">
-            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />} Konfirmasi Pembayaran
+            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />} { "Konfirmasi Pembayaran"}
           </Button>
         </div>
+      )}
+      {/* Show payment date if available */}
+      {bill.tanggalPembayaran && (
+        <div className="text-xs text-blue-500 mt-2">Tanggal Pembayaran: {new Date(bill.tanggalPembayaran).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
       )}
     </div>
   );

@@ -25,10 +25,10 @@ export default function DashboardPage() {
   //   );
   // }
 
-  // Dummy pending count for badge (should be from backend in real app)
-  const pendingCount = 2;
   // Get all bills for laporan tab (admin only)
   const { data: allBills = [], isLoading: loadingBills, error: errorBills } = useBills();
+  // Count pending bills for badge (from backend)
+  const pendingCount = (allBills || []).filter((bill: import('../../types/bill').Bill) => bill.status === 'pending').length;
   const tabs = [
     {
       key: 'konfirmasi',

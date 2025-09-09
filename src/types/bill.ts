@@ -9,4 +9,6 @@ export type Bill = {
   blokRumah?: string;
   nomorRumah?: string;
   nama?: string;
+  tanggalPengajuan?: string;
+  tanggalPembayaran?: string;
 };
