@@ -94,8 +94,8 @@ export default function DashboardPage() {
     },
   ];
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="w-full max-w-sm pb-20 bg-gradient-to-b  from-blue-100 to-white p-4 min-h-screen  sm:border sm:rounded-md">
+    <main className="min-h-screen flex flex-col items-center pb-24">
+      <div className="w-full max-w-sm bg-gradient-to-b from-blue-100 to-white p-4 min-h-screen sm:border sm:rounded-md">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           {tabs.map(t => (
             <TabsContent key={t.key} value={t.key}>
@@ -103,9 +103,9 @@ export default function DashboardPage() {
             </TabsContent>
           ))}
         </Tabs>
-        {/* Bottom Navigation Floating Tab */}
-        <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-2">
-          <div className="flex justify-between bg-white/95 shadow-xl rounded-xl border border-blue-100 overflow-hidden backdrop-blur supports-[backdrop-filter]:bg-white/80 animate-fade-in">
+    {/* Bottom Navigation Floating Tab - fixed, always at bottom, not affected by scroll */}
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-2" style={{paddingBottom: 'env(safe-area-inset-bottom, 0)'}}>
+      <div className="flex justify-between bg-white/95 shadow-xl rounded-xl border border-blue-100 overflow-hidden backdrop-blur supports-[backdrop-filter]:bg-white/80 animate-fade-in">
             {tabs.map(t => {
               const Icon = t.icon;
               return (
