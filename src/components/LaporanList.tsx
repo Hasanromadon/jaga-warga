@@ -1,34 +1,35 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
+import { PreviewImageModal } from "./ui/PreviewImageModal";
+
 import { Bill } from "../types/bill";
-import { useResidents, Resident } from '../hooks/useResidents';
+// import { useResidents, Resident } from '../hooks/useResidents';
 
 import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
 import { Filter, FileDown, Search } from "lucide-react";
 import { Button } from "./ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "./ui/select";
+import { STATUS_OPTIONS } from "../constants";
 
-const STATUS_OPTIONS = [
-  { label: "Semua", value: "all" },
-  { label: "Belum Lunas", value: "unpaid" },
-  { label: "Menunggu Verifikasi", value: "pending" },
-  { label: "Lunas", value: "paid" },
-  { label: "Disetujui", value: "approved" },
-  { label: "Ditolak", value: "rejected" },
-];
+const STATUS_LABELS: Record<string, string> = {
+  unpaid: "Belum Lunas",
+  pending: "Menunggu Verifikasi",
+  paid: "Lunas",
+  approved: "Disetujui",
+  rejected: "Ditolak",
+};
 
-function filterBills(bills: Bill[], residents: Resident[], search: string, status: string) {
+function filterBills(bills: Bill[], search: string, status: string) {
   let filtered = bills;
   if (search) {
     const q = search.toLowerCase();
     filtered = filtered.filter((bill) => {
-      const resident = residents.find(r => r.id === bill.residentId);
       return (
-        (resident?.name || '').toLowerCase().includes(q) ||
-        (resident?.block || '').toLowerCase().includes(q) ||
-        (resident?.houseNumber || '').toLowerCase().includes(q) ||
+        (bill.block || '').toLowerCase().includes(q) ||
+        (bill.houseNumber || '').toLowerCase().includes(q) ||
         (bill.month || '').toLowerCase().includes(q) ||
-        (bill.year || '').toLowerCase().includes(q)
+        (bill.year || '').toLowerCase().includes(q) ||
+        (bill.remark || '').toLowerCase().includes(q)
       );
     });
   }
@@ -46,35 +47,43 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [searchActive, setSearchActive] = useState(false);
-  const { data: residents = [] } = useResidents();
-
-  const filteredBills = filterBills(bills, residents, search, status);
+  const [previewImage, setPreviewImage] = useState<string|null>(null);
+  const filteredBills = filterBills(bills, search, status);
 
   const handleExport = () => {
-    // Simple CSV export
-    const header = ["Name", "Block", "House Number", "Month", "Year", "Amount", "Status"];
-    const rows = filteredBills.map((b) => {
-      const resident = residents.find(r => r.id === b.residentId);
-      return [
-        resident?.name,
-        resident?.block,
-        resident?.houseNumber,
+    try {
+      // Improved CSV export: format amount, escape quotes, handle commas
+      const header = ["Block", "House Number", "Month", "Year", "Amount", "Status", "Remark"];
+      const rows = filteredBills.map((b) => [
+        b.block,
+        b.houseNumber,
         b.month,
         b.year,
-        b.amount,
+        formatRupiah(Number(b.amount)),
         b.status,
-      ];
-    });
-    const csv = [header, ...rows]
-      .map((row) => row.map((v) => `"${v ?? ""}"`).join(","))
-      .join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "laporan_warga.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+        (b.remark ?? '').replace(/"/g, '""'),
+      ]);
+      console.log('Exporting CSV, rows:', rows.length, rows);
+      if (rows.length === 0) {
+        alert('Tidak ada data untuk diekspor!');
+        return;
+      }
+      const csv = [header, ...rows]
+        .map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "laporan_warga.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      console.error('CSV Export Error:', err);
+      alert('Gagal mengekspor CSV: ' + (err instanceof Error ? err.message : String(err)));
+    }
   };
 
   return (
@@ -138,28 +147,43 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
             <div className="mt-4 text-base font-semibold">Tidak ada data laporan.</div>
           </div>
         ) : (
-          filteredBills.map((bill) => (
-            <div
-              key={bill.id}
-              className="p-0 bg-white rounded-xl shadow-sm border border-blue-100 relative overflow-visible transition hover:shadow-md active:scale-[0.98] cursor-pointer group"
-              tabIndex={0}
-              aria-label={`Laporan ${residents.find(r => r.id === bill.residentId)?.name} bulan ${bill.month} ${bill.year}`}
-            >
-              <div className="px-4 pt-3 pb-2">
-                <div className="flex flex-wrap gap-2 items-center w-full mb-3">
-                  <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">{bill.month}/{bill.year}</span>
-                  <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">{residents.find(r => r.id === bill.residentId)?.block}/{residents.find(r => r.id === bill.residentId)?.houseNumber}</span>
-                  <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full border capitalize select-none
-                    ${bill.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : bill.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : bill.status === 'approved' ? 'bg-blue-50 text-blue-700 border-blue-200' : bill.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-red-50 text-red-700 border-red-200'}`}>{bill.status}</span>
-                </div>
-                <div className="font-semibold text-blue-900 text-sm truncate mb-1" title={residents.find(r => r.id === bill.residentId)?.name || 'Resident'}>{residents.find(r => r.id === bill.residentId)?.name || 'Resident'}</div>
-                <div className="flex items-center gap-2 text-sm mb-1">
-                  <span className="text-gray-700">Amount:</span>
-                  <span className="font-bold text-blue-700 text-base">{formatRupiah(Number(bill.amount))}</span>
+          <>
+            {filteredBills.map((bill) => (
+              <div
+                key={bill.id}
+                className="p-0 bg-white rounded-xl shadow-sm border border-blue-100 relative overflow-visible transition hover:shadow-md active:scale-[0.98] cursor-pointer group"
+                tabIndex={0}
+                aria-label={`Laporan Blok ${bill.block} No ${bill.houseNumber} bulan ${bill.month} ${bill.year}`}
+              >
+                <div className="px-4 pt-3 pb-2">
+                  <div className="flex flex-wrap gap-2 items-center w-full mb-3">
+                    <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">{bill.month}/{bill.year}</span>
+                    <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">{bill.block}/{bill.houseNumber}</span>
+                    <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full border select-none
+                      ${bill.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : bill.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : bill.status === 'approved' ? 'bg-blue-50 text-blue-700 border-blue-200' : bill.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-red-50 text-red-700 border-red-200'}`}>{STATUS_LABELS[bill.status] || bill.status}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm mb-1">
+                    <span className="text-gray-700">Jumlah:</span>
+                    <span className="font-bold text-blue-700 text-base">{formatRupiah(Number(bill.amount))}</span>
+                  </div>
+                  {(bill.status === 'paid' || bill.status === 'approved') && bill.proofUrl && (
+                    <button
+                      type="button"
+                      className="text-xs text-blue-600 underline bg-transparent border-0 p-0 cursor-pointer hover:text-blue-800 mt-1"
+                      onClick={() => setPreviewImage(bill.proofUrl || null)}
+                    >
+                      Lihat Bukti Pembayaran
+                    </button>
+                  )}
+                  {bill.remark && (
+                    <div className="text-xs text-gray-500 mt-1">Catatan: {bill.remark}</div>
+                  )}
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+            {/* Modal khusus untuk preview bukti bayar */}
+            <PreviewImageModal open={!!previewImage} src={previewImage} onClose={() => setPreviewImage(null)} />
+          </>
         )}
       </div>
     </div>

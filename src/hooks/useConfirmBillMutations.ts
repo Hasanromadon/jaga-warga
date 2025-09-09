@@ -7,7 +7,7 @@ export function useApproveBillMutation() {
   return useMutation({
     mutationFn: async ({ billId }: { billId: string }) => {
       await updateDoc(doc(db, 'bills', billId), {
-        status: 'approved',
+        status: 'paid',
       });
     },
     onSuccess: () => {

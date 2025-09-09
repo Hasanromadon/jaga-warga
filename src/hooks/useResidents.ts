@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 export interface Resident {
@@ -34,7 +34,8 @@ export function useAddResident() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: Omit<Resident, 'id'>) => {
-      await addDoc(collection(db, 'residents'), data);
+      const id = `${data.block}_${data.houseNumber}`;
+      await setDoc(doc(db, 'residents', id), data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['residents'] });

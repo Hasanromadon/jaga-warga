@@ -32,7 +32,7 @@ export function ModalConfirmation({
 }: ModalConfirmationProps) {
   return (
     <Dialog open={open} onOpenChange={v => !v && onCancel()}>
-  <DialogContent className="max-w-sm w-full p-2 sm:p-4">
+  <DialogContent className="max-w-sm w-full p-4 py-6 sm:p-4 rounded-md">
         <DialogHeader className="items-center">
           <div className="flex flex-col items-center gap-2">
             <AlertTriangle className="w-8 h-8 text-yellow-500 mb-1" />

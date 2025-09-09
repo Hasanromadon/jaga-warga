@@ -35,7 +35,6 @@ export const NumberInputWithSeparator: React.FC<NumberInputWithSeparatorProps> =
       <Input
         type="text"
         inputMode="numeric"
-        pattern="[0-9]*"
         value={formatValue(value)}
         onChange={handleChange}
         placeholder={placeholder}

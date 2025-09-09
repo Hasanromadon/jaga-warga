@@ -1,6 +1,6 @@
 "use client";
 
-import { Input } from "../../components/ui/input";
+
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../components/ui/select";
@@ -9,10 +9,8 @@ import toast, { Toaster } from "react-hot-toast";
 import {  Search,  Home, Calendar, Loader2, ChevronDown } from "lucide-react";
 import { BillDetail } from "../../components/custom/bill-detail";
 import Image from "next/image";
-
-
-import { BLOK_LIST, BULAN_LIST, TAHUN_LIST } from "../../constants";
-import type { Bill } from "../../types";
+import { BLOK_LIST, HOUSE_NUMBER_LIST, BULAN_LIST, TAHUN_LIST } from "../../constants";
+import { Bill } from "../../types/bill";
 
 import { useState } from "react";
 import { db, storage } from "../../firebaseConfig";
@@ -41,10 +39,10 @@ export default function WargaPage() {
       const billsRef = collection(db, "bills");
       const q = query(
         billsRef,
-        where("blokRumah", "==", blok),
-        where("nomorRumah", "==", nomor),
-        where("bulan", "==", bulan),
-        where("tahun", "==", tahun)
+        where("block", "==", blok),
+        where("houseNumber", "==", nomor),
+        where("month", "==", bulan),
+        where("year", "==", tahun)
       );
       const snap = await getDocs(q);
       if (snap.empty) {
@@ -52,8 +50,21 @@ export default function WargaPage() {
         toast.error("Tagihan tidak ditemukan.");
       } else {
         const data = snap.docs[0].data();
-          setBill({ id: snap.docs[0].id, ...data } as Bill);
-          setShowForm(false);
+        // Map Firestore fields to Bill type
+        setBill({
+          id: snap.docs[0].id,
+          amount: data.amount,
+          block: data.block,
+          houseNumber: data.houseNumber,
+          month: data.month,
+          year: data.year,
+          status: data.status,
+          proofUrl: data.proofUrl,
+          createdAt: data.createdAt,
+          remark: data.remark,
+          rejectReason: data?.rejectReason
+        } as Bill);
+        setShowForm(false);
       }
     } catch (e) {
       setError("Gagal mencari tagihan.");
@@ -73,11 +84,11 @@ export default function WargaPage() {
       await uploadBytes(buktiRef, bukti);
       const url = await getDownloadURL(buktiRef);
       await updateDoc(doc(db, "bills", bill.id), {
-        buktiBayarURL: url,
+        proofUrl: url,
         status: "pending",
       });
       setSuccess(true);
-      setBill({ ...bill, buktiBayarURL: url, status: "pending" });
+      setBill({ ...bill, proofUrl: url, status: "pending" });
       toast.success("Bukti berhasil diupload, menunggu verifikasi admin.");
     } catch (e) {
       setError("Gagal upload bukti.");
@@ -97,73 +108,105 @@ export default function WargaPage() {
         <p className="text-xs text-blue-700 text-center mb-2">Masukkan data rumah Anda untuk melihat status tagihan IPL</p>
       </div>
         <Card className="w-full max-w-sm shadow-xl border-0">
-          <CardContent className="pt-6">
-            <div className="flex flex-col gap-4">
-              {bill && (
-                <button
-                  className="w-full text-left font-semibold text-blue-900 bg-blue-50 rounded-lg px-3 py-2 mb-2 border border-blue-100 transition flex items-center justify-between"
-                  onClick={() => setShowForm(v => !v)}
-                  type="button"
-                  aria-expanded={showForm}
-                >
-                  <span>Cek Tagihan Rumah</span>
-                  <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${!showForm ? 'rotate-180' : ''}`} />
-                </button>
-              )}
-              {(showForm || !bill) && (
-                <div className="flex flex-col gap-2 animate-fade-in">
-                  <Label className="text-xs font-semibold flex items-center gap-1"><Home className="w-4 h-4" />Blok Rumah</Label>
-                  <Select value={blok} onValueChange={setBlok}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih Blok" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BLOK_LIST.map(b => (
-                        <SelectItem key={b} value={b}>{b}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <label className="text-xs font-semibold flex items-center gap-1">Nomor Rumah</label>
-                  <Input placeholder="Nomor Rumah" value={nomor} onChange={e => setNomor(e.target.value)} inputMode="numeric" />
-                  <Label className="text-xs font-semibold flex items-center gap-1"><Calendar className="w-4 h-4" />Bulan</Label>
-                  <Select value={bulan} onValueChange={setBulan}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih Bulan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BULAN_LIST.map(b => (
-                        <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Label className="text-xs font-semibold flex items-center gap-1">Tahun</Label>
-                  <Select value={tahun} onValueChange={setTahun}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih Tahun" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TAHUN_LIST.map(t => (
-                        <SelectItem key={t} value={t}>{t}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button onClick={handleCari} disabled={loading || !blok || !nomor || !bulan || !tahun} className="w-full mt-2 flex items-center justify-center gap-2">
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />} Cek Tagihan
+          <CardContent className="pt-6 pb-2">
+            <div className="flex flex-col gap-6">
+              <div className="mb-2 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-blue-800 flex items-center gap-2 mb-0">Cari Tagihan</h2>
+                {bill && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-1 text-blue-700"
+                    onClick={() => setShowForm(v => !v)}
+                    type="button"
+                    aria-expanded={showForm}
+                  >
+                    {showForm ? 'Sembunyikan Form' : 'Tampilkan Form'}
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${!showForm ? 'rotate-180' : ''}`} />
                   </Button>
-                  {/* Error handled by toast, no need for Alert here */}
-                  <div className="text-xs text-blue-500 mt-2 text-center">
-                    Pastikan blok, nomor rumah, bulan, dan tahun sudah benar sebelum menekan <b>Cek Tagihan</b>.<br />
-                    Jika masih ada kendala, hubungi admin IPL (<b>Pak Budi</b>): <a href="https://wa.me/6281234567890" className="underline text-blue-700" target="_blank" rel="noopener noreferrer">0812-3456-7890</a>
+                )}
+              </div>
+              {(showForm || !bill) && (
+                <form className="flex flex-col gap-5 animate-fade-in" onSubmit={e => { e.preventDefault(); handleCari(); }}>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-xs font-semibold flex items-center gap-1"><Home className="w-4 h-4" />Blok & Nomor Rumah</Label>
+                      <div className="flex gap-3">
+                        <div className="flex-1">
+                          <Select value={blok} onValueChange={setBlok}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Pilih Blok" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {BLOK_LIST.map(b => (
+                                <SelectItem key={b} value={b}>{b}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex-1">
+                          <Select value={nomor} onValueChange={setNomor}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Pilih Nomor" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {HOUSE_NUMBER_LIST.map(n => (
+                                <SelectItem key={n} value={n}>{n}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-xs font-semibold flex items-center gap-1"><Calendar className="w-4 h-4" />Periode Tagihan</Label>
+                      <div className="flex gap-3">
+                        <div className="flex-1">
+                          <Select value={bulan} onValueChange={setBulan}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Pilih Bulan" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {BULAN_LIST.map(b => (
+                                <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex-1">
+                          <Select value={tahun} onValueChange={setTahun}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Pilih Tahun" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {TAHUN_LIST.map(t => (
+                                <SelectItem key={t} value={t}>{t}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                  <Button type="submit" onClick={handleCari} disabled={loading || !blok || !nomor || !bulan || !tahun} className="w-full mt-1 flex items-center justify-center gap-2 text-base h-11 font-bold bg-blue-600 hover:bg-blue-700 text-white shadow">
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />} Cek Tagihan
+                  </Button>
+               
+                </form>
               )}
               {bill && (
                 <BillDetail bill={bill} uploading={uploading} bukti={bukti} setBukti={setBukti} handleUpload={handleUpload} />
-              ) }
+              )}
             </div>
+               <div className="text-xs text-neutral-900 mt-10 text-center">
+                    <span className="block mb-1">Pastikan semua data sudah benar sebelum menekan <b>Cek Tagihan</b>.</span>
+                    <span className="block">Jika ada kendala, hubungi admin IPL (<b>Pak Budi</b>): <a href="https://wa.me/6281234567890" className="underline text-blue-700" target="_blank" rel="noopener noreferrer">0812-3456-7890</a></span>
+                  </div>
           </CardContent>
         </Card>
+        
       <Toaster position="top-center" />
+      
     </main>
   );
 }

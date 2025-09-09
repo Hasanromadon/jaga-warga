@@ -1,3 +1,11 @@
+export const STATUS_OPTIONS = [
+  { label: "Semua", value: "all" },
+  { label: "Belum Lunas", value: "unpaid" },
+  { label: "Menunggu Verifikasi", value: "pending" },
+  { label: "Lunas", value: "paid" },
+  { label: "Disetujui", value: "approved" },
+  { label: "Ditolak", value: "rejected" },
+];
 // IPL App constants
 
 export const BLOK_LIST = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { collection, getDocs, query as fsQuery, where, CollectionReference, Query } from 'firebase/firestore';
+import { collection, getDocs, query as fsQuery, where, CollectionReference, Query, Timestamp } from 'firebase/firestore';
 
 
 
@@ -18,19 +18,22 @@ export function useBills(userId?: string) {
       // Map old keys to new keys for backward compatibility (if needed)
       return snapshot.docs.map(doc => {
         const data = doc.data();
-        return {
-          id: doc.id,
-          residentId: data.residentId ?? data.userId,
-          amount: data.amount ?? data.nominal,
-          month: data.month ?? data.bulan,
-          year: data.year ?? data.tahun,
-          status: data.status,
-          proofUrl: data.proofUrl ?? data.buktiBayarURL,
-          createdAt: data.createdAt ?? data.tanggalPengajuan,
-          paidAt: data.paidAt ?? data.tanggalPembayaran,
-          submittedAt: data.submittedAt,
-          rejectReason: data.rejectReason,
-        } as Bill;
+            return {
+              id: doc.id,
+              amount: data.amount ?? data.nominal,
+              block: data.block,
+              houseNumber: data.houseNumber,
+              month: data.month ?? data.bulan,
+              year: data.year ?? data.tahun,
+              status: data.status,
+              proofUrl: data.proofUrl ?? data.buktiBayarURL,
+              createdAt: data.createdAt instanceof Object && typeof data.createdAt.toDate === 'function'
+                ? data.createdAt
+                : (data.createdAt && Timestamp.fromDate(new Date(data.createdAt)))
+                  || (data.tanggalPengajuan && Timestamp.fromDate(new Date(data.tanggalPengajuan)))
+                  || undefined,
+              remark: data.remark,
+            } as Bill;
       });
     },
   });

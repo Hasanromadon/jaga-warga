@@ -1,9 +1,11 @@
-import { BadgeCheck, UploadCloud, XCircle, Home, Loader2 } from "lucide-react";
+import { UploadCloud, Home, Loader2 } from "lucide-react";
+import { BillStatusBadge } from "../ui/BillStatusBadge";
 import { Input } from "../ui/input";
+import toast from "react-hot-toast";
 import { Button } from "../ui/button";
 import { BULAN_LIST } from "../../constants";
 import type { Bill } from "../../types/bill";
-import { useResidents } from '../../hooks/useResidents';
+
 import React from "react";
 
 interface BillDetailProps {
@@ -13,18 +15,14 @@ interface BillDetailProps {
   setBukti: (file: File | null) => void;
   handleUpload: () => void;
 }
-
 export function BillDetail({ bill, uploading, bukti, setBukti, handleUpload }: BillDetailProps) {
-  const { data: residents = [] } = useResidents();
-  const resident = residents.find(r => r.id === bill.residentId);
   return (
     <div className="rounded-2xl bg-white/90 border border-blue-100  p-5 flex flex-col gap-3 transition-all duration-200 hover:shadow-blue-200/60 animate-fade-in">
-      {/* Resident name and address */}
+      {/* Resident address */}
       <div className="flex items-center gap-3">
         <div className="rounded-full bg-blue-100 p-2 flex items-center justify-center self-start mt-1"><Home className="w-5 h-5 text-blue-600" /></div>
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <div className="font-bold text-blue-900 text-lg leading-snug break-words whitespace-pre-line mb-0.5">{resident?.name || '-'}</div>
-          <div className="text-xs text-blue-500 font-medium leading-tight">{resident?.block}/{resident?.houseNumber}</div>
+          <div className="font-bold text-blue-900 text-lg leading-snug break-words whitespace-pre-line mb-0.5">Blok {bill.block} / No. {bill.houseNumber}</div>
         </div>
       </div>
       {/* Amount */}
@@ -42,32 +40,52 @@ export function BillDetail({ bill, uploading, bukti, setBukti, handleUpload }: B
         </div>
         <div className="flex flex-col items-end">
           <span className="text-[12px] text-blue-400 font-medium">Status</span>
-          {bill.status === "paid" ? (
-            <span className="flex items-center gap-1 text-green-600 text-xs font-semibold"><BadgeCheck className="w-4 h-4" /> Lunas</span>
-          ) : bill.status === "pending" ? (
-            <span className="flex items-center gap-1 text-yellow-600 text-xs font-semibold"><UploadCloud className="w-4 h-4" /> Menunggu Verifikasi</span>
-          ) : bill.status === "approved" ? (
-            <span className="flex items-center gap-1 text-blue-600 text-xs font-semibold"><UploadCloud className="w-4 h-4" /> Disetujui</span>
-          ) : bill.status === "rejected" ? (
-            <span className="flex items-center gap-1 text-red-600 text-xs font-semibold"><XCircle className="w-4 h-4" /> Ditolak</span>
-          ) : (
-            <span className="flex items-center gap-1 text-red-600 text-xs font-semibold"><XCircle className="w-4 h-4" /> Belum Lunas</span>
-          )}
+          <BillStatusBadge status={bill.status} />
         </div>
       </div>
-      {/* Upload proof only if status is unpaid */}
-      {bill.status === "unpaid" && (
-        <div className="mt-2 flex flex-col gap-1.5">
-          <label className="font-semibold text-xs mb-1">Upload Bukti Pembayaran</label>
-          <Input type="file" accept="image/*,application/pdf" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBukti(e.target.files?.[0] || null)} className="text-xs px-2 py-1" />
+      {/* Upload proof if status is unpaid or rejected */}
+      {(bill.status === "unpaid" || bill.status === "rejected") && (
+        <div className="my-2 flex flex-col gap-1.5">
+          {bill.status === "rejected" && (
+            <div className="bg-red-50  border border-red-200 text-red-700 rounded px-3 py-2 text-xs mb-4">
+              <div className="font-semibold mb-0.5">Tagihan Ditolak</div>
+              {bill.rejectReason ? <div>Alasan: {bill.rejectReason}</div> : <div>Tidak ada alasan penolakan.</div>}
+            </div>
+          )}
+          <label className="font-semibold text-xs mb-1">Unggah {bill.status === "rejected" ? "Ulang " : ""}Bukti Pembayaran</label>
+          <Input 
+            type="file" 
+            accept="image/*,application/pdf" 
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const file = e.target.files?.[0] || null;
+              if (file) {
+                const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf", "image/webp", "image/gif"];
+                if (!allowedTypes.includes(file.type)) {
+                  toast.error("File harus berupa gambar (jpg, png, webp, gif) atau PDF");
+                  e.target.value = "";
+                  setBukti(null);
+                  return;
+                }
+                if (file.size > 3 * 1024 * 1024) {
+                  toast.error("Ukuran file maksimal 3MB");
+                  e.target.value = "";
+                  setBukti(null);
+                  return;
+                }
+              }
+              setBukti(file);
+            }} 
+            className="text-xs px-2 py-1" 
+            aria-label="Unggah bukti pembayaran"
+            title="Unggah foto atau PDF bukti pembayaran (maksimal 3MB)"
+          />
+          <div className="text-[11px] text-blue-500 mt-1">
+            Hanya menerima file gambar (JPG, PNG, WEBP, GIF) atau PDF. Ukuran maksimal 3MB.
+          </div>
           <Button onClick={handleUpload} disabled={uploading || !bukti} className="w-full flex items-center justify-center gap-2 text-xs h-9 mt-1">
-            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />} Konfirmasi Pembayaran
+            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />} {bill.status === "rejected" ? "Upload Ulang" : "Konfirmasi Pembayaran"}
           </Button>
         </div>
-      )}
-      {/* Show payment date if available */}
-      {bill.paidAt && (
-        <div className="text-xs text-blue-500 mt-2">Tanggal Pembayaran: {new Date(bill.paidAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
       )}
     </div>
   );

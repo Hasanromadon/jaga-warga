@@ -13,9 +13,11 @@ export default function BillsList({ userId }: { userId?: string }) {
       {bills && (bills as Bill[]).length > 0 ? (
         (bills as Bill[]).map((bill) => (
           <div key={bill.id} className="p-4 bg-white rounded shadow flex flex-col">
-            <span>Bulan: {bill.bulan}/{bill.tahun}</span>
-            <span>Nominal: Rp{bill.nominal}</span>
+            <span>Bulan: {bill.month}/{bill.year}</span>
+            <span>Blok/No: {bill.block}/{bill.houseNumber}</span>
+            <span>Jumlah: Rp{Number(bill.amount).toLocaleString('id-ID')}</span>
             <span>Status: {bill.status}</span>
+            {bill.remark && <span>Catatan: {bill.remark}</span>}
           </div>
         ))
       ) : (
