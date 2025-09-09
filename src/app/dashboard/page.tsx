@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuthContext } from '../../context/AuthProvider';
-import BillsList from '../../components/BillsList';
 import ConfirmBillList from '../../components/ConfirmBillList';
 import AddBillForm from '../../components/AddBillForm';
 import ResidentList from '../../components/ResidentList';
@@ -67,8 +66,8 @@ export default function DashboardPage() {
     },
   ];
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-100 to-white flex flex-col items-center p-4">
-      <div className="w-full max-w-sm pb-20">
+    <main className="min-h-screen flex flex-col items-center">
+      <div className="w-full max-w-sm pb-20 bg-gradient-to-b  from-blue-100 to-white p-4 min-h-screen  sm:border sm:rounded-md">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           {tabs.map(t => (
             <TabsContent key={t.key} value={t.key}>

@@ -1,64 +1,70 @@
 "use client";
 import { useState } from "react";
 import { Bill } from "../types/bill";
-import { SearchInput } from "./custom/search-input";
+import { useResidents, Resident } from '../hooks/useResidents';
+
 import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
 import { Filter, FileDown, Search } from "lucide-react";
 import { Button } from "./ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "./ui/select";
-import { Download } from "lucide-react";
 
 const STATUS_OPTIONS = [
   { label: "All", value: "all" },
-  { label: "Belum Lunas", value: "belum_lunas" },
-  { label: "Lunas", value: "lunas" },
+  { label: "Unpaid", value: "unpaid" },
+  { label: "Pending", value: "pending" },
+  { label: "Paid", value: "paid" },
+  { label: "Approved", value: "approved" },
+  { label: "Rejected", value: "rejected" },
 ];
 
-function filterBills(bills: Bill[], search: string, status: string) {
+function filterBills(bills: Bill[], residents: Resident[], search: string, status: string) {
   let filtered = bills;
   if (search) {
     const q = search.toLowerCase();
-    filtered = filtered.filter(
-      (bill) =>
-        bill.nama?.toLowerCase().includes(q) ||
-        bill.blokRumah?.toLowerCase().includes(q) ||
-        bill.nomorRumah?.toLowerCase().includes(q) ||
-        bill.bulan?.toLowerCase().includes(q) ||
-        bill.tahun?.toLowerCase().includes(q)
-    );
+    filtered = filtered.filter((bill) => {
+      const resident = residents.find(r => r.id === bill.residentId);
+      return (
+        (resident?.name || '').toLowerCase().includes(q) ||
+        (resident?.block || '').toLowerCase().includes(q) ||
+        (resident?.houseNumber || '').toLowerCase().includes(q) ||
+        (bill.month || '').toLowerCase().includes(q) ||
+        (bill.year || '').toLowerCase().includes(q)
+      );
+    });
   }
   if (status && status !== "all") {
-    filtered = filtered.filter((bill) =>
-      status === "lunas"
-        ? bill.status === "lunas"
-        : bill.status !== "lunas"
-    );
+    filtered = filtered.filter((bill) => bill.status === status);
   }
   return filtered;
 }
-function formatRupiah(nominal: number) {
-  return nominal.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).replace(/,00$/, '');
+function formatRupiah(amount: number) {
+  return amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).replace(/,00$/, '');
 }
+
 
 export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [searchActive, setSearchActive] = useState(false);
+  const { data: residents = [] } = useResidents();
 
-  const filteredBills = filterBills(bills, search, status);
+  const filteredBills = filterBills(bills, residents, search, status);
 
   const handleExport = () => {
     // Simple CSV export
-    const header = ["Nama", "Blok", "Nomor", "Bulan", "Tahun", "Nominal", "Status"];
-    const rows = filteredBills.map((b) => [
-      b.nama,
-      b.blokRumah,
-      b.nomorRumah,
-      b.bulan,
-      b.tahun,
-      b.nominal,
-      b.status,
-    ]);
+    const header = ["Name", "Block", "House Number", "Month", "Year", "Amount", "Status"];
+    const rows = filteredBills.map((b) => {
+      const resident = residents.find(r => r.id === b.residentId);
+      return [
+        resident?.name,
+        resident?.block,
+        resident?.houseNumber,
+        b.month,
+        b.year,
+        b.amount,
+        b.status,
+      ];
+    });
     const csv = [header, ...rows]
       .map((row) => row.map((v) => `"${v ?? ""}"`).join(","))
       .join("\n");
@@ -136,19 +142,19 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
               key={bill.id}
               className="p-0 bg-white rounded-xl shadow-sm border border-blue-100 relative overflow-visible transition hover:shadow-md active:scale-[0.98] cursor-pointer group"
               tabIndex={0}
-              aria-label={`Laporan ${bill.nama} bulan ${bill.bulan} ${bill.tahun}`}
+              aria-label={`Laporan ${residents.find(r => r.id === bill.residentId)?.name} bulan ${bill.month} ${bill.year}`}
             >
               <div className="px-4 pt-3 pb-2">
                 <div className="flex flex-wrap gap-2 items-center w-full mb-3">
-                  <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">{bill.bulan}/{bill.tahun}</span>
-                  <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">{bill.blokRumah}/{bill.nomorRumah}</span>
+                  <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">{bill.month}/{bill.year}</span>
+                  <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">{residents.find(r => r.id === bill.residentId)?.block}/{residents.find(r => r.id === bill.residentId)?.houseNumber}</span>
                   <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full border capitalize select-none
-                    ${bill.status === 'lunas' ? 'bg-green-50 text-green-700 border-green-200' : bill.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-red-50 text-red-700 border-red-200'}`}>{bill.status}</span>
+                    ${bill.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : bill.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : bill.status === 'approved' ? 'bg-blue-50 text-blue-700 border-blue-200' : bill.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-red-50 text-red-700 border-red-200'}`}>{bill.status}</span>
                 </div>
-                <div className="font-semibold text-blue-900 text-sm truncate mb-1" title={bill.nama || 'Warga'}>{bill.nama || 'Warga'}</div>
+                <div className="font-semibold text-blue-900 text-sm truncate mb-1" title={residents.find(r => r.id === bill.residentId)?.name || 'Resident'}>{residents.find(r => r.id === bill.residentId)?.name || 'Resident'}</div>
                 <div className="flex items-center gap-2 text-sm mb-1">
-                  <span className="text-gray-700">Nominal:</span>
-                  <span className="font-bold text-blue-700 text-base">{formatRupiah(bill.nominal)}</span>
+                  <span className="text-gray-700">Amount:</span>
+                  <span className="font-bold text-blue-700 text-base">{formatRupiah(Number(bill.amount))}</span>
                 </div>
               </div>
             </div>

@@ -6,20 +6,15 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
+import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
 import { useResidents, useAddResident, useEditResident, useDeleteResident, Resident } from "../hooks/useResidents";
 import ResidentForm, { ResidentFormInputs } from "./ResidentForm";
 import toast from "react-hot-toast";
 import { SearchInput } from "./custom/search-input";
 
 export default function ResidentList() {
-  // Dummy data for prototyping
-  const dummyResidents: Resident[] = [
-    { id: '1', blokRumah: 'A', nomorRumah: '1', nama: 'Budi Santoso', userId: 'user1' },
-    { id: '2', blokRumah: 'B', nomorRumah: '5', nama: 'Siti Aminah', userId: 'user2' },
-    { id: '3', blokRumah: 'C', nomorRumah: '10', nama: 'Joko Widodo', userId: 'user3' },
-  ];
-  const { data: residents, isLoading } = useResidents();
-  const residentList = residents && residents.length > 0 ? residents : dummyResidents;
+  const { data: residents = [], isLoading } = useResidents();
+  const residentList = residents;
   const addResident = useAddResident();
   const editResident = useEditResident();
   const deleteResident = useDeleteResident();
@@ -29,9 +24,9 @@ export default function ResidentList() {
   const [deleteId, setDeleteId] = useState<string|null>(null);
 
   const filtered = residentList.filter(r =>
-    r.nama.toLowerCase().includes(search.toLowerCase()) ||
-    r.blokRumah.toLowerCase().includes(search.toLowerCase()) ||
-    r.nomorRumah.toLowerCase().includes(search.toLowerCase())
+    r.name.toLowerCase().includes(search.toLowerCase()) ||
+    r.block.toLowerCase().includes(search.toLowerCase()) ||
+    r.houseNumber.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleAdd = (data: Omit<Resident, "id">) => {
@@ -84,16 +79,19 @@ export default function ResidentList() {
         {isLoading ? (
           <div className="text-center text-gray-400 py-8">Loading...</div>
         ) : filtered.length === 0 ? (
-          <div className="text-center text-gray-400 py-8">Tidak ada warga</div>
+          <div className="flex flex-col items-center justify-center py-10 text-blue-700">
+            <EmptyBillIllustration />
+            <div className="mt-4 text-base font-semibold">Tidak ada warga.</div>
+          </div>
         ) : (
           filtered.map(r => (
             <Card key={r.id} className="animate-fade-in border border-gray-200 bg-white/95 shadow-sm rounded-xl px-4 pt-3 pb-2 flex flex-col gap-1">
               <div className="flex flex-wrap gap-2 items-center w-full mb-2">
-                <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">Blok {r.blokRumah}</span>
-                <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">No. {r.nomorRumah}</span>
+                <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">Block {r.block}</span>
+                <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">No. {r.houseNumber}</span>
                 <span className="ml-auto text-xs text-gray-400 font-normal">User ID: {r.userId}</span>
               </div>
-              <div className="font-semibold text-blue-900 text-sm truncate mb-1" title={r.nama}>{r.nama}</div>
+              <div className="font-semibold text-blue-900 text-sm truncate mb-1" title={r.name}>{r.name}</div>
               <div className="flex gap-2 mt-1 justify-end">
                 <Button variant="ghost" size="icon" onClick={() => setEditData(r)}>
                   <Edit className="w-4 h-4 text-blue-600" />
@@ -131,7 +129,7 @@ export default function ResidentList() {
       </Dialog>
            {/* Floating Add Button */}
       <Button
-        className="fixed bottom-20 right-4 left-4 z-50  bg-blue-600 text-white flex items-center gap-2 justify-center text-base"
+        className="fixed bottom-20 right-4 left-4 z-50  w-xs mx-auto bg-blue-600 text-white flex items-center gap-2 justify-center text-base"
         onClick={() => setShowForm(true)}
         aria-label="Tambah Warga"
         style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)' }}

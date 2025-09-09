@@ -1,14 +1,13 @@
 export type Bill = {
   id: string;
-  userId: string;
-  bulan: string;
-  tahun: string;
-  nominal: number;
-  status: string;
-  buktiBayarURL?: string;
-  blokRumah?: string;
-  nomorRumah?: string;
-  nama?: string;
-  tanggalPengajuan?: string;
-  tanggalPembayaran?: string;
+  residentId: string; // reference to residents
+  amount: number;
+  month: string; // e.g. '05'
+  year: string; // e.g. '2025'
+  status: 'unpaid' | 'pending' | 'paid' | 'rejected' | 'approved';
+  proofUrl?: string;
+  createdAt: string; // ISO date
+  paidAt?: string; // ISO date
+  submittedAt?: string; // ISO date
+  rejectReason?: string;
 };

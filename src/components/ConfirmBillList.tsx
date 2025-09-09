@@ -1,6 +1,7 @@
 "use client";
 import { useBills } from '../hooks/useBills';
 import { useApproveBillMutation, useRejectBillMutation } from '../hooks/useConfirmBillMutations';
+import { useResidents } from '../hooks/useResidents';
 import { BadgeCheck, XCircle, Download } from 'lucide-react';
 import { EmptyBillIllustration } from './svg/EmptyBillIllustration';
 import { Button } from './ui/button';
@@ -75,15 +76,21 @@ export default function ConfirmBillList() {
   const [loadingId, setLoadingId] = useState<string|null>(null);
   const [modal, setModal] = useState<null | { type: 'approve' | 'reject'; billId: string }>(null);
   const [previewImage, setPreviewImage] = useState<string|null>(null);
-  // Filter bills by search (by nama, blok, nomor, bulan, tahun)
+  // Get residents for display
+  const { data: residents = [] } = useResidents();
+  // Helper to get resident info by id
+  const getResident = (residentId: string) => residents.find(r => r.id === residentId);
+
+  // Filter bills by search (by resident name, block, houseNumber, month, year)
   const filteredBills = (bills || []).filter((bill: import('../types/bill').Bill) => {
+    const resident = getResident(bill.residentId);
     const q = search.toLowerCase();
     return (
-      (bill.nama || '').toLowerCase().includes(q) ||
-      (bill.blokRumah || '').toLowerCase().includes(q) ||
-      (bill.nomorRumah || '').toLowerCase().includes(q) ||
-      (bill.bulan || '').toLowerCase().includes(q) ||
-      (bill.tahun || '').toLowerCase().includes(q)
+      (resident?.name || '').toLowerCase().includes(q) ||
+      (resident?.block || '').toLowerCase().includes(q) ||
+      (resident?.houseNumber || '').toLowerCase().includes(q) ||
+      (bill.month || '').toLowerCase().includes(q) ||
+      (bill.year || '').toLowerCase().includes(q)
     );
   });
 
@@ -117,20 +124,20 @@ export default function ConfirmBillList() {
           <Card key={bill.id} className="animate-fade-in border border-gray-200 bg-white/95 shadow-sm rounded-xl">
             <div className="px-4 pt-3 pb-2">
               <div className="flex flex-wrap gap-2 items-center w-full mb-4">
-                <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">{bill.bulan}/{bill.tahun}</span>
-                <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">{bill.blokRumah}/{bill.nomorRumah}</span>
-                <span className="ml-auto text-xs text-gray-400 font-normal">{bill.tanggalPengajuan ? new Date(bill.tanggalPengajuan).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</span>
+                <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">{bill.month}/{bill.year}</span>
+                <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">{getResident(bill.residentId)?.block}/{getResident(bill.residentId)?.houseNumber}</span>
+                <span className="ml-auto text-xs text-gray-400 font-normal">{bill.createdAt ? new Date(bill.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</span>
               </div>
-              <div className="font-semibold text-blue-900 text-sm truncate mb-1" title={bill.nama || 'Warga'}>{bill.nama || 'Warga'}    </div>
+              <div className="font-semibold text-blue-900 text-sm truncate mb-1" title={getResident(bill.residentId)?.name || 'Resident'}>{getResident(bill.residentId)?.name || 'Resident'}</div>
               <div className="flex items-center gap-2 text-sm mb-1">
-                <span className="text-gray-700">Nominal:</span>
-                <span className="font-bold text-blue-700 text-base">Rp{bill.nominal.toLocaleString('id-ID')}</span>
+                <span className="text-gray-700">Amount:</span>
+                <span className="font-bold text-blue-700 text-base">Rp{Number(bill.amount).toLocaleString('id-ID')}</span>
               </div>
-              {bill.buktiBayarURL && (
+              {bill.proofUrl && (
                 <button
                   type="button"
                   className="text-xs text-blue-600 underline bg-transparent border-0 p-0 cursor-pointer hover:text-blue-800"
-                  onClick={() => setPreviewImage(bill.buktiBayarURL || null)}
+                  onClick={() => setPreviewImage(bill.proofUrl || null)}
                 >
                   Lihat Bukti Pembayaran
                 </button>
@@ -165,18 +172,18 @@ export default function ConfirmBillList() {
           return (
             <div className="text-left space-y-2">
               <div className="grid grid-cols-[120px_1fr] gap-x-4 gap-y-1 text-sm items-center">
-                <span className="text-gray-500">Nama</span> <span className="font-medium text-blue-900 truncate" title={bill.nama}>{bill.nama}</span>
-                <span className="text-gray-500">Blok/No</span> <span>{bill.blokRumah}/{bill.nomorRumah}</span>
-                <span className="text-gray-500">Bulan/Tahun</span> <span>{bill.bulan}/{bill.tahun}</span>
-                <span className="text-gray-500">Tgl Pengajuan</span> <span>{bill.tanggalPengajuan ? new Date(bill.tanggalPengajuan).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</span>
-                <span className="text-gray-500">Nominal</span> <span className="font-bold text-blue-700">Rp{bill.nominal.toLocaleString('id-ID')}</span>
-                {bill.buktiBayarURL && <>
-                  <span className="text-gray-500">Bukti</span>
+                <span className="text-gray-500">Name</span> <span className="font-medium text-blue-900 truncate" title={getResident(bill.residentId)?.name}>{getResident(bill.residentId)?.name}</span>
+                <span className="text-gray-500">Block/No</span> <span>{getResident(bill.residentId)?.block}/{getResident(bill.residentId)?.houseNumber}</span>
+                <span className="text-gray-500">Month/Year</span> <span>{bill.month}/{bill.year}</span>
+                <span className="text-gray-500">Created At</span> <span>{bill.createdAt ? new Date(bill.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</span>
+                <span className="text-gray-500">Amount</span> <span className="font-bold text-blue-700">Rp{Number(bill.amount).toLocaleString('id-ID')}</span>
+                {bill.proofUrl && <>
+                  <span className="text-gray-500">Proof</span>
                   <span className="inline-block">
                     <button
                       type="button"
                       className="text-blue-600 underline p-0 bg-transparent border-0 cursor-pointer hover:text-blue-800 text-left"
-                      onClick={e => { e.preventDefault(); setPreviewImage(bill.buktiBayarURL || null); }}
+                      onClick={e => { e.preventDefault(); setPreviewImage(bill.proofUrl || null); }}
                     >
                       Lihat Bukti Pembayaran
                     </button>

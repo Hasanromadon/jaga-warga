@@ -4,10 +4,10 @@ import { db } from '../firebaseConfig';
 
 export interface Resident {
   id: string;
-  blokRumah: string;
-  nomorRumah: string;
-  nama: string;
   userId: string;
+  block: string;
+  houseNumber: string;
+  name: string;
 }
 
 export function useResidents() {
@@ -15,7 +15,17 @@ export function useResidents() {
     queryKey: ['residents'],
     queryFn: async () => {
       const snap = await getDocs(collection(db, 'residents'));
-      return snap.docs.map(d => ({ id: d.id, ...d.data() } as Resident));
+      // Map old keys to new keys for backward compatibility (if needed)
+      return snap.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          userId: data.userId,
+          block: data.block ?? data.blokRumah,
+          houseNumber: data.houseNumber ?? data.nomorRumah,
+          name: data.name ?? data.nama,
+        } as Resident;
+      });
     },
   });
 }

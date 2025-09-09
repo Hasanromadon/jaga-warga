@@ -8,9 +8,13 @@ export function useAddBillMutation() {
   return useMutation({
     mutationFn: async (data: AddBillFormInputs) => {
       await addDoc(collection(db, 'bills'), {
-        ...data,
-        status: 'belum bayar',
-        buktiBayarURL: '',
+        residentId: data.residentId,
+        amount: data.amount,
+        month: data.month,
+        year: data.year,
+        status: 'unpaid',
+        proofUrl: '',
+        createdAt: new Date().toISOString(),
       });
     },
     onSuccess: () => {

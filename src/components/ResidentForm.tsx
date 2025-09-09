@@ -6,9 +6,9 @@ import { Input } from "./ui/input";
 import { useState } from 'react';
 
 export interface ResidentFormInputs {
-  blokRumah: string;
-  nomorRumah: string;
-  nama: string;
+  block: string;
+  houseNumber: string;
+  name: string;
   userId: string;
 }
 
@@ -24,7 +24,7 @@ export default function ResidentForm({ initial, onSave, title, subtitle }: Resid
   const [loading, setLoading] = useState(false);
 
   // Determine context-aware title/subtitle if not provided
-  const isEdit = !!(initial && (initial.nama || initial.userId || initial.blokRumah || initial.nomorRumah));
+  const isEdit = !!(initial && (initial.name || initial.userId || initial.block || initial.houseNumber));
   const displayTitle = title ?? (isEdit ? "Edit Warga" : "Tambah Warga");
   const displaySubtitle = subtitle ?? (
     isEdit
@@ -47,17 +47,17 @@ export default function ResidentForm({ initial, onSave, title, subtitle }: Resid
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="flex gap-2">
           <div className="flex-1 max-w-[7rem]">
-            <Input placeholder="Blok Rumah" {...register('blokRumah', { required: true })} className="text-sm" autoFocus />
-            {errors.blokRumah && <span className="text-red-500 text-xs">Blok wajib diisi</span>}
+            <Input placeholder="Block" {...register('block', { required: true })} className="text-sm" autoFocus />
+            {errors.block && <span className="text-red-500 text-xs">Block is required</span>}
           </div>
           <div className="flex-1 max-w-[9rem]">
-            <Input placeholder="Nomor Rumah" {...register('nomorRumah', { required: true })} className="text-sm" />
-            {errors.nomorRumah && <span className="text-red-500 text-xs">Nomor wajib diisi</span>}
+            <Input placeholder="House Number" {...register('houseNumber', { required: true })} className="text-sm" />
+            {errors.houseNumber && <span className="text-red-500 text-xs">House number is required</span>}
           </div>
         </div>
         <div>
-          <Input placeholder="Nama Warga" {...register('nama', { required: true })} className="text-sm w-full" />
-          {errors.nama && <span className="text-red-500 text-xs">Nama wajib diisi</span>}
+          <Input placeholder="Resident Name" {...register('name', { required: true })} className="text-sm w-full" />
+          {errors.name && <span className="text-red-500 text-xs">Name is required</span>}
         </div>
         <div>
           <Input placeholder="User ID" {...register('userId', { required: true })} className="text-sm w-full" />

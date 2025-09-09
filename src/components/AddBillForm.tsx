@@ -8,14 +8,14 @@ import { Label } from "../components/ui/label";
 import { useState } from 'react';
 import { useAddBillMutation } from '../hooks/useAddBillMutation';
 import toast from 'react-hot-toast';
-import { BLOK_LIST, BULAN_LIST, TAHUN_LIST } from '../constants';
+import { BULAN_LIST, TAHUN_LIST } from '../constants';
+import { useResidents } from '../hooks/useResidents';
 
 export interface AddBillFormInputs {
-  blokRumah: string;
-  nomorRumah: string;
-  bulan: string;
-  tahun: string;
-  nominal: number;
+  residentId: string; // reference to residents
+  amount: number;
+  month: string;
+  year: string;
 }
 
 export default function AddBillForm() {
@@ -23,8 +23,7 @@ export default function AddBillForm() {
   const [error, setError] = useState<string | null>(null);
   const { mutate: addBill, isPending: loading } = useAddBillMutation();
 
-  // Dummy nomor rumah, bisa diganti dengan fetch dari backend
-  const nomorList = Array.from({ length: 30 }, (_, i) => String(i + 1));
+  const { data: residents = [], isLoading: loadingResidents } = useResidents();
 
   const onSubmit = (data: AddBillFormInputs) => {
     setError(null);
@@ -32,11 +31,10 @@ export default function AddBillForm() {
       onSuccess: () => {
         toast.success('Tagihan berhasil ditambahkan!');
         reset({
-          blokRumah: '',
-          nomorRumah: '',
-          bulan: '',
-          tahun: '',
-          nominal: undefined,
+          residentId: '',
+          amount: undefined,
+          month: '',
+          year: '',
         });
       },
       onError: (err: unknown) => {
@@ -56,58 +54,39 @@ export default function AddBillForm() {
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <Label htmlFor="blokRumah">Blok Rumah</Label>
+            <Label htmlFor="residentId">Resident</Label>
             <Controller
-              name="blokRumah"
+              name="residentId"
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full mt-1" id="blokRumah">
-                    <SelectValue placeholder="Pilih blok" />
+                  <SelectTrigger className="w-full mt-1" id="residentId">
+                    <SelectValue placeholder={loadingResidents ? 'Loading...' : 'Select resident'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {BLOK_LIST.map(blok => (
-                      <SelectItem key={blok} value={blok}>{blok}</SelectItem>
+                    {residents.map(resident => (
+                      <SelectItem key={resident.id} value={resident.id}>
+                        {resident.name} ({resident.block}/{resident.houseNumber})
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
             />
-            {errors.blokRumah && <span className="text-red-500 text-xs">Blok wajib diisi</span>}
-          </div>
-          <div>
-            <Label htmlFor="nomorRumah">Nomor Rumah</Label>
-            <Controller
-              name="nomorRumah"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full mt-1" id="nomorRumah">
-                    <SelectValue placeholder="Pilih nomor rumah" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {nomorList.map(no => (
-                      <SelectItem key={no} value={no}>{no}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.nomorRumah && <span className="text-red-500 text-xs">Nomor rumah wajib diisi</span>}
+            {errors.residentId && <span className="text-red-500 text-xs">Resident is required</span>}
           </div>
           <div className="flex gap-2">
             <div className="flex-1">
-              <Label htmlFor="bulan">Bulan</Label>
+              <Label htmlFor="month">Month</Label>
               <Controller
-                name="bulan"
+                name="month"
                 control={control}
                 rules={{ required: true }}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full mt-1" id="bulan">
-                      <SelectValue placeholder="Pilih bulan" />
+                    <SelectTrigger className="w-full mt-1" id="month">
+                      <SelectValue placeholder="Select month" />
                     </SelectTrigger>
                     <SelectContent>
                       {BULAN_LIST.map(bulan => (
@@ -117,18 +96,18 @@ export default function AddBillForm() {
                   </Select>
                 )}
               />
-              {errors.bulan && <span className="text-red-500 text-xs">Bulan wajib diisi</span>}
+              {errors.month && <span className="text-red-500 text-xs">Month is required</span>}
             </div>
             <div className="flex-1">
-              <Label htmlFor="tahun">Tahun</Label>
+              <Label htmlFor="year">Year</Label>
               <Controller
-                name="tahun"
+                name="year"
                 control={control}
                 rules={{ required: true }}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full mt-1" id="tahun">
-                      <SelectValue placeholder="Pilih tahun" />
+                    <SelectTrigger className="w-full mt-1" id="year">
+                      <SelectValue placeholder="Select year" />
                     </SelectTrigger>
                     <SelectContent>
                       {TAHUN_LIST.map(tahun => (
@@ -138,24 +117,24 @@ export default function AddBillForm() {
                   </Select>
                 )}
               />
-              {errors.tahun && <span className="text-red-500 text-xs">Tahun wajib diisi</span>}
+              {errors.year && <span className="text-red-500 text-xs">Year is required</span>}
             </div>
           </div>
           <div>
-            <Label htmlFor="nominal">Nominal</Label>
+            <Label htmlFor="amount">Amount</Label>
             <div className="relative mt-1">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
               <Input
-                id="nominal"
+                id="amount"
                 type="number"
                 min={0}
                 step={1000}
-                placeholder="Nominal tagihan"
+                placeholder="Bill amount"
                 className="pl-8"
-                {...register('nominal', { required: true, valueAsNumber: true })}
+                {...register('amount', { required: true, valueAsNumber: true })}
               />
             </div>
-            {errors.nominal && <span className="text-red-500 text-xs">Nominal wajib diisi</span>}
+            {errors.amount && <span className="text-red-500 text-xs">Amount is required</span>}
           </div>
           {error && <div className="text-red-500 text-xs">{error}</div>}
           <Button type="submit" disabled={loading} className="w-full mt-2">{loading ? 'Loading...' : 'Tambah'}</Button>
