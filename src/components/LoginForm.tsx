@@ -2,6 +2,8 @@
 import { useForm } from 'react-hook-form';
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+import { Mail, Lock } from "lucide-react";
+import { mapFirebaseError } from "../utils/firebaseError";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
@@ -20,14 +22,15 @@ export default function LoginForm() {
   const router = useRouter();
 
   const onSubmit = async (data: LoginFormInputs) => {
+
+    console.log(data);
     setLoading(true);
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       router.push("/dashboard");
     } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Terjadi error');
+      setError(mapFirebaseError(err));
     } finally {
       setLoading(false);
     }
@@ -41,8 +44,7 @@ export default function LoginForm() {
       await signInWithPopup(auth, provider);
       router.push("/dashboard");
     } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Terjadi error');
+      setError(mapFirebaseError(err));
     } finally {
       setLoading(false);
     }
@@ -60,10 +62,16 @@ export default function LoginForm() {
           </div>
         )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <Input type="email" placeholder="Email" {...register('email', { required: true })} autoComplete="username" className="text-sm" />
-          {errors.email && <span className="text-red-500 text-xs">Email wajib diisi</span>}
-          <Input type="password" placeholder="Kata Sandi" {...register('password', { required: true })} autoComplete="current-password" className="text-sm" />
-          {errors.password && <span className="text-red-500 text-xs">Kata sandi wajib diisi</span>}
+          <div>
+            <label htmlFor="email" className="text-xs font-semibold text-blue-900 flex items-center gap-1 mb-1"><Mail className="w-4 h-4" />Email</label>
+            <Input id="email" type="email" placeholder="Email" {...register('email', { required: true })} autoComplete="username" className="text-sm" />
+            {errors.email && <span className="text-red-500 text-xs">Email wajib diisi</span>}
+          </div>
+          <div>
+            <label htmlFor="password" className="text-xs font-semibold text-blue-900 flex items-center gap-1 mb-1"><Lock className="w-4 h-4" />Kata Sandi</label>
+            <Input id="password" type="password" placeholder="Kata Sandi" {...register('password', { required: true })} autoComplete="current-password" className="text-sm" />
+            {errors.password && <span className="text-red-500 text-xs">Kata sandi wajib diisi</span>}
+          </div>
           <Button type="submit" disabled={loading} className="w-full text-base">{loading ? 'Memproses...' : 'Masuk'}</Button>
         </form>
         <Button onClick={handleGoogle} variant="outline" className="w-full mt-2 text-base flex items-center justify-center gap-2" disabled={loading}>

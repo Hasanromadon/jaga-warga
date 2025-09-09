@@ -10,12 +10,12 @@ export default function HomePage() {
           <Image src="/logo.svg" alt="Logo Jaga Warga" width={56} height={56} className="rounded-full" />
         </div>
         <h1 className="text-2xl font-bold text-blue-900 mb-1 text-center">Jaga Warga</h1>
-        <p className="text-sm text-blue-700 text-center mb-2">Aplikasi pengelolaan dan pengecekan iuran lingkungan untuk warga dan admin perumahan.</p>
+        <p className="text-sm text-blue-700 text-center mb-2">Aplikasi pengelolaan dan pengecekan iuran lingkungan untuk warga perumahan Flaminggo.</p>
       </div>
       <div className="w-full max-w-sm flex flex-col gap-4">
         <a href="/warga" className="flex items-center gap-3 p-4 rounded-xl shadow bg-white text-base font-semibold hover:bg-blue-50 transition border border-blue-100">
           <Users className="w-6 h-6 text-blue-600" />
-          Cek Tagihan Warga
+          Cek Tagihan IPL
         </a>
         <a href="/login" className="flex items-center gap-3 p-4 rounded-xl shadow bg-white text-base font-semibold hover:bg-green-50 transition border border-green-100">
           <LogIn className="w-6 h-6 text-green-600" />
