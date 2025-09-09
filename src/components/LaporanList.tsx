@@ -9,12 +9,12 @@ import { Button } from "./ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "./ui/select";
 
 const STATUS_OPTIONS = [
-  { label: "All", value: "all" },
-  { label: "Unpaid", value: "unpaid" },
-  { label: "Pending", value: "pending" },
-  { label: "Paid", value: "paid" },
-  { label: "Approved", value: "approved" },
-  { label: "Rejected", value: "rejected" },
+  { label: "Semua", value: "all" },
+  { label: "Belum Lunas", value: "unpaid" },
+  { label: "Menunggu Verifikasi", value: "pending" },
+  { label: "Lunas", value: "paid" },
+  { label: "Disetujui", value: "approved" },
+  { label: "Ditolak", value: "rejected" },
 ];
 
 function filterBills(bills: Bill[], residents: Resident[], search: string, status: string) {
@@ -110,6 +110,7 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
             </Select>
             <Button onClick={handleExport} variant="ghost" size="icon" title="Export Laporan" className="p-2">
               <FileDown className="w-5 h-5" />
+              <span className="sr-only">Ekspor</span>
             </Button>
           </div>
         ) : (
@@ -125,7 +126,7 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
               </SelectContent>
             </Select>
             <Button onClick={handleExport} variant="outline" className="gap-1 text-sm">
-              <FileDown className="w-4 h-4" /> Export
+              <FileDown className="w-4 h-4" /> Ekspor
             </Button>
           </div>
         )}

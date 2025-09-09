@@ -1,10 +1,8 @@
 "use client";
 import { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
+import { Card, } from "./ui/card";
 import { Dialog, DialogContent } from "./ui/dialog";
-import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
 import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
 import { useResidents, useAddResident, useEditResident, useDeleteResident, Resident } from "../hooks/useResidents";
@@ -29,7 +27,7 @@ export default function ResidentList() {
     r.houseNumber.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleAdd = (data: Omit<Resident, "id">) => {
+  const handleAdd = (data: ResidentFormInputs) => {
     addResident.mutate(data, {
       onSuccess: () => {
         toast.success("Warga berhasil ditambahkan");
@@ -89,7 +87,7 @@ export default function ResidentList() {
               <div className="flex flex-wrap gap-2 items-center w-full mb-2">
                 <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">Block {r.block}</span>
                 <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">No. {r.houseNumber}</span>
-                <span className="ml-auto text-xs text-gray-400 font-normal">User ID: {r.userId}</span>
+                {/* User ID removed as per new requirements */}
               </div>
               <div className="font-semibold text-blue-900 text-sm truncate mb-1" title={r.name}>{r.name}</div>
               <div className="flex gap-2 mt-1 justify-end">

@@ -4,10 +4,10 @@ import { db } from '../firebaseConfig';
 
 export interface Resident {
   id: string;
-  userId: string;
   block: string;
   houseNumber: string;
   name: string;
+  phoneNumber?: string;
 }
 
 export function useResidents() {
@@ -20,10 +20,10 @@ export function useResidents() {
         const data = d.data();
         return {
           id: d.id,
-          userId: data.userId,
           block: data.block ?? data.blokRumah,
           houseNumber: data.houseNumber ?? data.nomorRumah,
           name: data.name ?? data.nama,
+          phoneNumber: data.phoneNumber,
         } as Resident;
       });
     },

@@ -1,6 +1,7 @@
 // IPL App constants
 
 export const BLOK_LIST = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+export const HOUSE_NUMBER_LIST = Array.from({ length: 50 }, (_, i) => String(i + 1));
 
 export const BULAN_LIST = [
   { value: "01", label: "Januari" },
