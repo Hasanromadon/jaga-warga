@@ -6,11 +6,11 @@ import LayoutClient from "./layout-client";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Jaga Warga - Aplikasi Iuran & Pengelolaan Lingkungan Perumahan",
+  title: "Jaga Warga",
   description:
     "Jaga Warga adalah aplikasi digital untuk membantu warga mengelola iuran, laporan, dan kegiatan lingkungan perumahan secara mudah dan transparan.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.svg",
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     siteName: "Jaga Warga",
     images: [
       {
-        url: "/favicon.ico",
+        url: "/logo.svg",
         width: 600,
         height: 600,
         alt: "Jaga Warga",
