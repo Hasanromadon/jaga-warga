@@ -1,22 +1,21 @@
 "use client";
-import React, { useState } from "react";
-import { PreviewImageModal } from "./ui/PreviewImageModal";
+import { getMonthName } from "@/utils/formatDate";
+import { makeWaUrl } from "@/utils/formatPhone";
+import { Calendar, FileDown, Filter, Search } from "lucide-react";
+import { useState } from "react";
+import { BULAN_LIST, STATUS_OPTIONS } from "../constants";
 import { Bill } from "../types/bill";
 import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
-import { Filter, FileDown, Search, Calendar } from "lucide-react";
+import { WhatsAppIcon } from "./svg/WhatsappIcon";
 import { Button } from "./ui/button";
+import { PreviewImageModal } from "./ui/PreviewImageModal";
 import {
   Select,
-  SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { STATUS_OPTIONS, BULAN_LIST } from "../constants"; // 🆕 pastikan kamu punya BULAN_LIST di constants
-import { Label } from "@radix-ui/react-select";
-import { WhatsAppIcon } from "./svg/WhatsappIcon";
-import { makeWaUrl } from "@/utils/formatPhone";
-import { getMonthName } from "@/utils/formatDate";
 
 const STATUS_LABELS: Record<string, string> = {
   unpaid: "Belum Lunas",
@@ -72,8 +71,7 @@ function formatRupiah(amount: number) {
 export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
-  const [month, setMonth] = useState("all"); // 🆕 state bulan
-  const [searchActive, setSearchActive] = useState(false);
+  const [month, setMonth] = useState("all");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const filteredBills = filterBills(bills, search, status, month);
@@ -212,7 +210,7 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
                   <div className="flex flex-wrap gap-2 justify-between items-center w-full mb-3">
                     <div className="flex flex-col space-y-1">
                       <div className="flex flex-row space-x-2">
-                        <span className="text-sm font-bold truncate block max-w-[110px]">
+                        <span className="text-sm font-bold truncate block max-w-[100px]">
                           {bill.residentName}
                         </span>
                         <span className="bg-blue-50 text-blue-700 rounded px-2 items-center flex text-xs font-normal border border-blue-100">

@@ -20,7 +20,7 @@ export function normalizeWaNumber(raw?: string | null) {
 }
 
 export function makeWaUrl(bill: Bill) {
-  const num = normalizeWaNumber((bill as any).phoneNumber);
+  const num = normalizeWaNumber((bill as Bill).phoneNumber);
   if (!num) return null;
 
   const rupiah = (amt: number) =>
@@ -33,7 +33,7 @@ export function makeWaUrl(bill: Bill) {
       .replace(/,00$/, "");
 
   const text = [
-    `Assalamualaikum ${(bill as any).residentName || "Bapak/Ibu"},`,
+    `Assalamualaikum Bapak/Ibu ${(bill as Bill).residentName || "Saudara"},`,
     `Ini pengingat tagihan Iuran:`,
     `• Blok ${bill.block} No ${bill.houseNumber}`,
     `• Periode: ${getMonthName(bill.month)} ${bill.year}`,

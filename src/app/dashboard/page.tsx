@@ -1,46 +1,103 @@
 "use client";
 
-import { useAuthContext } from '../../context/AuthProvider';
-import ConfirmBillList from '../../components/ConfirmBillList';
-import AddBillForm from '../../components/AddBillForm';
-import ResidentList from '../../components/ResidentList';
-import LaporanList from '../../components/LaporanList';
-import { Tabs, TabsContent } from '../../components/ui/tabs';
+import { useState } from "react";
+import AddBillForm from "../../components/AddBillForm";
+import ConfirmBillList from "../../components/ConfirmBillList";
+import LaporanList from "../../components/LaporanList";
+import ResidentList from "../../components/ResidentList";
+import { Tabs, TabsContent } from "../../components/ui/tabs";
+import { useAuthContext } from "../../context/AuthProvider";
+import { useBills } from "../../hooks/useBills";
 // Dual-tone SVG icons for bottom navigation
-const DualToneBadgeCheck = ({active}: {active?: boolean}) => (
+const DualToneBadgeCheck = ({ active }: { active?: boolean }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="10" fill={active ? '#3973C4' : '#E0EDFF'} />
-    <path d="M8 12.5l2.5 2.5 5-5" stroke={active ? '#fff' : '#3973C4'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="12" cy="12" r="10" fill={active ? "#3973C4" : "#E0EDFF"} />
+    <path
+      d="M8 12.5l2.5 2.5 5-5"
+      stroke={active ? "#fff" : "#3973C4"}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
-const DualTonePlusCircle = ({active}: {active?: boolean}) => (
+const DualTonePlusCircle = ({ active }: { active?: boolean }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="10" fill={active ? '#3973C4' : '#E0EDFF'} />
-    <rect x="11" y="7" width="2" height="10" rx="1" fill={active ? '#fff' : '#3973C4'} />
-    <rect x="7" y="11" width="10" height="2" rx="1" fill={active ? '#fff' : '#3973C4'} />
+    <circle cx="12" cy="12" r="10" fill={active ? "#3973C4" : "#E0EDFF"} />
+    <rect
+      x="11"
+      y="7"
+      width="2"
+      height="10"
+      rx="1"
+      fill={active ? "#fff" : "#3973C4"}
+    />
+    <rect
+      x="7"
+      y="11"
+      width="10"
+      height="2"
+      rx="1"
+      fill={active ? "#fff" : "#3973C4"}
+    />
   </svg>
 );
-const DualToneUsers = ({active}: {active?: boolean}) => (
+const DualToneUsers = ({ active }: { active?: boolean }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <ellipse cx="12" cy="10" rx="4" ry="4" fill={active ? '#3973C4' : '#E0EDFF'} />
-    <ellipse cx="12" cy="18" rx="7" ry="3" fill={active ? '#7BA7E7' : '#E0EDFF'} />
-    <ellipse cx="7" cy="13" rx="2" ry="2" fill={active ? '#7BA7E7' : '#E0EDFF'} />
-    <ellipse cx="17" cy="13" rx="2" ry="2" fill={active ? '#7BA7E7' : '#E0EDFF'} />
+    <ellipse
+      cx="12"
+      cy="10"
+      rx="4"
+      ry="4"
+      fill={active ? "#3973C4" : "#E0EDFF"}
+    />
+    <ellipse
+      cx="12"
+      cy="18"
+      rx="7"
+      ry="3"
+      fill={active ? "#7BA7E7" : "#E0EDFF"}
+    />
+    <ellipse
+      cx="7"
+      cy="13"
+      rx="2"
+      ry="2"
+      fill={active ? "#7BA7E7" : "#E0EDFF"}
+    />
+    <ellipse
+      cx="17"
+      cy="13"
+      rx="2"
+      ry="2"
+      fill={active ? "#7BA7E7" : "#E0EDFF"}
+    />
   </svg>
 );
-const DualToneClock = ({active}: {active?: boolean}) => (
+const DualToneClock = ({ active }: { active?: boolean }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="10" fill={active ? '#3973C4' : '#E0EDFF'} />
-    <rect x="11" y="7" width="2" height="6" rx="1" fill={active ? '#fff' : '#3973C4'} />
-    <rect x="11" y="12" width="5" height="2" rx="1" fill={active ? '#fff' : '#3973C4'} />
+    <circle cx="12" cy="12" r="10" fill={active ? "#3973C4" : "#E0EDFF"} />
+    <rect
+      x="11"
+      y="7"
+      width="2"
+      height="6"
+      rx="1"
+      fill={active ? "#fff" : "#3973C4"}
+    />
+    <rect
+      x="11"
+      y="12"
+      width="5"
+      height="2"
+      rx="1"
+      fill={active ? "#fff" : "#3973C4"}
+    />
   </svg>
 );
-import { useState } from 'react';
-import { useBills } from '../../hooks/useBills';
 
 export default function DashboardPage() {
-  const { user, role } = useAuthContext();
-  const [tab, setTab] = useState('konfirmasi');
+  const [tab, setTab] = useState("konfirmasi");
 
   // if (role !== 'admin') {
   //   return (
@@ -53,39 +110,49 @@ export default function DashboardPage() {
   // }
 
   // Get all bills for laporan tab (admin only)
-  const { data: allBills = [], isLoading: loadingBills, error: errorBills } = useBills();
+  const {
+    data: allBills = [],
+    isLoading: loadingBills,
+    error: errorBills,
+  } = useBills();
   // Count pending bills for badge (from backend)
-  const pendingCount = (allBills || []).filter((bill: import('../../types/bill').Bill) => bill.status === 'pending').length;
+  const pendingCount = (allBills || []).filter(
+    (bill: import("../../types/bill").Bill) => bill.status === "pending"
+  ).length;
   const tabs = [
     {
-      key: 'konfirmasi',
-      label: 'Konfirmasi',
+      key: "konfirmasi",
+      label: "Konfirmasi",
       icon: DualToneBadgeCheck,
       content: <ConfirmBillList />,
       badge: pendingCount > 0 ? pendingCount : undefined,
     },
     {
-      key: 'tambah',
-      label: 'Tambah',
+      key: "tambah",
+      label: "Tambah",
       icon: DualTonePlusCircle,
       content: <AddBillForm />,
     },
     {
-      key: 'warga',
-      label: 'Warga',
+      key: "warga",
+      label: "Warga",
       icon: DualToneUsers,
       content: <ResidentList />,
     },
     {
-      key: 'laporan',
-      label: 'Laporan',
+      key: "laporan",
+      label: "Laporan",
       icon: DualToneClock,
       content: (
         <>
           {loadingBills ? (
-            <div className="text-center text-blue-700 py-8">Memuat data laporan...</div>
+            <div className="text-center text-blue-700 py-8">
+              Memuat data laporan...
+            </div>
           ) : errorBills ? (
-            <div className="text-center text-red-600 py-8">Gagal memuat data laporan</div>
+            <div className="text-center text-red-600 py-8">
+              Gagal memuat data laporan
+            </div>
           ) : (
             <LaporanList bills={allBills} />
           )}
@@ -97,28 +164,37 @@ export default function DashboardPage() {
     <main className="min-h-screen flex flex-col items-center pb-24">
       <div className="w-full max-w-sm bg-gradient-to-b from-blue-100 to-white p-4 min-h-screen sm:border sm:rounded-md">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          {tabs.map(t => (
+          {tabs.map((t) => (
             <TabsContent key={t.key} value={t.key}>
               {t.content}
             </TabsContent>
           ))}
         </Tabs>
-    {/* Bottom Navigation Floating Tab - fixed, always at bottom, not affected by scroll */}
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-2" style={{paddingBottom: 'env(safe-area-inset-bottom, 0)'}}>
-      <div className="flex justify-between bg-white/95 shadow-xl rounded-xl border border-blue-100 overflow-hidden backdrop-blur supports-[backdrop-filter]:bg-white/80 animate-fade-in">
-            {tabs.map(t => {
+        {/* Bottom Navigation Floating Tab - fixed, always at bottom, not affected by scroll */}
+        <nav
+          className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-2"
+          style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}
+        >
+          <div className="flex justify-between bg-white/95 shadow-xl rounded-xl border border-blue-100 overflow-hidden backdrop-blur supports-[backdrop-filter]:bg-white/80 animate-fade-in">
+            {tabs.map((t) => {
               const Icon = t.icon;
               return (
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className={`group flex-1 flex flex-col items-center py-1.5 px-1 transition-all duration-200 border-b-2 ${tab===t.key ? 'text-blue-700 border-blue-600 font-bold bg-blue-50/60' : 'text-blue-900 border-transparent hover:bg-blue-50/40'}`}
+                  className={`group flex-1 flex flex-col items-center py-1.5 px-1 transition-all duration-200 border-b-2 ${
+                    tab === t.key
+                      ? "text-blue-700 border-blue-600 font-bold bg-blue-50/60"
+                      : "text-blue-900 border-transparent hover:bg-blue-50/40"
+                  }`}
                   style={{ minWidth: 0 }}
                 >
                   <span className="relative">
-                    <Icon active={tab===t.key} />
+                    <Icon active={tab === t.key} />
                     {t.badge && (
-                      <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center border border-white shadow">{t.badge}</span>
+                      <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center border border-white shadow">
+                        {t.badge}
+                      </span>
                     )}
                   </span>
                   <span className="text-xs leading-tight">{t.label}</span>
