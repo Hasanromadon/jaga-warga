@@ -145,11 +145,10 @@ export default function AddBillForm() {
       return;
     }
 
-    // ✅ kirim data beserta residentId ke mutation single
+    // ✅ kirim data beserta residential_id admin ke mutation single
     addBill(
       {
         ...data,
-        residentId: resident.id, // tambahkan id warga
         residential_id: residentialId ?? undefined,
       },
       {

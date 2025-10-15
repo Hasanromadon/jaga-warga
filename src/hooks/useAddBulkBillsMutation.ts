@@ -5,9 +5,11 @@ import { AddBillFormInputs } from "../components/AddBillForm";
 import { Resident } from "./useResidents";
 import { extractBillKeywords } from "../utils/extractBillKeywords";
 import toast from "react-hot-toast";
+import { useAuth } from "./useAuth";
 
 export function useAddBulkBillsMutation() {
   const queryClient = useQueryClient();
+  const { residentialId } = useAuth();
 
   return useMutation({
     mutationFn: async ({
@@ -23,13 +25,12 @@ export function useAddBulkBillsMutation() {
             ...data,
             block: resident.block,
             houseNumber: resident.houseNumber,
-            residentId: resident.id,
-            residential_id: resident.residential_id,
             residentName: resident.name,
             phoneNumber: resident.phoneNumber || "",
             status: "unpaid",
             proofUrl: "",
             createdAt: serverTimestamp(),
+            residential_id: residentialId,
           };
           const keywords = extractBillKeywords(
             billData as unknown as Record<string, string | null | undefined>

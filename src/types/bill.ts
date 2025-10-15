@@ -13,4 +13,5 @@ export type Bill = {
   remark?: string;
   phoneNumber?: string | null;
   residentName?: string | null;
+  residential_id?: string | null;
 };

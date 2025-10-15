@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { extractKeywords } from "../utils/extractKeywords";
+import { useAuth } from "./useAuth";
 
 export interface Resident {
   id: string;
@@ -56,13 +57,18 @@ export function useResidents(residentialId?: string, search?: string) {
   });
 }
 
-export function useAddResident(residentialId?: string) {
+export function useAddResident() {
   const queryClient = useQueryClient();
+  const { residentialId } = useAuth();
   return useMutation({
     mutationFn: async (data: Omit<Resident, "id">) => {
       const id = `${data.block}_${data.houseNumber}`;
       const keywords = extractKeywords(data);
-      await setDoc(doc(db, "residents", id), { ...data, keywords, residential_id: residentialId ?? data.residential_id ?? null });
+      await setDoc(doc(db, "residents", id), {
+        ...data,
+        keywords,
+        residential_id: residentialId ?? data.residential_id ?? null,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["residents"] });
@@ -72,11 +78,16 @@ export function useAddResident(residentialId?: string) {
 
 export function useEditResident() {
   const queryClient = useQueryClient();
+  const { residentialId } = useAuth();
   return useMutation({
     mutationFn: async (data: Resident) => {
       const { id, ...fields } = data;
       const keywords = extractKeywords(fields);
-      await updateDoc(doc(db, "residents", id), { ...fields, keywords });
+      await updateDoc(doc(db, "residents", id), {
+        ...fields,
+        keywords,
+        residential_id: residentialId ?? fields.residential_id ?? null,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["residents"] });
