@@ -1,6 +1,7 @@
 "use client";
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "../components/ui/button";
+import { useEffect, useMemo } from "react";
 import { NumberInputWithSeparator } from "../components/ui/number-input-with-separator";
 import {
   Card,
@@ -15,7 +16,16 @@ import {
   SelectContent,
   SelectItem,
 } from "../components/ui/select";
-import { Home, Calendar, Coins, FileText } from "lucide-react";
+import {
+  Home,
+  Calendar,
+  Coins,
+  FileText,
+  User,
+  Phone,
+  MapPin,
+  PhoneCall,
+} from "lucide-react";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { useState } from "react";
@@ -29,6 +39,8 @@ import {
 } from "../constants";
 import { useAddBulkBillsMutation } from "@/hooks/useAddBulkBillsMutation";
 import { useResidents } from "@/hooks/useResidents"; // ⬅️ Import hook kamu di sini
+import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
+import { UserNotFoundIllustration } from "./svg/UserNotFoundIllustration";
 
 export interface AddBillFormInputs {
   block: string;
@@ -57,7 +69,8 @@ export default function AddBillForm() {
   const { mutate: addBill, isPending: loadingSingle } = useAddBillMutation();
   const addBulkBills = useAddBulkBillsMutation();
   const { data: residents = [], isLoading: loadingResidents } = useResidents();
-
+  const selectedBlock = watch("block");
+  const selectedNumber = watch("houseNumber");
   const HOUSE_NUMBERS = HOUSE_NUMBER_LIST;
 
   const onSubmit = (data: AddBillFormInputs) => {
@@ -147,6 +160,18 @@ export default function AddBillForm() {
       }
     );
   };
+  const selectedResident = useMemo(() => {
+    if (!selectedBlock || !selectedNumber) return null;
+    return residents.find(
+      (r) => r.block === selectedBlock && r.houseNumber === selectedNumber
+    );
+  }, [selectedBlock, selectedNumber, residents]);
+
+  useEffect(() => {
+    if (selectedResident) {
+      setValue("residentId", selectedResident.id);
+    }
+  }, [selectedResident, setValue]);
 
   return (
     <Card className="max-w-sm mx-auto mt-6 shadow-sm border border-gray-200">
@@ -240,6 +265,49 @@ export default function AddBillForm() {
                     </span>
                   )}
                 </div>
+              </div>
+              <div className="flex w-full gap-3">
+                {/* Detail Warga */}
+                {watch("block") &&
+                  watch("houseNumber") &&
+                  (selectedResident ? (
+                    <div className="w-full border text-xs border-blue-100 bg-blue-50/60 rounded-lg p-3 text-blue-900 shadow-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-semibold text-blue-800 text-xs">
+                          Detail Warga
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-blue-600" />
+                          <span className="truncate">
+                            {selectedResident.name || "-"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Home className="w-4 h-4 text-blue-600" />
+                          <span>
+                            Blok {selectedResident.block} /{" "}
+                            {selectedResident.houseNumber}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <PhoneCall className="w-4 h-4 text-blue-600" />
+                          <span>{selectedResident.phoneNumber || "-"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-24 w-full border border-red-100 justify-start bg-red-50/60 rounded-lg text-blue-900 shadow-sm flex items-center gap-2">
+                      <UserNotFoundIllustration className="h-24 w-auto mt-2" />
+                      <span className="font-semibold text-red-800 text-xs">
+                        Data Warga tidak ditemukan
+                      </span>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
@@ -335,7 +403,7 @@ export default function AddBillForm() {
                       field.onChange(val ? parseInt(val, 10) : "")
                     }
                     placeholder="Masukkan jumlah tagihan"
-                    className="pl-8"
+                    className="pl-8 text-xs"
                   />
                 )}
               />
@@ -363,7 +431,7 @@ export default function AddBillForm() {
                 <Textarea
                   id="remark"
                   placeholder="Dimohon untuk membayar iuran..."
-                  className="resize-y"
+                  className="resize-y text-xs"
                   {...field}
                 />
               )}

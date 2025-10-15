@@ -11,7 +11,15 @@ import {
 } from "../../components/ui/select";
 import { Label } from "../../components/ui/label";
 import toast, { Toaster } from "react-hot-toast";
-import { Search, Home, Calendar, Loader2, ChevronDown } from "lucide-react";
+import {
+  Search,
+  Home,
+  Calendar,
+  Loader2,
+  ChevronDown,
+  PhoneCall,
+  User,
+} from "lucide-react";
 import { BillDetail } from "../../components/custom/bill-detail";
 import Image from "next/image";
 import {
@@ -33,6 +41,9 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { EmptyBillIllustration } from "@/components/svg/EmptyBillIllustration";
+import { useResidents } from "@/hooks/useResidents";
+import { UserNotFoundIllustration } from "@/components/svg/UserNotFoundIllustration";
 
 export default function WargaPage() {
   const [blok, setBlok] = useState("");
@@ -46,6 +57,8 @@ export default function WargaPage() {
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showForm, setShowForm] = useState(true);
+
+  const { data: residents = [], isLoading: loadingResidents } = useResidents();
 
   const handleCari = async () => {
     setLoading(true);
@@ -176,7 +189,13 @@ export default function WargaPage() {
                     </Label>
                     <div className="flex gap-3">
                       <div className="flex-1">
-                        <Select value={blok} onValueChange={setBlok}>
+                        <Select
+                          value={blok}
+                          onValueChange={(value) => {
+                            setBlok(value);
+                            setNomor("");
+                          }}
+                        >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Pilih Blok" />
                           </SelectTrigger>
@@ -205,6 +224,53 @@ export default function WargaPage() {
                       </div>
                     </div>
                   </div>
+                  {blok && nomor && (
+                    <div className="animate-fade-in">
+                      {(() => {
+                        const resident = residents.find(
+                          (r) => r.block === blok && r.houseNumber === nomor
+                        );
+                        return resident ? (
+                          <div className="w-full border text-xs border-blue-100 bg-blue-50/60 rounded-lg p-5 text-blue-900 shadow-sm ">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="font-semibold text-blue-800 text-xs flex items-center gap-1">
+                                <Home className="w-4 h-4" /> Detail Warga
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                              <div className="flex items-center gap-2">
+                                <User className="w-4 h-4 text-blue-600" />
+                                <span className="truncate">
+                                  {resident.name || "-"}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Home className="w-4 h-4 text-blue-600" />
+                                <span>
+                                  Blok {resident.block} / {resident.houseNumber}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <PhoneCall className="w-4 h-4 text-blue-600" />
+                                <span>{resident.phoneNumber || "-"}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="h-24 border border-red-100 justify-start bg-red-50/60 rounded-lg text-blue-900 shadow-sm flex items-center gap-2">
+                            <UserNotFoundIllustration className="h-24 w-auto mt-2" />
+                            <span className="font-semibold text-red-800 text-xs">
+                              Data Warga tidak ditemukan
+                            </span>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-2">
                     <Label className="text-xs font-semibold flex items-center gap-1">
                       <Calendar className="w-4 h-4" />

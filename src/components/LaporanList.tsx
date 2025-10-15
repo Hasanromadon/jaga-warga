@@ -278,7 +278,7 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
                         className="text-xs text-blue-600 underline hover:text-blue-800 mt-1"
                         onClick={() => setPreviewImage(bill.proofUrl || null)}
                       >
-                        Lihat Bukti Pembayaran
+                        🔗 Lihat Bukti Pembayaran
                       </button>
                     )}
 

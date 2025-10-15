@@ -44,20 +44,8 @@ const DualTonePlusCircle = ({ active }: { active?: boolean }) => (
 );
 const DualToneUsers = ({ active }: { active?: boolean }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <ellipse
-      cx="12"
-      cy="10"
-      rx="4"
-      ry="4"
-      fill={active ? "#3973C4" : "#E0EDFF"}
-    />
-    <ellipse
-      cx="12"
-      cy="18"
-      rx="7"
-      ry="3"
-      fill={active ? "#7BA7E7" : "#E0EDFF"}
-    />
+    <ellipse cx="12" cy="10" rx="4" ry="4" fill={"#3973C4"} />
+    <ellipse cx="12" cy="18" rx="7" ry="3" fill={"#7BA7E7"} />
     <ellipse
       cx="7"
       cy="13"

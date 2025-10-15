@@ -102,10 +102,10 @@ export default function ConfirmBillList() {
                 </span>
               </div>
               <div
-                className="font-semibold text-blue-900 text-sm truncate mb-1"
+                className="font-semibold text-blue-900 text-xs truncate mb-1"
                 title={`Blok ${bill.block} No ${bill.houseNumber}`}
               >{`Blok ${bill.block} No ${bill.houseNumber}`}</div>
-              <div className="flex items-center gap-2 text-sm mb-0">
+              <div className="flex items-center gap-2 text-xs mb-0">
                 <span className="text-gray-700">Jumlah :</span>
                 <span className="font-bold text-blue-700 text-base">
                   Rp{Number(bill.amount).toLocaleString("id-ID")}
@@ -117,7 +117,7 @@ export default function ConfirmBillList() {
                   className="text-xs text-blue-600 underline bg-transparent border-0 p-0 cursor-pointer hover:text-blue-800"
                   onClick={() => setPreviewImage(bill.proofUrl || null)}
                 >
-                  Lihat Bukti Pembayaran
+                  🔗 Lihat Bukti Pembayaran
                 </button>
               )}
               <div className="flex gap-2 mt-3 justify-end">
@@ -183,7 +183,7 @@ export default function ConfirmBillList() {
                                 setPreviewImage(bill.proofUrl || null);
                               }}
                             >
-                              Lihat Bukti Pembayaran
+                              🔗 Lihat Bukti Pembayaran
                             </button>
                           </span>
                         </>
