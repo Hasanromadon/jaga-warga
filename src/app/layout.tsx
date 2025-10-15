@@ -10,9 +10,9 @@ export const metadata: Metadata = {
   description:
     "Jaga Warga adalah aplikasi digital untuk membantu warga mengelola iuran, laporan, dan kegiatan lingkungan perumahan secara mudah dan transparan.",
   icons: {
-    icon: "/logo.svg",
-    shortcut: "/logo.svg",
-    apple: "/logo.svg",
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
   keywords: [
     "Jaga Warga",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     siteName: "Jaga Warga",
     images: [
       {
-        url: "/logo.svg",
+        url: "/favicon.ico",
         width: 600,
         height: 600,
         alt: "Jaga Warga",
