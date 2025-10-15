@@ -165,10 +165,10 @@ export default function ResidentList() {
           filtered.map((r) => (
             <Card
               key={r.id}
-              className="animate-fade-in border border-gray-200 bg-white/95 shadow-sm rounded-xl px-4 pt-4 pb-3 flex flex-col gap-2"
+              className="animate-fade-in border border-gray-200 bg-white/95 shadow-sm rounded-xl px-4 py-2 flex flex-col gap-1"
             >
               <div
-                className="font-semibold text-blue-900 text-base truncate mb-2"
+                className="font-semibold text-blue-900 text-base truncate"
                 title={r.name}
               >
                 {r.name}
@@ -182,12 +182,12 @@ export default function ResidentList() {
                 </span>
               </div>
               {r.phoneNumber && (
-                <div className="text-xs text-blue-700 flex items-center gap-1 mb-2">
+                <div className="text-xs text-blue-700 flex items-center gap-1">
                   <Phone className="w-4 h-4" />
                   <span>{r.phoneNumber}</span>
                 </div>
               )}
-              <div className="flex gap-2 justify-end">
+              <div className="flex gap-1 justify-end">
                 <Button
                   variant="ghost"
                   size="icon"

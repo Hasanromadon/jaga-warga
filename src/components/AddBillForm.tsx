@@ -107,9 +107,22 @@ export default function AddBillForm() {
     }
 
     // ✅ Jika untuk 1 warga
+    // cari resident berdasarkan blok & nomor rumah
+    const resident = residents.find(
+      (r) => r.block === data.block && r.houseNumber === data.houseNumber
+    );
+
+    if (!resident) {
+      setError("Warga dengan blok dan nomor rumah tersebut tidak ditemukan.");
+      toast.error("Warga tidak ditemukan.");
+      return;
+    }
+
+    // ✅ kirim data beserta residentId ke mutation single
     addBill(
       {
         ...data,
+        residentId: resident.id, // tambahkan id warga
       },
       {
         onSuccess: () => {
@@ -166,68 +179,70 @@ export default function AddBillForm() {
           </div>
 
           {/* Blok & Nomor Rumah */}
-          <div className="flex flex-col gap-2">
-            <Label
-              className={`text-xs font-semibold ${
-                isAllResidents ? "text-gray-300" : "text-blue-900"
-              } flex items-center gap-1 mb-0`}
-            >
-              <Home className="w-4 h-4" />
-              Blok & Nomor Rumah
-            </Label>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <Select
-                  value={watch("block") || ""}
-                  onValueChange={(val) => {
-                    setValue("block", val);
-                    setValue("houseNumber", "");
-                  }}
-                  disabled={isAllResidents}
-                >
-                  <SelectTrigger className="w-full" id="block">
-                    <SelectValue placeholder="Pilih Blok" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BLOK_LIST.map((blok) => (
-                      <SelectItem key={blok} value={blok}>
-                        {blok}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.block && (
-                  <span className="text-red-500 text-xs">
-                    Blok wajib dipilih
-                  </span>
-                )}
-              </div>
+          {!isAllResidents && (
+            <div className="flex flex-col gap-2">
+              <Label
+                className={`text-xs font-semibold ${
+                  isAllResidents ? "text-gray-300" : "text-blue-900"
+                } flex items-center gap-1 mb-0`}
+              >
+                <Home className="w-4 h-4" />
+                Blok & Nomor Rumah
+              </Label>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <Select
+                    value={watch("block") || ""}
+                    onValueChange={(val) => {
+                      setValue("block", val);
+                      setValue("houseNumber", "");
+                    }}
+                    disabled={isAllResidents}
+                  >
+                    <SelectTrigger className="w-full" id="block">
+                      <SelectValue placeholder="Pilih Blok" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BLOK_LIST.map((blok) => (
+                        <SelectItem key={blok} value={blok}>
+                          {blok}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.block && (
+                    <span className="text-red-500 text-xs">
+                      Blok wajib dipilih
+                    </span>
+                  )}
+                </div>
 
-              <div className="flex-1">
-                <Select
-                  value={watch("houseNumber") || ""}
-                  onValueChange={(val) => setValue("houseNumber", val)}
-                  disabled={!watch("block") || isAllResidents}
-                >
-                  <SelectTrigger className="w-full" id="houseNumber">
-                    <SelectValue placeholder="Pilih Nomor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {HOUSE_NUMBERS.map((no) => (
-                      <SelectItem key={no} value={no}>
-                        {no}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.houseNumber && (
-                  <span className="text-red-500 text-xs">
-                    Nomor rumah wajib dipilih
-                  </span>
-                )}
+                <div className="flex-1">
+                  <Select
+                    value={watch("houseNumber") || ""}
+                    onValueChange={(val) => setValue("houseNumber", val)}
+                    disabled={!watch("block") || isAllResidents}
+                  >
+                    <SelectTrigger className="w-full" id="houseNumber">
+                      <SelectValue placeholder="Pilih Nomor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {HOUSE_NUMBERS.map((no) => (
+                        <SelectItem key={no} value={no}>
+                          {no}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.houseNumber && (
+                    <span className="text-red-500 text-xs">
+                      Nomor rumah wajib dipilih
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Periode Tagihan */}
           <div className="flex flex-col gap-2">
@@ -347,7 +362,7 @@ export default function AddBillForm() {
               render={({ field }) => (
                 <Textarea
                   id="remark"
-                  placeholder="Tulis catatan tambahan jika ada..."
+                  placeholder="Dimohon untuk membayar iuran..."
                   className="resize-y"
                   {...field}
                 />
