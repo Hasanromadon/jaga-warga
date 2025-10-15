@@ -20,7 +20,7 @@ import { getMonthName } from "@/utils/formatDate";
 
 const STATUS_LABELS: Record<string, string> = {
   unpaid: "Belum Lunas",
-  pending: "Menunggu Verifikasi",
+  pending: "Verifikasi",
   paid: "Lunas",
   approved: "Disetujui",
   rejected: "Ditolak",
@@ -212,7 +212,7 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
                   <div className="flex flex-wrap gap-2 justify-between items-center w-full mb-3">
                     <div className="flex flex-col space-y-1">
                       <div className="flex flex-row space-x-2">
-                        <span className="text-md font-bold">
+                        <span className="text-sm font-bold truncate block max-w-[110px]">
                           {bill.residentName}
                         </span>
                         <span className="bg-blue-50 text-blue-700 rounded px-2 items-center flex text-xs font-normal border border-blue-100">

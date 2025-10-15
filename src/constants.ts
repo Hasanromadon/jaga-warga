@@ -1,7 +1,7 @@
 export const STATUS_OPTIONS = [
   { label: "Semua", value: "all" },
   { label: "Belum Lunas", value: "unpaid" },
-  { label: "Menunggu Verifikasi", value: "pending" },
+  { label: "Verifikasi", value: "pending" },
   { label: "Lunas", value: "paid" },
   { label: "Disetujui", value: "approved" },
   { label: "Ditolak", value: "rejected" },
@@ -9,7 +9,9 @@ export const STATUS_OPTIONS = [
 // IPL App constants
 
 export const BLOK_LIST = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-export const HOUSE_NUMBER_LIST = Array.from({ length: 50 }, (_, i) => String(i + 1));
+export const HOUSE_NUMBER_LIST = Array.from({ length: 50 }, (_, i) =>
+  String(i + 1)
+);
 
 export const BULAN_LIST = [
   { value: "01", label: "Januari" },
