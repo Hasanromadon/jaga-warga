@@ -149,6 +149,7 @@ export default function ResidentForm({
           </Label>
           <Input
             id="name"
+            maxLength={20}
             placeholder="Nama Warga"
             {...register("name", { required: true })}
             className="text-sm w-full"

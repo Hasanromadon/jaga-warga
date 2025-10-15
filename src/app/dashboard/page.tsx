@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useAuthContext } from "../../context/AuthProvider";
 import ConfirmBillList from "../../components/ConfirmBillList";
 import AddBillForm from "../../components/AddBillForm";
@@ -9,6 +10,8 @@ import { Tabs, TabsContent } from "../../components/ui/tabs";
 import { Button } from "../../components/ui/button";
 import { LogOut, User } from "lucide-react";
 import { withProtectedRoute } from "../../utils/protectedRoute";
+import { useBills } from "../../hooks/useBills";
+
 // Dual-tone SVG icons for bottom navigation
 const DualToneBadgeCheck = ({ active }: { active?: boolean }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -45,20 +48,8 @@ const DualTonePlusCircle = ({ active }: { active?: boolean }) => (
 );
 const DualToneUsers = ({ active }: { active?: boolean }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <ellipse
-      cx="12"
-      cy="10"
-      rx="4"
-      ry="4"
-      fill={active ? "#3973C4" : "#E0EDFF"}
-    />
-    <ellipse
-      cx="12"
-      cy="18"
-      rx="7"
-      ry="3"
-      fill={active ? "#7BA7E7" : "#E0EDFF"}
-    />
+    <ellipse cx="12" cy="10" rx="4" ry="4" fill={"#3973C4"} />
+    <ellipse cx="12" cy="18" rx="7" ry="3" fill={"#7BA7E7"} />
     <ellipse
       cx="7"
       cy="13"
@@ -96,20 +87,10 @@ const DualToneClock = ({ active }: { active?: boolean }) => (
     />
   </svg>
 );
-import { useState } from "react";
-import { useBills } from "../../hooks/useBills";
 
 function DashboardPage() {
-  const { user, role, residentialId, signOut } = useAuthContext();
   const [tab, setTab] = useState("konfirmasi");
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
+  const { user, role, signOut } = useAuthContext();
 
   // if (role !== 'admin') {
   //   return (
@@ -126,7 +107,7 @@ function DashboardPage() {
     data: allBills = [],
     isLoading: loadingBills,
     error: errorBills,
-  } = useBills(residentialId ?? undefined);
+  } = useBills();
   // Count pending bills for badge (from backend)
   const pendingCount = (allBills || []).filter(
     (bill: import("../../types/bill").Bill) => bill.status === "pending"
@@ -189,7 +170,7 @@ function DashboardPage() {
             </div>
           </div>
           <Button
-            onClick={handleLogout}
+            onClick={signOut}
             variant="outline"
             size="sm"
             className="text-red-600 border-red-200 hover:bg-red-50"

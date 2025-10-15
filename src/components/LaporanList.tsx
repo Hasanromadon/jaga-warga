@@ -1,23 +1,25 @@
 "use client";
-import React, { useState } from "react";
-import { PreviewImageModal } from "./ui/PreviewImageModal";
+import { getMonthName } from "@/utils/formatDate";
+import { makeWaUrl } from "@/utils/formatPhone";
+import { Calendar, FileDown, Filter, Search } from "lucide-react";
+import { useState } from "react";
+import { BULAN_LIST, STATUS_OPTIONS } from "../constants";
 import { Bill } from "../types/bill";
 import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
-import { Filter, FileDown, Search, Calendar } from "lucide-react";
+import { WhatsAppIcon } from "./svg/WhatsappIcon";
 import { Button } from "./ui/button";
+import { PreviewImageModal } from "./ui/PreviewImageModal";
 import {
   Select,
-  SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { STATUS_OPTIONS, BULAN_LIST } from "../constants"; // 🆕 pastikan kamu punya BULAN_LIST di constants
-import { Label } from "@radix-ui/react-select";
 
 const STATUS_LABELS: Record<string, string> = {
   unpaid: "Belum Lunas",
-  pending: "Menunggu Verifikasi",
+  pending: "Verifikasi",
   paid: "Lunas",
   approved: "Disetujui",
   rejected: "Ditolak",
@@ -69,8 +71,7 @@ function formatRupiah(amount: number) {
 export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
-  const [month, setMonth] = useState("all"); // 🆕 state bulan
-  const [searchActive, setSearchActive] = useState(false);
+  const [month, setMonth] = useState("all");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const filteredBills = filterBills(bills, search, status, month);
@@ -126,7 +127,7 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
     <div className="space-y-4">
       {/* 🔹 Row 1: Search, Filter, Export */}
       <div className="flex flex-wrap items-center gap-1 w-full pb-1">
-        {/* 🔍 Search Input (selalu muncul) */}
+        {/* 🔍 Search Input */}
         <div className="relative flex-1 min-w-[200px] sm:min-w-[280px]">
           <input
             type="text"
@@ -206,15 +207,23 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
                 className="p-0 bg-white rounded-xl shadow-sm border border-blue-100 relative overflow-visible transition hover:shadow-md active:scale-[0.98] cursor-pointer group"
               >
                 <div className="px-4 pt-3 pb-2">
-                  <div className="flex flex-wrap gap-2 items-center w-full mb-3">
-                    <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold">
-                      {bill.month}/{bill.year}
-                    </span>
-                    <span className="bg-blue-50 text-blue-700 rounded px-2 py-0.5 text-xs font-normal border border-blue-100">
-                      {bill.block}/{bill.houseNumber}
-                    </span>
-                    <span
-                      className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full border select-none
+                  <div className="flex flex-wrap gap-2 justify-between items-center w-full mb-3">
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex flex-row space-x-2">
+                        <span className="text-sm font-bold truncate block max-w-[100px]">
+                          {bill.residentName}
+                        </span>
+                        <span className="bg-blue-50 text-blue-700 rounded px-2 items-center flex text-xs font-normal border border-blue-100">
+                          Blok {bill.block} No {bill.houseNumber}
+                        </span>
+                      </div>
+                      <span className="inline-flex bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold w-fit whitespace-nowrap shrink-0">
+                        {getMonthName(bill.month)} {bill.year}
+                      </span>
+                    </div>
+                    <div className="flex flex-col space-y-2">
+                      <span
+                        className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full border select-none
                         ${
                           bill.status === "paid"
                             ? "bg-green-50 text-green-700 border-green-200"
@@ -226,9 +235,33 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
                             ? "bg-red-50 text-red-700 border-red-200"
                             : "bg-red-50 text-red-700 border-red-200"
                         }`}
-                    >
-                      {STATUS_LABELS[bill.status] || bill.status}
-                    </span>
+                      >
+                        {STATUS_LABELS[bill.status] || bill.status}
+                      </span>
+
+                      <span className="inline-flex items-center">
+                        {bill.status === "unpaid" &&
+                          (() => {
+                            const waUrl = makeWaUrl(bill);
+                            return waUrl ? (
+                              <a
+                                href={waUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition"
+                                title="Kirim pengingat via WhatsApp"
+                              >
+                                <WhatsAppIcon className="w-4 h-4" />
+                                <span>WhatsApp</span>
+                              </a>
+                            ) : (
+                              <span className="text-[8px] text-gray-400">
+                                No. WA tidak tersedia
+                              </span>
+                            );
+                          })()}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm mb-1">
@@ -245,7 +278,7 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
                         className="text-xs text-blue-600 underline hover:text-blue-800 mt-1"
                         onClick={() => setPreviewImage(bill.proofUrl || null)}
                       >
-                        Lihat Bukti Pembayaran
+                        🔗 Lihat Bukti Pembayaran
                       </button>
                     )}
 

@@ -56,13 +56,13 @@ export function useResidents(residentialId?: string, search?: string) {
   });
 }
 
-export function useAddResident() {
+export function useAddResident(residentialId?: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: Omit<Resident, "id">) => {
       const id = `${data.block}_${data.houseNumber}`;
       const keywords = extractKeywords(data);
-      await setDoc(doc(db, "residents", id), { ...data, keywords });
+      await setDoc(doc(db, "residents", id), { ...data, keywords, residential_id: residentialId ?? data.residential_id ?? null });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["residents"] });

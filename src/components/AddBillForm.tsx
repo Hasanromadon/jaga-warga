@@ -1,6 +1,7 @@
 "use client";
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "../components/ui/button";
+import { useEffect, useMemo } from "react";
 import { NumberInputWithSeparator } from "../components/ui/number-input-with-separator";
 import {
   Card,
@@ -15,7 +16,16 @@ import {
   SelectContent,
   SelectItem,
 } from "../components/ui/select";
-import { Home, Calendar, Coins, FileText } from "lucide-react";
+import {
+  Home,
+  Calendar,
+  Coins,
+  FileText,
+  User,
+  Phone,
+  MapPin,
+  PhoneCall,
+} from "lucide-react";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { useState } from "react";
@@ -28,7 +38,10 @@ import {
   HOUSE_NUMBER_LIST,
 } from "../constants";
 import { useAddBulkBillsMutation } from "@/hooks/useAddBulkBillsMutation";
-import { useResidents } from "@/hooks/useResidents"; // ⬅️ Import hook kamu di sini
+import { useResidents } from "@/hooks/useResidents";
+import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
+import { UserNotFoundIllustration } from "./svg/UserNotFoundIllustration";
+import { useAuth } from "../hooks/useAuth";
 
 export interface AddBillFormInputs {
   block: string;
@@ -57,8 +70,12 @@ export default function AddBillForm() {
 
   const { mutate: addBill, isPending: loadingSingle } = useAddBillMutation();
   const addBulkBills = useAddBulkBillsMutation();
-  const { data: residents = [], isLoading: loadingResidents } = useResidents();
-
+  const { residentialId } = useAuth();
+  const { data: residents = [], isLoading: loadingResidents } = useResidents(
+    residentialId ?? undefined
+  );
+  const selectedBlock = watch("block");
+  const selectedNumber = watch("houseNumber");
   const HOUSE_NUMBERS = HOUSE_NUMBER_LIST;
 
   const onSubmit = (data: AddBillFormInputs) => {
@@ -76,14 +93,23 @@ export default function AddBillForm() {
         return;
       }
 
+      // Overwrite all resident's residential_id with current user's residentialId
+      const residentsWithAuthResidence = Array.isArray(residents)
+        ? residents.map((r) => ({
+            ...r,
+            residential_id: residentialId ?? undefined,
+          }))
+        : residents;
+
       addBulkBills.mutate(
         {
-          residents,
+          residents: residentsWithAuthResidence,
           data: {
             month: data.month,
             year: data.year,
             amount: data.amount,
             remark: data.remark || "",
+            residential_id: residentialId ?? undefined,
           },
         },
         {
@@ -108,9 +134,23 @@ export default function AddBillForm() {
     }
 
     // ✅ Jika untuk 1 warga
+    // cari resident berdasarkan blok & nomor rumah
+    const resident = residents.find(
+      (r) => r.block === data.block && r.houseNumber === data.houseNumber
+    );
+
+    if (!resident) {
+      setError("Warga dengan blok dan nomor rumah tersebut tidak ditemukan.");
+      toast.error("Warga tidak ditemukan.");
+      return;
+    }
+
+    // ✅ kirim data beserta residentId ke mutation single
     addBill(
       {
         ...data,
+        residentId: resident.id, // tambahkan id warga
+        residential_id: residentialId ?? undefined,
       },
       {
         onSuccess: () => {
@@ -135,6 +175,18 @@ export default function AddBillForm() {
       }
     );
   };
+  const selectedResident = useMemo(() => {
+    if (!selectedBlock || !selectedNumber) return null;
+    return residents.find(
+      (r) => r.block === selectedBlock && r.houseNumber === selectedNumber
+    );
+  }, [selectedBlock, selectedNumber, residents]);
+
+  useEffect(() => {
+    if (selectedResident) {
+      setValue("residentId", selectedResident.id);
+    }
+  }, [selectedResident, setValue]);
 
   return (
     <Card className="max-w-sm mx-auto mt-6 shadow-sm border border-gray-200">
@@ -167,68 +219,113 @@ export default function AddBillForm() {
           </div>
 
           {/* Blok & Nomor Rumah */}
-          <div className="flex flex-col gap-2">
-            <Label
-              className={`text-xs font-semibold ${
-                isAllResidents ? "text-gray-300" : "text-blue-900"
-              } flex items-center gap-1 mb-0`}
-            >
-              <Home className="w-4 h-4" />
-              Blok & Nomor Rumah
-            </Label>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <Select
-                  value={watch("block") || ""}
-                  onValueChange={(val) => {
-                    setValue("block", val);
-                    setValue("houseNumber", "");
-                  }}
-                  disabled={isAllResidents}
-                >
-                  <SelectTrigger className="w-full" id="block">
-                    <SelectValue placeholder="Pilih Blok" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BLOK_LIST.map((blok) => (
-                      <SelectItem key={blok} value={blok}>
-                        {blok}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.block && (
-                  <span className="text-red-500 text-xs">
-                    Blok wajib dipilih
-                  </span>
-                )}
-              </div>
+          {!isAllResidents && (
+            <div className="flex flex-col gap-2">
+              <Label
+                className={`text-xs font-semibold ${
+                  isAllResidents ? "text-gray-300" : "text-blue-900"
+                } flex items-center gap-1 mb-0`}
+              >
+                <Home className="w-4 h-4" />
+                Blok & Nomor Rumah
+              </Label>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <Select
+                    value={watch("block") || ""}
+                    onValueChange={(val) => {
+                      setValue("block", val);
+                      setValue("houseNumber", "");
+                    }}
+                    disabled={isAllResidents}
+                  >
+                    <SelectTrigger className="w-full" id="block">
+                      <SelectValue placeholder="Pilih Blok" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BLOK_LIST.map((blok) => (
+                        <SelectItem key={blok} value={blok}>
+                          {blok}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.block && (
+                    <span className="text-red-500 text-xs">
+                      Blok wajib dipilih
+                    </span>
+                  )}
+                </div>
 
-              <div className="flex-1">
-                <Select
-                  value={watch("houseNumber") || ""}
-                  onValueChange={(val) => setValue("houseNumber", val)}
-                  disabled={!watch("block") || isAllResidents}
-                >
-                  <SelectTrigger className="w-full" id="houseNumber">
-                    <SelectValue placeholder="Pilih Nomor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {HOUSE_NUMBERS.map((no) => (
-                      <SelectItem key={no} value={no}>
-                        {no}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.houseNumber && (
-                  <span className="text-red-500 text-xs">
-                    Nomor rumah wajib dipilih
-                  </span>
-                )}
+                <div className="flex-1">
+                  <Select
+                    value={watch("houseNumber") || ""}
+                    onValueChange={(val) => setValue("houseNumber", val)}
+                    disabled={!watch("block") || isAllResidents}
+                  >
+                    <SelectTrigger className="w-full" id="houseNumber">
+                      <SelectValue placeholder="Pilih Nomor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {HOUSE_NUMBERS.map((no) => (
+                        <SelectItem key={no} value={no}>
+                          {no}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.houseNumber && (
+                    <span className="text-red-500 text-xs">
+                      Nomor rumah wajib dipilih
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex w-full gap-3">
+                {/* Detail Warga */}
+                {watch("block") &&
+                  watch("houseNumber") &&
+                  (selectedResident ? (
+                    <div className="w-full border text-xs border-blue-100 bg-blue-50/60 rounded-lg p-3 text-blue-900 shadow-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-semibold text-blue-800 text-xs">
+                          Detail Warga
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-blue-600" />
+                          <span className="truncate">
+                            {selectedResident.name || "-"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Home className="w-4 h-4 text-blue-600" />
+                          <span>
+                            Blok {selectedResident.block} /{" "}
+                            {selectedResident.houseNumber}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <PhoneCall className="w-4 h-4 text-blue-600" />
+                          <span>{selectedResident.phoneNumber || "-"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-24 w-full border border-red-100 justify-start bg-red-50/60 rounded-lg text-blue-900 shadow-sm flex items-center gap-2">
+                      <UserNotFoundIllustration className="h-24 w-auto mt-2" />
+                      <span className="font-semibold text-red-800 text-xs">
+                        Data Warga tidak ditemukan
+                      </span>
+                    </div>
+                  ))}
               </div>
             </div>
-          </div>
+          )}
 
           {/* Periode Tagihan */}
           <div className="flex flex-col gap-2">
@@ -321,7 +418,7 @@ export default function AddBillForm() {
                       field.onChange(val ? parseInt(val, 10) : "")
                     }
                     placeholder="Masukkan jumlah tagihan"
-                    className="pl-8"
+                    className="pl-8 text-xs"
                   />
                 )}
               />
@@ -348,8 +445,8 @@ export default function AddBillForm() {
               render={({ field }) => (
                 <Textarea
                   id="remark"
-                  placeholder="Tulis catatan tambahan jika ada..."
-                  className="resize-y"
+                  placeholder="Dimohon untuk membayar iuran..."
+                  className="resize-y text-xs"
                   {...field}
                 />
               )}
