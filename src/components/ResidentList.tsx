@@ -25,6 +25,7 @@ import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Dialog, DialogContent } from "./ui/dialog";
+import { Input } from "./ui/input";
 
 type ResidentCSVRow = {
   name: string;
@@ -258,16 +259,23 @@ export default function ResidentList() {
       {/* Modal Import Warga */}
       <Dialog open={showImport} onOpenChange={setShowImport}>
         <DialogContent className="max-w-sm mx-auto rounded-md">
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-start gap-3">
             <h2 className="text-blue-900 font-semibold text-lg">
               Import Data Warga (CSV)
             </h2>
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleImportFile}
-              className="text-sm text-blue-700"
-            />
+            <div>
+              <Input
+                type="file"
+                accept=".csv"
+                onChange={handleImportFile}
+                className="text-sm text-blue-700"
+                aria-label="Import Data Warga"
+                title="Unggah data warga CSV (maksimal 3MB)"
+              />
+              <div className="text-[11px] text-blue-500 mt-1">
+                Hanya menerima file CSV. Ukuran maksimal 3MB.
+              </div>
+            </div>
             {importedData.length > 0 && (
               <div className="w-full bg-blue-50 border border-blue-200 rounded-md p-3 text-xs text-blue-700 max-h-40 overflow-y-auto">
                 <div className="font-semibold mb-1">
