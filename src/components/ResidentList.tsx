@@ -1,31 +1,37 @@
 "use client";
-import { useState } from "react";
-import { Card } from "./ui/card";
-import { Dialog, DialogContent } from "./ui/dialog";
-import { Button } from "./ui/button";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  PlusCircle,
   Edit,
-  Trash2,
+  FileDown,
   Phone,
   Plus,
+  Trash2,
   Upload,
-  FileDown,
   UserPlus,
 } from "lucide-react";
-import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  useResidents,
-  useAddResident,
-  useEditResident,
-  useDeleteResident,
-  Resident,
-} from "../hooks/useResidents";
-import ResidentForm, { ResidentFormInputs } from "./ResidentForm";
-import toast from "react-hot-toast";
-import { SearchInput } from "./custom/search-input";
 import Papa from "papaparse";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import {
+  Resident,
+  useAddResident,
+  useDeleteResident,
+  useEditResident,
+  useResidents,
+} from "../hooks/useResidents";
+import { SearchInput } from "./custom/search-input";
+import ResidentForm, { ResidentFormInputs } from "./ResidentForm";
+import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Dialog, DialogContent } from "./ui/dialog";
+
+type ResidentCSVRow = {
+  name: string;
+  block: string;
+  houseNumber: string;
+  phoneNumber?: string;
+};
 
 export default function ResidentList() {
   const { data: residents = [], isLoading } = useResidents();
@@ -53,17 +59,18 @@ export default function ResidentList() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    Papa.parse(file, {
+    Papa.parse<ResidentCSVRow>(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        const parsed = results.data as any[];
-        const formatted = parsed.map((row) => ({
-          name: row.name || "",
-          block: row.block || "",
-          houseNumber: row.houseNumber || "",
-          phoneNumber: row.phoneNumber || "",
+        // results.data sudah bertipe ResidentCSVRow[]
+        const formatted = results.data.map((row) => ({
+          name: row.name?.trim() || "",
+          block: row.block?.trim() || "",
+          houseNumber: row.houseNumber?.trim() || "",
+          phoneNumber: row.phoneNumber?.trim() || "",
         }));
+
         setImportedData(formatted);
         toast.success(`${formatted.length} data siap diimpor`);
       },
