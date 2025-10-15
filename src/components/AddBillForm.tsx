@@ -38,6 +38,7 @@ export interface AddBillFormInputs {
   year: string;
   remark?: string;
   residentId?: string;
+  residential_id?: string;
   forAllResidents?: boolean;
 }
 

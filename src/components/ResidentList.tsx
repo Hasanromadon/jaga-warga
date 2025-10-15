@@ -19,6 +19,7 @@ import {
   useEditResident,
   useResidents,
 } from "../hooks/useResidents";
+import { useAuth } from "../hooks/useAuth";
 import { SearchInput } from "./custom/search-input";
 import ResidentForm, { ResidentFormInputs } from "./ResidentForm";
 import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
@@ -35,12 +36,16 @@ type ResidentCSVRow = {
 };
 
 export default function ResidentList() {
-  const { data: residents = [], isLoading } = useResidents();
+  const { residentialId } = useAuth();
+  const [search, setSearch] = useState("");
+  const { data: residents = [], isLoading } = useResidents(
+    residentialId ?? undefined,
+    search.trim() ? search.trim().toLowerCase() : undefined
+  );
   const residentList = residents;
   const addResident = useAddResident();
   const editResident = useEditResident();
   const deleteResident = useDeleteResident();
-  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editData, setEditData] = useState<Resident | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -49,12 +54,8 @@ export default function ResidentList() {
   const [isImporting, setIsImporting] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
 
-  const filtered = residentList.filter(
-    (r) =>
-      r.name.toLowerCase().includes(search.toLowerCase()) ||
-      r.block.toLowerCase().includes(search.toLowerCase()) ||
-      r.houseNumber.toLowerCase().includes(search.toLowerCase())
-  );
+  // Filtering now handled by Firestore query (keywords)
+  const filtered = residentList;
 
   const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

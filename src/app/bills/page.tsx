@@ -1,22 +1,21 @@
 "use client";
-"use client";
-import { useRouter } from 'next/navigation';
-import { useAuthContext } from '../../context/AuthProvider';
-import BillsList from '../../components/BillsList';
+import { useAuthContext } from "../../context/AuthProvider";
+import BillsList from "../../components/BillsList";
+import { withProtectedRoute } from "../../utils/protectedRoute";
 
-export default function BillsPage() {
-  const { user, role } = useAuthContext();
-  const router = useRouter();
-
-  if (!user) {
-    router.replace('/login');
-    return null;
-  }
+function BillsPage() {
+  const { role, residentialId } = useAuthContext();
 
   return (
     <main className="p-4 max-w-lg mx-auto">
       <h1 className="text-xl font-bold mb-4">Daftar Tagihan</h1>
-      {role === 'admin' ? <BillsList /> : <BillsList userId={user.uid} />}
+      {role === "admin" ? (
+        <BillsList />
+      ) : (
+        <BillsList userId={residentialId ?? undefined} />
+      )}
     </main>
   );
 }
+
+export default withProtectedRoute(BillsPage);
