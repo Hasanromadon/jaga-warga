@@ -1,17 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import {
-  doc,
-  getDoc,
   collection,
   query,
   where,
   getDocs,
   updateDoc,
+  doc,
 } from "firebase/firestore";
+import { useResidentialInfo } from "@/hooks/useResidentialInfo";
 import { db, storage } from "../../../firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Button } from "../../../components/ui/button";
@@ -43,26 +43,16 @@ import {
 } from "../../../constants";
 import { Bill } from "../../../types/bill";
 import { useResidents } from "@/hooks/useResidents";
+import ResidentialLoading from "@/components/ResidentialLoading";
 import { UserNotFoundIllustration } from "@/components/svg/UserNotFoundIllustration";
 
-interface ManagementContact {
-  name: string;
-  phone: string;
-}
-
-interface ResidentialInfo {
-  name: string;
-  logo?: string;
-  address?: string;
-  management?: ManagementContact[];
-}
+// ResidentialInfo type provided by hook
 
 export default function WargaWithResidencePage() {
   const params = useParams();
   const residentialId = params?.residential_id as string;
-  const [residentialInfo, setResidentialInfo] =
-    useState<ResidentialInfo | null>(null);
-  const [loadingBranding, setLoadingBranding] = useState(true);
+  const { data: residentialInfo, isLoading: loadingBranding } =
+    useResidentialInfo(residentialId);
 
   // Main warga page state
   const [blok, setBlok] = useState("");
@@ -71,7 +61,9 @@ export default function WargaWithResidencePage() {
   const [tahun, setTahun] = useState("");
   const [loading, setLoading] = useState(false);
   const [bill, setBill] = useState<Bill | null>(null);
-  const [error, setError] = useState<string | null>(null); // error is not used, but kept for future use
+  const [error, setError] = useState<string | null>(null);
+  // keep error to show toasts; also output to debug to avoid unused var linter
+  if (error) console.debug("Warga page error:", error);
   const [bukti, setBukti] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   // const [success, setSuccess] = useState(false); // not used
@@ -80,19 +72,7 @@ export default function WargaWithResidencePage() {
   // Residents hook, filter by residential_id
   const { data: residents = [] } = useResidents(residentialId);
 
-  useEffect(() => {
-    if (!residentialId) return;
-    const fetchInfo = async () => {
-      setLoadingBranding(true);
-      const docRef = doc(db, "residential_info", residentialId);
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        setResidentialInfo(snap.data() as ResidentialInfo);
-      }
-      setLoadingBranding(false);
-    };
-    fetchInfo();
-  }, [residentialId]);
+  // residentialInfo and loadingBranding come from useResidentialInfo hook
 
   const handleCari = async () => {
     setLoading(true);
@@ -163,7 +143,7 @@ export default function WargaWithResidencePage() {
   };
 
   if (loadingBranding) {
-    return <div className="text-center py-10">Memuat data perumahan...</div>;
+    return <ResidentialLoading />;
   }
   if (!residentialInfo) {
     return (

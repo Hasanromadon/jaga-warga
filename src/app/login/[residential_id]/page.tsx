@@ -1,40 +1,18 @@
 "use client";
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../../firebaseConfig";
 import LoginForm from "../../../components/LoginForm";
 import Image from "next/image";
-
-interface ResidentialInfo {
-  name: string;
-  logo?: string;
-  // address?: string; // tidak perlu di halaman login
-}
+import { useResidentialInfo } from "@/hooks/useResidentialInfo";
+import ResidentialLoading from "@/components/ResidentialLoading";
 
 export default function LoginWithResidencePage() {
   const params = useParams();
   const residentialId = params?.residential_id as string;
-  const [residentialInfo, setResidentialInfo] =
-    useState<ResidentialInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!residentialId) return;
-    const fetchInfo = async () => {
-      setLoading(true);
-      const docRef = doc(db, "residential_info", residentialId);
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        setResidentialInfo(snap.data() as ResidentialInfo);
-      }
-      setLoading(false);
-    };
-    fetchInfo();
-  }, [residentialId]);
+  const { data: residentialInfo, isLoading: loading } =
+    useResidentialInfo(residentialId);
 
   if (loading) {
-    return <div className="text-center py-10">Memuat data perumahan...</div>;
+    return <ResidentialLoading />;
   }
 
   if (!residentialInfo) {
