@@ -16,16 +16,7 @@ import {
   SelectContent,
   SelectItem,
 } from "../components/ui/select";
-import {
-  Home,
-  Calendar,
-  Coins,
-  FileText,
-  User,
-  Phone,
-  MapPin,
-  PhoneCall,
-} from "lucide-react";
+import { Home, Calendar, Coins, FileText, User, PhoneCall } from "lucide-react";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { useState } from "react";
@@ -39,7 +30,6 @@ import {
 } from "../constants";
 import { useAddBulkBillsMutation } from "@/hooks/useAddBulkBillsMutation";
 import { useResidents } from "@/hooks/useResidents";
-import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
 import { UserNotFoundIllustration } from "./svg/UserNotFoundIllustration";
 import { useAuth } from "../hooks/useAuth";
 

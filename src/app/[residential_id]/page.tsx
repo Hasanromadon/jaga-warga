@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { Users, LogIn, Home, ShieldCheck, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -82,20 +83,20 @@ export default function HomeWithResidencePage() {
         </p>
       </div>
       <div className="w-full max-w-sm flex flex-col gap-4">
-        <a
+        <Link
           href="/warga"
           className="flex items-center gap-3 p-4 rounded-xl shadow bg-white text-base font-semibold hover:bg-blue-50 transition border border-blue-100"
         >
           <Users className="w-6 h-6 text-blue-600" />
           Cek Tagihan IPL
-        </a>
-        <a
+        </Link>
+        <Link
           href="/login"
           className="flex items-center gap-3 p-4 rounded-xl shadow bg-white text-base font-semibold hover:bg-green-50 transition border border-green-100"
         >
           <LogIn className="w-6 h-6 text-green-600" />
           Login Admin
-        </a>
+        </Link>
       </div>
       <div className="w-full max-w-sm mt-5 space-y-1">
         <div className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-lg p-3">

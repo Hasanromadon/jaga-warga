@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 import LoginForm from "../../../components/LoginForm";
+import Image from "next/image";
 
 interface ResidentialInfo {
   name: string;
@@ -47,11 +48,15 @@ export default function LoginWithResidencePage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50">
       {residentialInfo.logo && (
-        <img
-          src={residentialInfo.logo}
-          alt="Logo"
-          className="h-20 mb-4 rounded-lg shadow"
-        />
+        <div className="mb-4">
+          <Image
+            src={residentialInfo.logo}
+            alt="Logo"
+            width={80}
+            height={80}
+            className="h-20 w-auto rounded-lg shadow"
+          />
+        </div>
       )}
       <h1 className="text-2xl font-bold text-blue-900 mb-2">
         {residentialInfo.name}
