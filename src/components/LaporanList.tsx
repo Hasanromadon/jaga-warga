@@ -19,6 +19,7 @@ import {
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import toast from "react-hot-toast";
 
 const STATUS_LABELS: Record<string, string> = {
   unpaid: "Belum Lunas",
@@ -166,7 +167,7 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
   // 🔽 Handle pilihan ekspor
   const handleExport = (type: string) => {
     if (filteredBills.length === 0) {
-      alert("Tidak ada data untuk diekspor!");
+      toast.error("Tidak ada data untuk diekspor!");
       return;
     }
     if (type === "csv") exportCSV();
@@ -183,6 +184,7 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
           <input
             type="text"
             value={search}
+            disabled={filteredBills.length === 0}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari laporan..."
             className="w-full transition-all duration-200 bg-white border border-blue-200 rounded-md pl-9 pr-3 py-2 text-sm placeholder:text-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
@@ -207,7 +209,10 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
         </Select>
 
         {/* 📤 Export Dropdown */}
-        <Select onValueChange={handleExport}>
+        <Select
+          onValueChange={handleExport}
+          disabled={filteredBills.length === 0}
+        >
           <SelectTrigger className="w-14 h-12 p-0 flex items-center justify-center bg-white rounded-md hover:bg-blue-50">
             <FileDown className="w-5 h-5 text-blue-800" />
           </SelectTrigger>
@@ -225,7 +230,11 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
           <Calendar className="w-4 h-4" />
           Bulan
         </span>
-        <Select value={month} onValueChange={setMonth}>
+        <Select
+          value={month}
+          onValueChange={setMonth}
+          disabled={filteredBills.length === 0}
+        >
           <SelectTrigger className="bg-white w-[140px] border border-blue-200">
             <SelectValue placeholder="Pilih Bulan" />
           </SelectTrigger>
