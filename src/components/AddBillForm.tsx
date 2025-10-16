@@ -178,7 +178,7 @@ export default function AddBillForm() {
   }, [selectedResident, setValue]);
 
   return (
-    <Card className="max-w-sm mx-auto mt-6 shadow-sm border border-gray-200">
+    <Card className="max-w-sm mx-auto mt-2 shadow-sm border border-gray-200">
       <CardHeader>
         <CardTitle className="text-blue-900 text-lg font-bold">
           Tambah Tagihan

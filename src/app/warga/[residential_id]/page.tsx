@@ -1,50 +1,52 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
-import { useParams } from "next/navigation";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  doc,
-} from "firebase/firestore";
-import { useResidentialInfo } from "@/hooks/useResidentialInfo";
-import { db, storage } from "../../../firebaseConfig";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Button } from "../../../components/ui/button";
-import { Card, CardContent } from "../../../components/ui/card";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "../../../components/ui/select";
-import { Label } from "../../../components/ui/label";
-import toast, { Toaster } from "react-hot-toast";
-import {
-  Search,
-  Home,
-  Calendar,
-  Loader2,
-  ChevronDown,
-  PhoneCall,
-  User,
-} from "lucide-react";
-import { BillDetail } from "../../../components/custom/bill-detail";
-import {
-  BLOK_LIST,
-  HOUSE_NUMBER_LIST,
-  BULAN_LIST,
-  TAHUN_LIST,
-} from "../../../constants";
-import { Bill } from "../../../types/bill";
-import { useResidents } from "@/hooks/useResidents";
 import ResidentialLoading from "@/components/ResidentialLoading";
 import { UserNotFoundIllustration } from "@/components/svg/UserNotFoundIllustration";
+import { useResidentialInfo } from "@/hooks/useResidentialInfo";
+import { useResidents } from "@/hooks/useResidents";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import {
+  Calendar,
+  ChevronDown,
+  ChevronLeft,
+  Home,
+  Loader2,
+  PhoneCall,
+  Search,
+  User,
+} from "lucide-react";
+import Image from "next/image";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { BillDetail } from "../../../components/custom/bill-detail";
+import { Button } from "../../../components/ui/button";
+import { Card, CardContent } from "../../../components/ui/card";
+import { Label } from "../../../components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
+import {
+  BLOK_LIST,
+  BULAN_LIST,
+  HOUSE_NUMBER_LIST,
+  TAHUN_LIST,
+} from "../../../constants";
+import { db, storage } from "../../../firebaseConfig";
+import { Bill } from "../../../types/bill";
+import { HousingNotFoundIllustration } from "@/components/svg/HousingNotFoundIllustration";
 
 // ResidentialInfo type provided by hook
 
@@ -145,10 +147,24 @@ export default function WargaWithResidencePage() {
   if (loadingBranding) {
     return <ResidentialLoading />;
   }
+
   if (!residentialInfo) {
     return (
-      <div className="text-center py-10 text-red-600">
-        Data perumahan tidak ditemukan.
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-blue-900 flex flex-col items-center justify-center gap-2">
+          <HousingNotFoundIllustration className="h-80 w-auto mt-2" />
+          <span className="font-semibold text-[#7BA7E7] text-lg">
+            Data Perumahan tidak ditemukan
+          </span>
+          <Button
+            onClick={() => window.location.replace("/GHI")}
+            variant="default"
+            size="sm"
+          >
+            <ChevronLeft />
+            Kembali ke halaman Utama
+          </Button>
+        </div>
       </div>
     );
   }
@@ -167,6 +183,9 @@ export default function WargaWithResidencePage() {
           <h1 className="text-2xl font-bold text-blue-900 mb-1 text-center">
             {residentialInfo.name}
           </h1>
+          <p className="text-xs text-blue-900 text-center mb-2">
+            Masukkan data rumah Anda untuk melihat status tagihan
+          </p>
         </div>
       ) : (
         <div className="w-full max-w-sm flex flex-col items-center mt-6 mb-4">
@@ -189,7 +208,7 @@ export default function WargaWithResidencePage() {
         </div>
       )}
       <Card className="w-full max-w-sm shadow-xl border-0">
-        <CardContent className="pt-6 pb-2">
+        <CardContent className="pb-2">
           <div className="flex flex-col gap-6">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="text-lg font-bold text-blue-800 flex items-center gap-2 mb-0">

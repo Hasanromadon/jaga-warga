@@ -16,6 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const STATUS_LABELS: Record<string, string> = {
   unpaid: "Belum Lunas",
@@ -25,7 +28,7 @@ const STATUS_LABELS: Record<string, string> = {
   rejected: "Ditolak",
 };
 
-// 🧠 Update filter function: tambahkan filter bulan
+// 🧠 Filter function
 function filterBills(
   bills: Bill[],
   search: string,
@@ -36,15 +39,15 @@ function filterBills(
 
   if (search) {
     const q = search.toLowerCase();
-    filtered = filtered.filter((bill) => {
-      return (
+    filtered = filtered.filter(
+      (bill) =>
         (bill.block || "").toLowerCase().includes(q) ||
         (bill.houseNumber || "").toLowerCase().includes(q) ||
         (bill.month || "").toLowerCase().includes(q) ||
         (bill.year || "").toLowerCase().includes(q) ||
-        (bill.remark || "").toLowerCase().includes(q)
-      );
-    });
+        (bill.remark || "").toLowerCase().includes(q) ||
+        (bill.residentName || "").toLowerCase().includes(q)
+    );
   }
 
   if (status && status !== "all") {
@@ -76,55 +79,103 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
 
   const filteredBills = filterBills(bills, search, status, month);
 
-  const handleExport = () => {
-    try {
-      const header = [
-        "Block",
-        "House Number",
-        "Month",
-        "Year",
-        "Amount",
-        "Status",
-        "Remark",
-      ];
-      const rows = filteredBills.map((b) => [
-        b.block,
-        b.houseNumber,
-        b.month,
-        b.year,
-        formatRupiah(Number(b.amount)),
-        b.status,
-        (b.remark ?? "").replace(/"/g, '""'),
-      ]);
-      if (rows.length === 0) {
-        alert("Tidak ada data untuk diekspor!");
-        return;
-      }
-      const csv = [header, ...rows]
-        .map((row) =>
-          row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")
-        )
-        .join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "laporan_warga.csv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (err) {
-      console.error("CSV Export Error:", err);
-      alert(
-        "Gagal mengekspor CSV: " +
-          (err instanceof Error ? err.message : String(err))
-      );
+  // 🟢 Ekspor ke CSV
+  const exportCSV = () => {
+    const header = [
+      "Nama",
+      "Block",
+      "House Number",
+      "Month",
+      "Year",
+      "Amount",
+      "Status",
+      "Remark",
+    ];
+    const rows = filteredBills.map((b) => [
+      b.residentName,
+      b.block,
+      b.houseNumber,
+      getMonthName(b.month),
+      b.year,
+      formatRupiah(Number(b.amount)),
+      STATUS_LABELS[b.status] || b.status,
+      b.remark || "",
+    ]);
+    const csv = [header, ...rows].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "laporan_warga.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  // 🟡 Ekspor ke Excel
+  const exportExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(
+      filteredBills.map((b) => ({
+        Nama: b.residentName,
+        Blok: b.block,
+        "No Rumah": b.houseNumber,
+        Bulan: getMonthName(b.month),
+        Tahun: b.year,
+        Jumlah: formatRupiah(Number(b.amount)),
+        Status: STATUS_LABELS[b.status] || b.status,
+        Catatan: b.remark || "",
+      }))
+    );
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan");
+    XLSX.writeFile(workbook, "laporan_warga.xlsx");
+  };
+
+  // 🔴 Ekspor ke PDF
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Laporan Pembayaran Warga GHI", 14, 15);
+    autoTable(doc, {
+      startY: 25,
+      head: [
+        [
+          "Nama",
+          "Block",
+          "No Rumah",
+          "Bulan",
+          "Tahun",
+          "Jumlah",
+          "Status",
+          "Catatan",
+        ],
+      ],
+      body: filteredBills.map((b) => [
+        String(b.residentName ?? ""),
+        String(b.block ?? ""),
+        String(b.houseNumber ?? ""),
+        String(getMonthName(b.month) ?? ""),
+        String(b.year ?? ""),
+        String(formatRupiah(Number(b.amount))),
+        String(STATUS_LABELS[b.status] ?? b.status ?? ""),
+        String(b.remark ?? ""),
+      ]),
+    });
+    doc.save("laporan_warga.pdf");
+  };
+
+  // 🔽 Handle pilihan ekspor
+  const handleExport = (type: string) => {
+    if (filteredBills.length === 0) {
+      alert("Tidak ada data untuk diekspor!");
+      return;
     }
+    if (type === "csv") exportCSV();
+    if (type === "excel") exportExcel();
+    if (type === "pdf") exportPDF();
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-2">
       {/* 🔹 Row 1: Search, Filter, Export */}
       <div className="flex flex-wrap items-center gap-1 w-full pb-1">
         {/* 🔍 Search Input */}
@@ -155,18 +206,17 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
           </SelectContent>
         </Select>
 
-        {/* 📤 Export */}
-        <div className="p-0 flex items-center justify-center bg-white rounded-md hover:bg-blue-50">
-          <Button
-            onClick={handleExport}
-            variant="ghost"
-            size="icon"
-            className="text-blue-800 hover:bg-blue-50"
-            title="Ekspor CSV"
-          >
-            <FileDown className="w-5 h-5" />
-          </Button>
-        </div>
+        {/* 📤 Export Dropdown */}
+        <Select onValueChange={handleExport}>
+          <SelectTrigger className="w-14 h-12 p-0 flex items-center justify-center bg-white rounded-md hover:bg-blue-50">
+            <FileDown className="w-5 h-5 text-blue-800" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="csv">Ekspor CSV</SelectItem>
+            <SelectItem value="excel">Ekspor Excel</SelectItem>
+            <SelectItem value="pdf">Ekspor PDF</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* 🔹 Row 2: Filter Bulan */}
@@ -190,7 +240,7 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
         </Select>
       </div>
 
-      {/* List Section */}
+      {/* 🔹 List Section */}
       <div className="space-y-2">
         {filteredBills.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-blue-700">

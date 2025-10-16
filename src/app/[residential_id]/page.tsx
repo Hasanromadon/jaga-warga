@@ -1,11 +1,24 @@
 "use client";
+import ResidentialLoading from "@/components/ResidentialLoading";
+import { HousingNotFoundIllustration } from "@/components/svg/HousingNotFoundIllustration";
+import { Button } from "@/components/ui/button";
+import { useResidentialInfo } from "@/hooks/useResidentialInfo";
+import {
+  ChevronLeft,
+  FileText,
+  Home,
+  LogIn,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Users, LogIn, Home, ShieldCheck, FileText } from "lucide-react";
-import React from "react";
 import { useParams } from "next/navigation";
-import { useResidentialInfo } from "@/hooks/useResidentialInfo";
-import ResidentialLoading from "@/components/ResidentialLoading";
+
+interface ResidentialInfo {
+  name: string;
+  logo?: string;
+}
 
 export default function HomeWithResidencePage() {
   const params = useParams();
@@ -19,8 +32,21 @@ export default function HomeWithResidencePage() {
 
   if (!residentialInfo) {
     return (
-      <div className="text-center py-10 text-red-600">
-        Data perumahan tidak ditemukan.
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-blue-900 flex flex-col items-center justify-center gap-2">
+          <HousingNotFoundIllustration className="h-80 w-auto mt-2" />
+          <span className="font-semibold text-[#7BA7E7] text-lg">
+            Data Perumahan tidak ditemukan
+          </span>
+          <Button
+            onClick={() => window.location.replace("/GHI")}
+            variant="default"
+            size="sm"
+          >
+            <ChevronLeft />
+            Kembali ke halaman Utama
+          </Button>
+        </div>
       </div>
     );
   }

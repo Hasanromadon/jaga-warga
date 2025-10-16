@@ -1,18 +1,7 @@
+import LoadingOverlay from "@/components/LoadingOverlay";
 import { useAuthContext } from "../context/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-
-// Loading component for auth state checks
-function AuthLoadingSpinner() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Memuat...</p>
-      </div>
-    </div>
-  );
-}
 
 export function withProtectedRoute<P>(
   Component: React.ComponentType<P>,
@@ -35,17 +24,22 @@ export function withProtectedRoute<P>(
 
     // Show loading while auth is being initialized or is loading
     if (!initialized || loading) {
-      return <AuthLoadingSpinner />;
+      return (
+        <LoadingOverlay
+          show={!initialized || loading}
+          message="Memuat Data..."
+        />
+      );
     }
 
     // Show loading if user is not authenticated (while redirect is happening)
     if (!user) {
-      return <AuthLoadingSpinner />;
+      return <LoadingOverlay show={true} message="Memuat Data..." />;
     }
 
     // Show loading if role is required but not available or not allowed
     if (allowedRoles && (!role || !allowedRoles.includes(role))) {
-      return <AuthLoadingSpinner />;
+      return <LoadingOverlay show={true} message="Memuat Data..." />;
     }
 
     // @ts-expect-error: props spreading for HOC

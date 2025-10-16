@@ -157,7 +157,7 @@ function DashboardPage() {
     <main className="min-h-screen flex flex-col items-center pb-24">
       <div className="w-full max-w-sm bg-gradient-to-b from-blue-100 to-white p-4 min-h-screen sm:border sm:rounded-md">
         {/* Header with user info and logout */}
-        <div className="flex items-center justify-between mb-6 bg-white/80 backdrop-blur rounded-lg p-3 shadow-sm">
+        <div className="flex items-center justify-between bg-white/80 backdrop-blur rounded-lg p-3 shadow-sm">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-white" />
