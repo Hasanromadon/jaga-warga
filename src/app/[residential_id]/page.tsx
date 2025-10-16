@@ -84,7 +84,7 @@ export default function HomeWithResidencePage() {
       </div>
       <div className="w-full max-w-sm flex flex-col gap-4">
         <Link
-          href="/warga"
+          href={`/warga/${residentialId}`}
           className="flex items-center gap-3 p-4 rounded-xl shadow bg-white text-base font-semibold hover:bg-blue-50 transition border border-blue-100"
         >
           <Users className="w-6 h-6 text-blue-600" />
