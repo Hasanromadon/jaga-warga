@@ -46,9 +46,9 @@ export default function LoginWithResidencePage() {
           <Image
             src={residentialInfo.logo}
             alt="Logo"
-            width={80}
-            height={80}
-            className="h-20 w-auto rounded-lg shadow"
+            width={100}
+            height={100}
+            className="h-40 w-auto rounded-lg"
           />
         </div>
       )}

@@ -228,7 +228,7 @@ export default function AddBillForm() {
                     }}
                     disabled={isAllResidents}
                   >
-                    <SelectTrigger className="w-full" id="block">
+                    <SelectTrigger className="w-full text-xs" id="block">
                       <SelectValue placeholder="Pilih Blok" />
                     </SelectTrigger>
                     <SelectContent>
@@ -252,7 +252,7 @@ export default function AddBillForm() {
                     onValueChange={(val) => setValue("houseNumber", val)}
                     disabled={!watch("block") || isAllResidents}
                   >
-                    <SelectTrigger className="w-full" id="houseNumber">
+                    <SelectTrigger className="w-full text-xs" id="houseNumber">
                       <SelectValue placeholder="Pilih Nomor" />
                     </SelectTrigger>
                     <SelectContent>
@@ -330,7 +330,7 @@ export default function AddBillForm() {
                   rules={{ required: true }}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full" id="month">
+                      <SelectTrigger className="w-full text-xs" id="month">
                         <SelectValue placeholder="Pilih bulan" />
                       </SelectTrigger>
                       <SelectContent>
@@ -357,7 +357,7 @@ export default function AddBillForm() {
                   rules={{ required: true }}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full" id="year">
+                      <SelectTrigger className="w-full text-xs" id="year">
                         <SelectValue placeholder="Pilih tahun" />
                       </SelectTrigger>
                       <SelectContent>
@@ -389,7 +389,7 @@ export default function AddBillForm() {
               Jumlah Tagihan
             </Label>
             <div className="relative mt-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">
                 Rp
               </span>
               <Controller
@@ -407,7 +407,7 @@ export default function AddBillForm() {
                       field.onChange(val ? parseInt(val, 10) : "")
                     }
                     placeholder="Masukkan jumlah tagihan"
-                    className="pl-8 text-xs"
+                    className="pl-8 !text-xs"
                   />
                 )}
               />
@@ -435,7 +435,7 @@ export default function AddBillForm() {
                 <Textarea
                   id="remark"
                   placeholder="Dimohon untuk membayar iuran..."
-                  className="resize-y text-xs"
+                  className="resize-y !text-xs"
                   {...field}
                 />
               )}

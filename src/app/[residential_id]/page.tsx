@@ -97,7 +97,7 @@ export default function HomeWithResidencePage() {
           Cek Tagihan IPL
         </Link>
         <Link
-          href="/login"
+          href={`/login/${residentialId}`}
           className="flex items-center gap-3 p-4 rounded-xl shadow bg-white text-base font-semibold hover:bg-green-50 transition border border-green-100"
         >
           <LogIn className="w-6 h-6 text-green-600" />

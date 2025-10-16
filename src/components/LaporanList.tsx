@@ -195,7 +195,11 @@ export default function LaporanList({ bills = [] }: { bills: Bill[] }) {
         </div>
 
         {/* 🔽 Filter Status */}
-        <Select value={status} onValueChange={setStatus}>
+        <Select
+          value={status}
+          onValueChange={setStatus}
+          disabled={filteredBills.length === 0}
+        >
           <SelectTrigger className="w-14 h-12 p-0 flex items-center justify-center bg-white rounded-md hover:bg-blue-50">
             <Filter className="w-4 h-4 text-blue-800" />
           </SelectTrigger>
