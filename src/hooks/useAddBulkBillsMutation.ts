@@ -4,7 +4,6 @@ import { db } from "../firebaseConfig";
 import { AddBillFormInputs } from "../components/AddBillForm";
 import { Resident } from "./useResidents";
 import { extractBillKeywords } from "../utils/extractBillKeywords";
-import toast from "react-hot-toast";
 import { useAuth } from "./useAuth";
 
 export function useAddBulkBillsMutation() {
@@ -41,10 +40,6 @@ export function useAddBulkBillsMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bills"] });
-      toast.success("Tagihan massal berhasil ditambahkan!");
-    },
-    onError: () => {
-      toast.error("Gagal menambahkan tagihan massal.");
     },
   });
 }

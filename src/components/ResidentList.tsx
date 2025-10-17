@@ -53,6 +53,11 @@ export default function ResidentList() {
   const [importedData, setImportedData] = useState<ResidentFormInputs[]>([]);
   const [isImporting, setIsImporting] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
+  const [importProgress, setImportProgress] = useState({
+    current: 0,
+    total: 0,
+  });
+  const [importErrors, setImportErrors] = useState<string[]>([]);
 
   // Filtering now handled by Firestore query (keywords)
   const filtered = residentList;
@@ -61,22 +66,69 @@ export default function ResidentList() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file size (max 3MB)
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Ukuran file terlalu besar. Maksimal 3MB");
+      return;
+    }
+
+    // Reset previous state
+    setImportErrors([]);
+    setImportProgress({ current: 0, total: 0 });
+
     Papa.parse<ResidentCSVRow>(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        // results.data sudah bertipe ResidentCSVRow[]
-        const formatted = results.data.map((row) => ({
-          name: row.name?.trim() || "",
-          block: row.block?.trim() || "",
-          houseNumber: row.houseNumber?.trim() || "",
-          phoneNumber: row.phoneNumber?.trim() || "",
-        }));
+        const errors: string[] = [];
+
+        // Validate and format data
+        const formatted: ResidentFormInputs[] = [];
+
+        results.data.forEach((row, index) => {
+          const name = row.name?.trim() || "";
+          const block = row.block?.trim() || "";
+          const houseNumber = row.houseNumber?.trim() || "";
+          const phoneNumber = row.phoneNumber?.trim();
+
+          // Validation
+          if (!name || !block || !houseNumber) {
+            errors.push(
+              `Baris ${
+                index + 2
+              }: Data tidak lengkap (nama: "${name}", blok: "${block}", nomor: "${houseNumber}")`
+            );
+            return;
+          }
+
+          formatted.push({
+            name,
+            block,
+            houseNumber,
+            phoneNumber,
+          });
+        });
+
+        if (formatted.length === 0) {
+          toast.error("Tidak ada data valid untuk diimpor");
+          setImportErrors(errors);
+          return;
+        }
 
         setImportedData(formatted);
-        toast.success(`${formatted.length} data siap diimpor`);
+        setImportErrors(errors);
+
+        if (errors.length > 0) {
+          toast.success(
+            `${formatted.length} data valid siap diimpor (${errors.length} baris diabaikan)`
+          );
+        } else {
+          toast.success(`${formatted.length} data siap diimpor`);
+        }
       },
-      error: () => toast.error("Gagal membaca file CSV"),
+      error: (error) => {
+        toast.error(`Gagal membaca file CSV: ${error.message}`);
+      },
     });
   };
 
@@ -87,19 +139,65 @@ export default function ResidentList() {
     }
 
     setIsImporting(true);
-    try {
-      // Gunakan mutateAsync agar bisa di-await
-      await Promise.all(
-        importedData.map((data) => addResident.mutateAsync(data))
-      );
+    setImportProgress({ current: 0, total: importedData.length });
 
-      toast.success("Semua warga berhasil diimpor");
-      setImportedData([]);
-      setShowImport(false);
-    } catch {
-      toast.error("Beberapa data gagal diimpor");
+    const errors: string[] = [];
+    let successCount = 0;
+
+    try {
+      // Process in batches to avoid overwhelming Firestore
+      const batchSize = 10;
+      for (let i = 0; i < importedData.length; i += batchSize) {
+        const batch = importedData.slice(i, i + batchSize);
+
+        // Process batch
+        await Promise.allSettled(
+          batch.map(async (data, batchIndex) => {
+            try {
+              await addResident.mutateAsync(data);
+              setImportProgress({
+                current: i + batchIndex + 1,
+                total: importedData.length,
+              });
+              successCount++;
+            } catch (error) {
+              const rowNumber = i + batchIndex + 1;
+              const errorMsg =
+                error instanceof Error
+                  ? error.message
+                  : "Error tidak diketahui";
+              errors.push(
+                `Baris ${rowNumber} (${data.name}, Blok ${data.block} No.${data.houseNumber}): ${errorMsg}`
+              );
+              throw error;
+            }
+          })
+        );
+
+        // Small delay between batches to prevent rate limiting
+        if (i + batchSize < importedData.length) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      }
+
+      // Show results
+      if (errors.length === 0) {
+        toast.success(`✅ Semua ${successCount} warga berhasil diimpor!`);
+        setImportedData([]);
+        setImportErrors([]);
+        setShowImport(false);
+      } else {
+        toast.error(
+          `${successCount} berhasil, ${errors.length} gagal. Lihat detail di bawah.`
+        );
+        setImportErrors(errors);
+      }
+    } catch (error) {
+      toast.error("Terjadi kesalahan saat mengimpor data");
+      console.error("Bulk import error:", error);
     } finally {
       setIsImporting(false);
+      setImportProgress({ current: 0, total: 0 });
     }
   };
 
@@ -258,13 +356,29 @@ export default function ResidentList() {
         </DialogContent>
       </Dialog>
       {/* Modal Import Warga */}
-      <Dialog open={showImport} onOpenChange={setShowImport}>
-        <DialogContent className="max-w-sm mx-auto rounded-md">
+      <Dialog
+        open={showImport}
+        onOpenChange={(open) => {
+          if (!open && isImporting) {
+            toast.error("Tunggu hingga import selesai");
+            return;
+          }
+          setShowImport(open);
+          if (!open) {
+            setImportedData([]);
+            setImportErrors([]);
+            setImportProgress({ current: 0, total: 0 });
+          }
+        }}
+      >
+        <DialogContent className="max-w-sm mx-auto rounded-md max-h-[90vh] overflow-y-auto">
           <div className="flex flex-col items-start gap-3">
             <h2 className="text-blue-900 font-semibold text-lg">
               Import Data Warga (CSV)
             </h2>
-            <div>
+
+            {/* File Upload Section */}
+            <div className="w-full">
               <Input
                 type="file"
                 accept=".csv"
@@ -272,20 +386,50 @@ export default function ResidentList() {
                 className="text-sm text-blue-700"
                 aria-label="Import Data Warga"
                 title="Unggah data warga CSV (maksimal 3MB)"
+                disabled={isImporting}
               />
               <div className="text-[11px] text-blue-500 mt-1">
                 Hanya menerima file CSV. Ukuran maksimal 3MB.
               </div>
             </div>
-            {importedData.length > 0 && (
-              <div className="w-full bg-blue-50 border border-blue-200 rounded-md p-3 text-xs text-blue-700 max-h-40 overflow-y-auto">
-                <div className="font-semibold mb-1">
-                  {importedData.length} data siap diimpor:
+
+            {/* Progress Bar */}
+            {isImporting && importProgress.total > 0 && (
+              <div className="w-full bg-blue-100 border border-blue-300 rounded-md p-3">
+                <div className="text-xs font-semibold text-blue-900 mb-2">
+                  Sedang mengimpor... {importProgress.current} dari{" "}
+                  {importProgress.total}
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2.5">
+                  <div
+                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${
+                        (importProgress.current / importProgress.total) * 100
+                      }%`,
+                    }}
+                  />
+                </div>
+                <div className="text-[11px] text-blue-600 mt-1">
+                  {Math.round(
+                    (importProgress.current / importProgress.total) * 100
+                  )}
+                  % selesai
+                </div>
+              </div>
+            )}
+
+            {/* Preview Valid Data */}
+            {importedData.length > 0 && !isImporting && (
+              <div className="w-full bg-green-50 border border-green-200 rounded-md p-3 text-xs text-green-700 max-h-40 overflow-y-auto">
+                <div className="font-semibold mb-1 flex items-center gap-1">
+                  ✅ {importedData.length} data valid siap diimpor:
                 </div>
                 <ul className="list-disc ml-5 space-y-1">
                   {importedData.slice(0, 5).map((d, i) => (
                     <li key={i}>
                       {d.name} - Blok {d.block} No.{d.houseNumber}
+                      {d.phoneNumber && ` (${d.phoneNumber})`}
                     </li>
                   ))}
                   {importedData.length > 5 && (
@@ -296,17 +440,64 @@ export default function ResidentList() {
                 </ul>
               </div>
             )}
-            <div className="flex gap-2 mt-3">
+
+            {/* Validation Errors */}
+            {importErrors.length > 0 && (
+              <div className="w-full bg-red-50 border border-red-200 rounded-md p-3 text-xs text-red-700 max-h-40 overflow-y-auto">
+                <div className="font-semibold mb-1 flex items-center gap-1">
+                  ⚠️ {importErrors.length} baris bermasalah:
+                </div>
+                <ul className="list-disc ml-5 space-y-1">
+                  {importErrors.slice(0, 10).map((error, i) => (
+                    <li key={i} className="text-[11px]">
+                      {error}
+                    </li>
+                  ))}
+                  {importErrors.length > 10 && (
+                    <li className="italic text-gray-500">
+                      +{importErrors.length - 10} error lainnya...
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 mt-3 w-full">
               <Button
                 onClick={handleBulkImport}
                 disabled={isImporting || importedData.length === 0}
+                className="flex-1"
               >
-                {isImporting ? "Mengimpor..." : "Mulai Import"}
+                {isImporting
+                  ? `Mengimpor... (${importProgress.current}/${importProgress.total})`
+                  : "Mulai Import"}
               </Button>
-              <Button variant="outline" onClick={() => setShowImport(false)}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowImport(false);
+                  setImportedData([]);
+                  setImportErrors([]);
+                  setImportProgress({ current: 0, total: 0 });
+                }}
+                disabled={isImporting}
+              >
                 Batal
               </Button>
             </div>
+
+            {/* Help Text */}
+            {!importedData.length && !importErrors.length && (
+              <div className="w-full bg-gray-50 border border-gray-200 rounded-md p-3 text-xs text-gray-600">
+                <div className="font-semibold mb-1">Format CSV:</div>
+                <ul className="list-disc ml-5 space-y-0.5">
+                  <li>Header: name, block, houseNumber, phoneNumber</li>
+                  <li>name, block, houseNumber wajib diisi</li>
+                  <li>phoneNumber opsional</li>
+                </ul>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

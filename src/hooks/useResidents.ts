@@ -5,7 +5,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  setDoc,
+  addDoc,
   query,
   where,
   Query,
@@ -62,9 +62,8 @@ export function useAddResident() {
   const { residentialId } = useAuth();
   return useMutation({
     mutationFn: async (data: Omit<Resident, "id">) => {
-      const id = `${data.block}_${data.houseNumber}`;
       const keywords = extractKeywords(data);
-      await setDoc(doc(db, "residents", id), {
+      await addDoc(collection(db, "residents"), {
         ...data,
         keywords,
         residential_id: residentialId ?? data.residential_id ?? null,
