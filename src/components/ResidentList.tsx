@@ -243,7 +243,7 @@ export default function ResidentList() {
   };
 
   return (
-    <div className="w-full max-w-sm mx-auto mt-4">
+    <div className="w-full max-w-sm mx-auto">
       <div className="sticky top-0 z-10 bg-gradient-to-b pb-2 pt-2">
         <div className="flex flex-col gap-2">
           <SearchInput

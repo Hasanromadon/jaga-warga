@@ -73,7 +73,7 @@ export default function LoginForm() {
             {error}
           </div>
         )}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 ">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <label
               htmlFor="email"
@@ -120,7 +120,7 @@ export default function LoginForm() {
             {loading ? "Memproses..." : "Masuk"}
           </Button>
         </form>
-        <Button
+        {/* <Button
           onClick={handleGoogle}
           variant="outline"
           className="w-full mt-2 text-base flex items-center justify-center gap-2"
@@ -158,7 +158,7 @@ export default function LoginForm() {
             </defs>
           </svg>
           Masuk dengan Google
-        </Button>
+        </Button> */}
       </CardContent>
     </Card>
   );

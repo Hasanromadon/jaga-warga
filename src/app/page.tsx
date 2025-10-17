@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import { Users, LogIn, Home, ShieldCheck, FileText } from "lucide-react";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
