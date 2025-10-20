@@ -63,9 +63,14 @@ export function useBills(residentialId?: string, search?: string) {
 }
 
 // Infinite scroll bills query with keyword filtering
-export function useInfiniteBills(residentialId?: string, search?: string) {
+export function useInfiniteBills(
+  residentialId?: string,
+  search?: string,
+  month?: string,
+  status?: string
+) {
   return useInfiniteQuery({
-    queryKey: ["bills-infinite", residentialId, search],
+    queryKey: ["bills-infinite", residentialId, search, month, status],
     queryFn: async ({ pageParam }) => {
       const BILLS_PER_PAGE = 20;
       let q: CollectionReference | Query = collection(db, "bills");
@@ -79,6 +84,16 @@ export function useInfiniteBills(residentialId?: string, search?: string) {
       if (search && search.trim()) {
         const searchTerm = search.trim().toLowerCase();
         q = fsQuery(q, where("keywords", "array-contains", searchTerm));
+      }
+
+      // Add month filter if provided
+      if (month && month !== "all") {
+        q = fsQuery(q, where("month", "==", month));
+      }
+
+      // Add status filter if provided
+      if (status && status !== "all") {
+        q = fsQuery(q, where("status", "==", status));
       }
 
       // Add ordering and pagination
@@ -113,7 +128,10 @@ export function useInfiniteBills(residentialId?: string, search?: string) {
 
       return {
         bills,
-        nextCursor: snapshot.docs.length === BILLS_PER_PAGE ? snapshot.docs[snapshot.docs.length - 1] : null,
+        nextCursor:
+          snapshot.docs.length === BILLS_PER_PAGE
+            ? snapshot.docs[snapshot.docs.length - 1]
+            : null,
         hasMore: snapshot.docs.length === BILLS_PER_PAGE,
       };
     },

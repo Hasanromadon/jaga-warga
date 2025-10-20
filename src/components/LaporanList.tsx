@@ -47,17 +47,10 @@ export default function LaporanList({
   // Infinite scroll setup
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteBills(residentialId, search);
+    useInfiniteBills(residentialId, search, month, status);
 
   // All bills from all pages
   const allBills = data?.pages.flatMap((page) => page.bills) ?? [];
-
-  // Client-side filtering for status and month (since these are not in keywords)
-  const filteredBills = allBills.filter((bill) => {
-    if (status && status !== "all" && bill.status !== status) return false;
-    if (month && month !== "all" && bill.month !== month) return false;
-    return true;
-  });
 
   // Intersection observer for infinite scroll
   useEffect(() => {
@@ -93,7 +86,7 @@ export default function LaporanList({
       "Status",
       "Remark",
     ];
-    const rows = filteredBills.map((b) => [
+    const rows = allBills.map((b) => [
       b.residentName,
       b.block,
       b.houseNumber,
@@ -117,7 +110,7 @@ export default function LaporanList({
   // 🟡 Ekspor ke Excel
   const exportExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
-      filteredBills.map((b) => ({
+      allBills.map((b) => ({
         Nama: b.residentName,
         Blok: b.block,
         "No Rumah": b.houseNumber,
@@ -151,7 +144,7 @@ export default function LaporanList({
           "Catatan",
         ],
       ],
-      body: filteredBills.map((b) => [
+      body: allBills.map((b) => [
         String(b.residentName ?? ""),
         String(b.block ?? ""),
         String(b.houseNumber ?? ""),
@@ -167,7 +160,7 @@ export default function LaporanList({
 
   // 🔽 Handle pilihan ekspor
   const handleExport = (type: string) => {
-    if (filteredBills.length === 0) {
+    if (allBills.length === 0) {
       toast.error("Tidak ada data untuk diekspor!");
       return;
     }
@@ -246,7 +239,7 @@ export default function LaporanList({
           <input
             type="text"
             value={search}
-            disabled={filteredBills.length === 0}
+            disabled={allBills.length === 0}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nama, blok, nomor rumah..."
             className="w-full transition-all duration-200 bg-white border border-blue-200 rounded-lg pl-10 pr-4 py-2.5 text-sm placeholder:text-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 outline-none shadow-sm"
@@ -260,7 +253,7 @@ export default function LaporanList({
         <Select
           value={status}
           onValueChange={setStatus}
-          disabled={filteredBills.length === 0}
+          disabled={allBills.length === 0}
         >
           <SelectTrigger className="w-12 h-10 p-0 flex items-center justify-center bg-white border border-blue-200 rounded-lg hover:bg-blue-50 shadow-sm">
             <Filter className="w-4 h-4 text-blue-600" />
@@ -275,10 +268,7 @@ export default function LaporanList({
         </Select>
 
         {/*Export Dropdown */}
-        <Select
-          onValueChange={handleExport}
-          disabled={filteredBills.length === 0}
-        >
+        <Select onValueChange={handleExport} disabled={allBills.length === 0}>
           <SelectTrigger className="w-12 h-10 p-0 flex items-center justify-center bg-white border border-blue-200 rounded-lg hover:bg-blue-50 shadow-sm">
             <FileDown className="w-4 h-4 text-blue-600" />
           </SelectTrigger>
@@ -296,11 +286,7 @@ export default function LaporanList({
           <Calendar className="w-4 h-4 text-blue-600" />
           Filter Bulan
         </span>
-        <Select
-          value={month}
-          onValueChange={setMonth}
-          disabled={filteredBills.length === 0}
-        >
+        <Select value={month} onValueChange={setMonth}>
           <SelectTrigger className="bg-white w-[160px] border border-blue-200 shadow-sm">
             <SelectValue placeholder="Pilih Bulan" />
           </SelectTrigger>
@@ -331,7 +317,7 @@ export default function LaporanList({
               </p>
             </div>
           </div>
-        ) : filteredBills.length === 0 ? (
+        ) : allBills.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4">
             <EmptyBillIllustration />
 
@@ -347,23 +333,20 @@ export default function LaporanList({
           </div>
         ) : (
           <>
-            {filteredBills.length > 0 && (
+            {allBills.length > 0 && (
               <div className="flex items-center justify-between text-sm text-blue-700 bg-blue-50/50 rounded-lg px-4 py-2 border border-blue-100/50">
                 <span className="font-medium">
-                  Menampilkan {filteredBills.length} tagihan
+                  Menampilkan {allBills.length} tagihan
                 </span>
                 <span className="text-xs text-blue-600">
                   Total:{" "}
                   {formatRupiah(
-                    filteredBills.reduce(
-                      (sum, bill) => sum + Number(bill.amount),
-                      0
-                    )
+                    allBills.reduce((sum, bill) => sum + Number(bill.amount), 0)
                   )}
                 </span>
               </div>
             )}
-            {filteredBills.map((bill) => (
+            {allBills.map((bill) => (
               <BillCard
                 key={bill.id}
                 bill={bill}
