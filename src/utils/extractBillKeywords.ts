@@ -16,6 +16,7 @@ export const extractBillKeywords = (
     item.year,
     item.status,
     item.remark,
+    item.residentName,
   ];
   fields.forEach((val) => {
     if (typeof val === "string") {

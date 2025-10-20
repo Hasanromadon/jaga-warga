@@ -46,3 +46,40 @@ export function useRejectBillMutation() {
     },
   });
 }
+
+export function useUpdateBillStatusMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      billId,
+      status,
+      rejectReason,
+    }: {
+      billId: string;
+      status: "paid" | "unpaid" | "pending" | "approved" | "rejected";
+      rejectReason?: string;
+    }) => {
+      const updateData: { status: string; rejectReason?: string } = { status };
+      if (rejectReason && status === "rejected") {
+        updateData.rejectReason = rejectReason;
+      }
+      await updateDoc(doc(db, "bills", billId), updateData);
+    },
+    onSuccess: (_, { status }) => {
+      queryClient.invalidateQueries({ queryKey: ["bills"] });
+      const statusMessages = {
+        paid: "Tagihan berhasil ditandai sebagai lunas!",
+        unpaid: "Status tagihan diubah menjadi belum lunas.",
+        pending: "Status tagihan diubah menjadi verifikasi.",
+        approved: "Tagihan berhasil disetujui!",
+        rejected: "Tagihan berhasil ditolak!",
+      };
+      toast.success(
+        statusMessages[status] || "Status tagihan berhasil diubah!"
+      );
+    },
+    onError: () => {
+      toast.error("Gagal mengubah status tagihan.");
+    },
+  });
+}

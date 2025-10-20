@@ -28,4 +28,12 @@ export const BULAN_LIST = [
   { value: "12", label: "Desember" },
 ];
 
+export const STATUS_LABELS: Record<string, string> = {
+  unpaid: "Belum Lunas",
+  pending: "Verifikasi",
+  paid: "Lunas",
+  approved: "Disetujui",
+  rejected: "Ditolak",
+};
+
 export const TAHUN_LIST = ["2024", "2025", "2026"];

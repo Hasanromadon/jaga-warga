@@ -1,12 +1,40 @@
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./dialog";
-import { AlertTriangle } from "lucide-react";
-import { Button } from "./button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "./dialog"; // Asumsi dari shadcn/ui
+import { AlertTriangle, AlertCircle, Info } from "lucide-react";
+import { Button } from "./button"; // Asumsi dari shadcn/ui
+
+// Konfigurasi untuk tipe modal yang berbeda (lebih fleksibel)
+const MODAL_TYPES = {
+  warning: {
+    Icon: AlertTriangle,
+    className:
+      "text-yellow-500 bg-yellow-100 dark:bg-yellow-900/40 dark:text-yellow-300",
+    confirmClass: "bg-yellow-500 hover:bg-yellow-600",
+  },
+  danger: {
+    Icon: AlertCircle,
+    className: "text-red-500 bg-red-100 dark:bg-red-900/40 dark:text-red-300",
+    confirmClass: "bg-red-600 hover:bg-red-700",
+  },
+  info: {
+    Icon: Info,
+    className:
+      "text-blue-500 bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300",
+    confirmClass: "bg-blue-600 hover:bg-blue-700",
+  },
+};
 
 export interface ModalConfirmationProps {
   open: boolean;
+  type?: keyof typeof MODAL_TYPES;
   title: string;
   description?: React.ReactNode;
   confirmLabel?: string;
@@ -20,6 +48,7 @@ export interface ModalConfirmationProps {
 
 export function ModalConfirmation({
   open,
+  type = "warning", // Default ke 'warning'
   title,
   description,
   confirmLabel = "Ya, Lanjutkan",
@@ -30,34 +59,65 @@ export function ModalConfirmation({
   rejectReason,
   onRejectReasonChange,
 }: ModalConfirmationProps) {
+  const modalType = MODAL_TYPES[type];
+  const { Icon, className: iconClassName, confirmClass } = modalType;
+
   return (
-    <Dialog open={open} onOpenChange={v => !v && onCancel()}>
-  <DialogContent className="max-w-sm w-full p-4 py-6 sm:p-4 rounded-md">
-        <DialogHeader className="items-center">
-          <div className="flex flex-col items-center gap-2">
-            <AlertTriangle className="w-8 h-8 text-yellow-500 mb-1" />
-            <DialogTitle className="text-center text-base font-bold text-blue-900">{title}</DialogTitle>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+      <DialogContent className="w-[90vw] max-w-md rounded-xl p-6">
+        <div className="flex flex-col items-center text-center">
+          {/* Ikon Dinamis */}
+          <div
+            className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full ${iconClassName}`}
+          >
+            <Icon className="h-7 w-7" />
           </div>
-        </DialogHeader>
-  {description && <div className="text-sm text-muted-foreground text-center mb-3 mt-1">{description}</div>}
-        {typeof rejectReason !== 'undefined' && onRejectReasonChange && (
-          <textarea
-            className="border rounded px-3 py-2 text-sm w-full mb-3 min-h-[64px] resize-none focus:outline-blue-400"
-            placeholder="Alasan penolakan..."
-            value={rejectReason}
-            onChange={e => onRejectReasonChange(e.target.value)}
-            autoFocus
-            maxLength={200}
-          />
-        )}
-        <DialogFooter className="flex flex-row gap-2 justify-center mt-2">
-          <Button onClick={onConfirm} disabled={loading} className="px-4">
-            {loading ? "Memproses..." : confirmLabel}
-          </Button>
-          <Button variant="outline" onClick={onCancel} disabled={loading} className="px-4">
-            {cancelLabel}
-          </Button>
-        </DialogFooter>
+
+          {/* Header */}
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-gray-900 dark:text-gray-50">
+              {title}
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Deskripsi */}
+          {description && (
+            <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              {description}
+            </div>
+          )}
+
+          {/* Input Alasan Penolakan */}
+          {typeof rejectReason !== "undefined" && onRejectReasonChange && (
+            <textarea
+              className="mt-4 w-full min-h-[80px] resize-none rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900"
+              placeholder="Berikan alasan penolakan..."
+              value={rejectReason}
+              onChange={(e) => onRejectReasonChange(e.target.value)}
+              maxLength={200}
+              autoFocus
+            />
+          )}
+
+          {/* Footer dengan layout mobile-first */}
+          <DialogFooter className="mt-6 flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-center">
+            <Button
+              variant="outline"
+              onClick={onCancel}
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
+              {cancelLabel}
+            </Button>
+            <Button
+              onClick={onConfirm}
+              disabled={loading}
+              className={`w-full text-white sm:w-auto ${confirmClass}`}
+            >
+              {loading ? "Memproses..." : confirmLabel}
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -14,13 +14,15 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { PreviewImageModal } from "./ui/PreviewImageModal";
 import { formatTimestampID, getMonthName } from "../utils/formatDate";
+import { useAuthContext } from "../context/AuthProvider";
 
 export default function ConfirmBillList() {
-  const { data: bills, isLoading, error } = useBills();
-  const approveMutation = useApproveBillMutation();
-  const rejectMutation = useRejectBillMutation();
+  const { residentialId } = useAuthContext();
   const [rejectReason, setRejectReason] = useState("");
   const [search, setSearch] = useState("");
+  const { data: bills, isLoading, error } = useBills(residentialId || undefined, search || undefined);
+  const approveMutation = useApproveBillMutation();
+  const rejectMutation = useRejectBillMutation();
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [modal, setModal] = useState<null | {
     type: "approve" | "reject";
@@ -28,18 +30,8 @@ export default function ConfirmBillList() {
   }>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const filteredBills = (bills || []).filter(
-    (bill: import("../types/bill").Bill) => {
-      const q = search.toLowerCase();
-      return (
-        (bill.residentName || "").toLowerCase().includes(q) ||
-        (bill.block || "").toLowerCase().includes(q) ||
-        (bill.houseNumber || "").toLowerCase().includes(q) ||
-        (bill.month || "").toLowerCase().includes(q) ||
-        (bill.year || "").toLowerCase().includes(q) ||
-        (bill.remark || "").toLowerCase().includes(q)
-      );
-    }
+  const pendingBills = (bills || []).filter(
+    (bill) => bill.status === "pending"
   );
 
   if (isLoading)
@@ -54,10 +46,6 @@ export default function ConfirmBillList() {
         Gagal memuat data tagihan
       </div>
     );
-
-  const pendingBills = (filteredBills || []).filter(
-    (bill) => bill.status === "pending"
-  );
 
   // Search input and empty state
   if (pendingBills.length === 0)
@@ -95,7 +83,9 @@ export default function ConfirmBillList() {
             <div className="px-4">
               <div className="flex flex-col mb-2 space-y-1">
                 <div className="flex flex-row space-x-2">
-                  <span className="text-md font-bold">{bill.residentName}</span>
+                  <span className="text-md font-bold">
+                    {bill.residentName || "Nama tidak tersedia"}
+                  </span>
                 </div>
                 <span className="inline-flex bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold w-fit whitespace-nowrap shrink-0">
                   {getMonthName(bill.month)} {bill.year}
