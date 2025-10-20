@@ -20,7 +20,11 @@ export default function ConfirmBillList() {
   const { residentialId } = useAuthContext();
   const [rejectReason, setRejectReason] = useState("");
   const [search, setSearch] = useState("");
-  const { data: bills, isLoading, error } = useBills(residentialId || undefined, search || undefined);
+  const {
+    data: bills,
+    isLoading,
+    error,
+  } = useBills(residentialId || undefined, search || undefined);
   const approveMutation = useApproveBillMutation();
   const rejectMutation = useRejectBillMutation();
   const [loadingId, setLoadingId] = useState<string | null>(null);
