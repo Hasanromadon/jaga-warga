@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuthContext } from "../../context/AuthProvider";
 import ConfirmBillList from "../../components/ConfirmBillList";
-import AddBillForm from "../../components/AddBillForm";
+// import AddBillForm from "../../components/AddBillForm";
 import ResidentList from "../../components/ResidentList";
 import LaporanList from "../../components/LaporanList";
 import { Tabs, TabsContent } from "../../components/ui/tabs";
@@ -11,9 +11,39 @@ import { Button } from "../../components/ui/button";
 import { LogOut, User } from "lucide-react";
 import { withProtectedRoute } from "../../utils/protectedRoute";
 import { useBills } from "../../hooks/useBills";
-import { Bill } from "@/types/bill";
+import { Bill } from "../../types/bill";
+import DashboardPage from "@/components/DashboardPage";
 
 // Dual-tone SVG icons for bottom navigation
+const DualToneDashboard = ({ active }: { active?: boolean }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill={active ? "#3973C4" : "#E0EDFF"} />
+    <rect
+      x="7"
+      y="7"
+      width="10"
+      height="6"
+      rx="1"
+      fill={active ? "#fff" : "#3973C4"}
+    />
+    <rect
+      x="9"
+      y="9"
+      width="2"
+      height="2"
+      rx="1"
+      fill={active ? "#3973C4" : "#E0EDFF"}
+    />
+    <rect
+      x="13"
+      y="9"
+      width="2"
+      height="2"
+      rx="1"
+      fill={active ? "#3973C4" : "#E0EDFF"}
+    />
+  </svg>
+);
 const DualToneBadgeCheck = ({ active }: { active?: boolean }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="12" r="10" fill={active ? "#3973C4" : "#E0EDFF"} />
@@ -23,27 +53,6 @@ const DualToneBadgeCheck = ({ active }: { active?: boolean }) => (
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-    />
-  </svg>
-);
-const DualTonePlusCircle = ({ active }: { active?: boolean }) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="10" fill={active ? "#3973C4" : "#E0EDFF"} />
-    <rect
-      x="11"
-      y="7"
-      width="2"
-      height="10"
-      rx="1"
-      fill={active ? "#fff" : "#3973C4"}
-    />
-    <rect
-      x="7"
-      y="11"
-      width="10"
-      height="2"
-      rx="1"
-      fill={active ? "#fff" : "#3973C4"}
     />
   </svg>
 );
@@ -88,9 +97,21 @@ const DualToneClock = ({ active }: { active?: boolean }) => (
     />
   </svg>
 );
+const DualToneUser = ({ active }: { active?: boolean }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill={active ? "#3973C4" : "#E0EDFF"} />
+    <circle cx="12" cy="10" r="3" fill={active ? "#fff" : "#3973C4"} />
+    <path
+      d="M6 20c0-3.5 2.7-6.5 6-6.5s6 3 6 6.5"
+      stroke={active ? "#fff" : "#3973C4"}
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
 
-function DashboardPage() {
-  const [tab, setTab] = useState("konfirmasi");
+function AppPage() {
+  const [tab, setTab] = useState("dashboard");
   const { user, role, signOut } = useAuthContext();
 
   // if (role !== 'admin') {
@@ -113,19 +134,20 @@ function DashboardPage() {
   const pendingCount = (allBills || []).filter(
     (bill: Bill) => bill.status === "pending"
   ).length;
+
   const tabs = [
+    {
+      key: "dashboard",
+      label: "Dashboard",
+      icon: DualToneDashboard,
+      content: <DashboardPage />,
+    },
     {
       key: "konfirmasi",
       label: "Konfirmasi",
       icon: DualToneBadgeCheck,
       content: <ConfirmBillList />,
       badge: pendingCount > 0 ? pendingCount : undefined,
-    },
-    {
-      key: "tambah",
-      label: "Tambah",
-      icon: DualTonePlusCircle,
-      content: <AddBillForm />,
     },
     {
       key: "warga",
@@ -153,33 +175,38 @@ function DashboardPage() {
         </>
       ),
     },
-  ];
-  return (
-    <main className="min-h-screen flex flex-col items-center pb-10">
-      <div className="w-full max-w-sm bg-gradient-to-b from-blue-100 to-white p-4 min-h-screen sm:border sm:rounded-md">
-        {/* Header with user info and logout */}
-        <div className="flex items-center justify-between bg-white/80 backdrop-blur rounded-lg p-3 shadow-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-white" />
+    {
+      key: "profil",
+      label: "Profil",
+      icon: DualToneUser,
+      content: (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 bg-white/80 backdrop-blur rounded-lg p-4 shadow-sm">
+            <div className="w-12 h-12 bg-blue-800 rounded-full flex items-center justify-center">
+              <User className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-sm font-medium text-blue-900">
+              <p className="text-base font-medium text-blue-900">
                 {user?.displayName || user?.email?.split("@")[0] || "Admin"}
               </p>
-              <p className="text-xs text-blue-600 capitalize">{role}</p>
+              <p className="text-sm text-blue-600 capitalize">{role}</p>
             </div>
           </div>
           <Button
             onClick={signOut}
             variant="outline"
-            size="sm"
-            className="text-red-600 border-red-200 hover:bg-red-50"
+            className="w-full text-red-600 border-red-200 hover:bg-red-50"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 mr-2" />
+            Keluar
           </Button>
         </div>
-
+      ),
+    },
+  ];
+  return (
+    <main className="min-h-screen flex flex-col items-center pb-10">
+      <div className="w-full max-w-sm bg-gradient-to-b from-blue-100 to-white p-4 min-h-screen sm:border sm:rounded-md">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           {tabs.map((t) => (
             <TabsContent key={t.key} value={t.key}>
@@ -228,4 +255,4 @@ function DashboardPage() {
   );
 }
 
-export default withProtectedRoute(DashboardPage, ["admin"]);
+export default withProtectedRoute(AppPage, ["admin"]);
