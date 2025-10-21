@@ -11,6 +11,7 @@ import { Button } from "../../components/ui/button";
 import { LogOut, User } from "lucide-react";
 import { withProtectedRoute } from "../../utils/protectedRoute";
 import { useBills } from "../../hooks/useBills";
+import { Bill } from "@/types/bill";
 
 // Dual-tone SVG icons for bottom navigation
 const DualToneBadgeCheck = ({ active }: { active?: boolean }) => (
@@ -110,7 +111,7 @@ function DashboardPage() {
   } = useBills();
   // Count pending bills for badge (from backend)
   const pendingCount = (allBills || []).filter(
-    (bill: import("../../types/bill").Bill) => bill.status === "pending"
+    (bill: Bill) => bill.status === "pending"
   ).length;
   const tabs = [
     {
@@ -147,7 +148,7 @@ function DashboardPage() {
               Gagal memuat data laporan
             </div>
           ) : (
-            <LaporanList bills={allBills} />
+            <LaporanList />
           )}
         </>
       ),
