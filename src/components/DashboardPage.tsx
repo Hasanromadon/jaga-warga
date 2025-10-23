@@ -1,8 +1,16 @@
-import { TrendingDown, TrendingUp } from "lucide-react";
-import React from "react";
+import {
+  FilePlus2,
+  TrendingDown,
+  TrendingUp,
+  Users,
+  Wallet,
+} from "lucide-react";
+import React, { useState } from "react";
+import AddBillForm from "./AddBillForm";
+import ResidentList from "./ResidentList";
+import AddFinanceRecordForm from "./AddFinanceRecordForm";
 
-// --- Definisi Tipe & Helper ---
-
+// --- Tipe dan Helper ---
 interface User {
   displayName: string;
   photoURL: string;
@@ -25,67 +33,79 @@ interface Activity {
   time: string;
 }
 
-const formatRupiah = (number: number): string => {
-  return new Intl.NumberFormat("id-ID", {
+const formatRupiah = (number: number): string =>
+  new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
   }).format(number);
+
+// --- Tambahan type untuk view ---
+type ViewType = "dashboard" | "tagihan" | "warga" | "keuangan";
+
+// --- Komponen Fast Menu ---
+interface FastMenuProps {
+  onSelect: (menu: ViewType) => void;
+}
+const FastMenu: React.FC<FastMenuProps> = ({ onSelect }) => {
+  const menus: {
+    id: number;
+    key: ViewType;
+    title: string;
+    icon: React.ReactNode;
+    bg: string;
+  }[] = [
+    {
+      id: 1,
+      key: "tagihan",
+      title: "Tambah Tagihan",
+      icon: <FilePlus2 className="w-5 h-5 text-blue-600" />,
+      bg: "bg-blue-100",
+    },
+    {
+      id: 2,
+      key: "warga",
+      title: "List Warga",
+      icon: <Users className="w-5 h-5 text-emerald-600" />,
+      bg: "bg-emerald-100",
+    },
+    {
+      id: 3,
+      key: "keuangan",
+      title: "Catat Keuangan",
+      icon: <Wallet className="w-5 h-5 text-orange-600" />,
+      bg: "bg-orange-100",
+    },
+  ];
+
+  return (
+    <div className="bg-white rounded-2xl p-3 shadow-sm border border-slate-200/50">
+      <h2 className="text-sm font-semibold text-slate-700 mb-3">Menu</h2>
+
+      {/* Ubah grid jadi flex row */}
+      <div className="flex items-center justify-between gap-2">
+        {menus.map((menu) => (
+          <button
+            key={menu.id}
+            onClick={() => onSelect(menu.key)}
+            className="flex flex-col items-center justify-center flex-1 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition"
+          >
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${menu.bg}`}
+            >
+              {menu.icon}
+            </div>
+            <span className="text-[10px] font-medium text-slate-700 text-center">
+              {menu.title}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 };
 
-// --- Komponen-Komponen UI Kecil (Building Blocks) ---
-
-interface IconProps {
-  className?: string;
-}
-
-const CheckBadgeIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
-
-const ChartBarIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-    />
-  </svg>
-);
-
-const PlusIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-  </svg>
-);
-
+// --- Komponen StatCard ---
 const StatCard: React.FC<{
   title: string;
   value: string | number;
@@ -105,8 +125,7 @@ const StatCard: React.FC<{
   </div>
 );
 
-// --- Komponen Halaman Dasbor ---
-
+// --- Komponen Utama Dashboard ---
 interface DashboardPageProps {
   user: User;
   stats: Stats;
@@ -114,8 +133,21 @@ interface DashboardPageProps {
 }
 
 function DashboardPage({ user, stats, activities }: DashboardPageProps) {
+  const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+
+  if (currentView === "tagihan") {
+    return <AddBillForm onBack={() => setCurrentView("dashboard")} />;
+  }
+  if (currentView === "warga") {
+    return <ResidentList onBack={() => setCurrentView("dashboard")} />;
+  }
+
+  if (currentView === "keuangan") {
+    return <AddFinanceRecordForm onBack={() => setCurrentView("dashboard")} />;
+  }
+
   return (
-    <div className="min-h-screen  font-sans text-slate-800">
+    <div className="min-h-screen font-sans text-slate-800">
       <main className="w-full max-w-md mx-auto">
         <div className="space-y-6">
           {/* Header */}
@@ -159,7 +191,10 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
             />
           </div>
 
-          {/* Aktivitas Terbaru */}
+          {/* Fast Menu */}
+          <FastMenu onSelect={setCurrentView} />
+
+          {/* Aktivitas */}
           <section>
             <h2 className="text-lg font-bold text-slate-800 mb-2">
               Aktivitas Terbaru
@@ -167,64 +202,53 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
             <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/50">
               <div className="divide-y divide-slate-100">
                 {activities.length > 0 ? (
-                  activities.map((activity) => {
-                    const icons: Record<ActivityType, React.ReactElement> = {
-                      paid: (
-                        <CheckBadgeIcon className="w-5 h-5 text-green-500" />
-                      ),
-                      new: <PlusIcon className="w-5 h-5 text-blue-500" />,
-                      pending: (
-                        <ChartBarIcon className="w-5 h-5 text-amber-500" />
-                      ),
-                    };
-                    const texts: Record<ActivityType, string> = {
-                      paid: "Pembayaran dari",
-                      new: "Tagihan untuk",
-                      pending: "Menunggu dari",
-                    };
-                    return (
-                      <div
-                        key={activity.id}
-                        className="flex items-center gap-3 py-3"
-                      >
-                        <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          {icons[activity.type]}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-slate-800 break-words">
-                            <span className="font-semibold">
-                              {texts[activity.type]}
-                            </span>{" "}
-                            {activity.user}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            {activity.time}
-                          </p>
-                        </div>
-                        <p
-                          className={`text-sm font-semibold whitespace-nowrap text-right ${
-                            activity.type === "paid"
-                              ? "text-green-600"
-                              : "text-slate-700"
-                          }`}
-                        >
-                          {activity.type === "paid" ? "+" : ""}
-                          {formatRupiah(activity.amount)}
+                  activities.map((activity) => (
+                    <div
+                      key={activity.id}
+                      className="flex items-center gap-3 py-3"
+                    >
+                      <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        {activity.type === "paid" ? (
+                          <TrendingUp className="w-5 h-5 text-green-500" />
+                        ) : activity.type === "new" ? (
+                          <FilePlus2 className="w-5 h-5 text-blue-500" />
+                        ) : (
+                          <TrendingDown className="w-5 h-5 text-amber-500" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-slate-800 break-words">
+                          <span className="font-semibold">
+                            {activity.type === "paid"
+                              ? "Pembayaran dari"
+                              : activity.type === "new"
+                              ? "Tagihan untuk"
+                              : "Menunggu dari"}
+                          </span>{" "}
+                          {activity.user}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {activity.time}
                         </p>
                       </div>
-                    );
-                  })
+                      <p
+                        className={`text-sm font-semibold whitespace-nowrap text-right ${
+                          activity.type === "paid"
+                            ? "text-green-600"
+                            : "text-slate-700"
+                        }`}
+                      >
+                        {activity.type === "paid" ? "+" : ""}
+                        {formatRupiah(activity.amount)}
+                      </p>
+                    </div>
+                  ))
                 ) : (
                   <p className="text-center text-sm text-slate-500 py-4">
                     Belum ada aktivitas.
                   </p>
                 )}
               </div>
-              {activities.length > 0 && (
-                <button className="w-full text-center text-sm font-semibold text-blue-600 mt-4 pt-3 border-t border-slate-100 hover:underline disabled:text-slate-400 disabled:no-underline">
-                  Lihat Semua
-                </button>
-              )}
             </div>
           </section>
         </div>
@@ -233,10 +257,8 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
   );
 }
 
-// --- Komponen App Utama untuk Menampilkan Dasbor ---
-
+// --- App Utama ---
 export default function App() {
-  // Data contoh untuk ditampilkan di UI
   const sampleUser: User = {
     displayName: "Budi Doremi",
     photoURL: "https://placehold.co/100x100/0ea5e9/ffffff?text=BD",

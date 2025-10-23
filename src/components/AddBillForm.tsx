@@ -1,37 +1,44 @@
 "use client";
-import { useForm, Controller } from "react-hook-form";
+import { useAddBulkBillsMutation } from "@/hooks/useAddBulkBillsMutation";
+import { useResidents } from "@/hooks/useResidents";
+import {
+  ArrowLeft,
+  Calendar,
+  Coins,
+  FileText,
+  Home,
+  PhoneCall,
+  User,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { Button } from "../components/ui/button";
-import { useEffect, useMemo } from "react";
-import { NumberInputWithSeparator } from "../components/ui/number-input-with-separator";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
+import { Label } from "../components/ui/label";
+import { NumberInputWithSeparator } from "../components/ui/number-input-with-separator";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "../components/ui/select";
-import { Home, Calendar, Coins, FileText, User, PhoneCall } from "lucide-react";
-import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
-import { useState } from "react";
-import { useAddBillMutation } from "../hooks/useAddBillMutation";
-import toast from "react-hot-toast";
 import {
-  BULAN_LIST,
-  TAHUN_LIST,
   BLOK_LIST,
+  BULAN_LIST,
   HOUSE_NUMBER_LIST,
+  TAHUN_LIST,
 } from "../constants";
-import { useAddBulkBillsMutation } from "@/hooks/useAddBulkBillsMutation";
-import { useResidents } from "@/hooks/useResidents";
-import { UserNotFoundIllustration } from "./svg/UserNotFoundIllustration";
+import { useAddBillMutation } from "../hooks/useAddBillMutation";
 import { useAuth } from "../hooks/useAuth";
+import { UserNotFoundIllustration } from "./svg/UserNotFoundIllustration";
 
 export interface AddBillFormInputs {
   block: string;
@@ -45,7 +52,7 @@ export interface AddBillFormInputs {
   forAllResidents?: boolean;
 }
 
-export default function AddBillForm() {
+export default function AddBillForm({ onBack }: { onBack?: () => void }) {
   const {
     handleSubmit,
     control,
@@ -179,11 +186,20 @@ export default function AddBillForm() {
 
   return (
     <Card className="max-w-sm mx-auto mt-2 shadow-sm border border-gray-200">
-      <CardHeader>
-        <CardTitle className="text-blue-900 text-lg font-bold">
-          Tambah Tagihan
+      <CardHeader className="relative">
+        <CardTitle className="text-blue-900 flex items-center text-lg font-bold">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onBack}
+            className="text-blue-900 flex items-center w-0 p-0 h-auto"
+          >
+            <ArrowLeft className="h-10" />
+          </Button>
+          <span>Tambah Tagihan</span>
         </CardTitle>
-        <div className="text-xs text-gray-500 mt-1">
+
+        <div className="text-xs text-gray-500 mt-1 text-left">
           Isi data tagihan IPL untuk warga sesuai periode yang berlaku.
         </div>
       </CardHeader>
