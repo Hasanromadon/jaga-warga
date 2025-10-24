@@ -6,13 +6,12 @@ import {
   Wallet,
   PlusCircle,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import AddBillForm from "./AddBillForm";
 import ResidentList from "./ResidentList";
 import AddFinanceRecordForm from "./AddFinanceRecordForm";
 import FinanceList from "./FinanceList";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { db } from "@/firebaseConfig";
+import { useDashboardStats, useActivities } from "@/hooks/useDashboard";
 
 // --- Tipe dan Helper ---
 interface User {
@@ -30,7 +29,7 @@ interface Stats {
 type ActivityType = "income" | "expense";
 
 interface Activity {
-  id: number;
+  id: string;
   type: ActivityType;
   user: string;
   amount: number;
@@ -150,57 +149,17 @@ interface DashboardPageProps {
 }
 
 function DashboardPage({ user }: DashboardPageProps) {
-  const [stats, setStats] = useState<Stats>({
-    totalIncome: 0,
-    totalExpenses: 0,
-    totalBills: 0,
-    pendingBills: 0,
-  });
-  const [activities, setActivities] = useState<Activity[]>([]);
   const [currentView, setCurrentView] = useState<ViewType>("dashboard");
 
-  useEffect(() => {
-    const fetchStatsAndActivities = async () => {
-      try {
-        const now = new Date();
-        const year = now.getFullYear().toString();
-        const month = (now.getMonth() + 1).toString().padStart(2, "0");
-
-        const summaryRef = doc(db, "monthly_summaries", "GHI", year, month);
-        const summarySnap = await getDoc(summaryRef);
-
-        if (summarySnap.exists()) {
-          const data = summarySnap.data();
-          setStats({
-            totalIncome: data.total_income || 0,
-            totalExpenses: data.total_expense || 0,
-            totalBills: data.total_bills || 0,
-            pendingBills: data.pending_bills || 0,
-          });
-        }
-
-        const transSnap = await getDocs(collection(db, "general_transactions"));
-
-        const list: Activity[] = transSnap.docs.map((doc) => {
-          const t = doc.data();
-          console.log(t);
-          return {
-            id: doc.id as unknown as number,
-            type: t.type,
-            user: t.description,
-            amount: t.amount,
-            time: new Date(t.date.seconds * 1000).toLocaleString("id-ID"),
-          };
-        });
-
-        setActivities(list);
-      } catch (err) {
-        console.error("Error fetching stats:", err);
-      }
-    };
-
-    fetchStatsAndActivities();
-  }, []);
+  const {
+    data: stats = {
+      totalIncome: 0,
+      totalExpenses: 0,
+      totalBills: 0,
+      pendingBills: 0,
+    },
+  } = useDashboardStats();
+  const { data: activities = [] } = useActivities();
 
   if (currentView === "tagihan") {
     return <AddBillForm onBack={() => setCurrentView("dashboard")} />;
@@ -352,28 +311,28 @@ export default function App() {
 
   const sampleActivities: Activity[] = [
     {
-      id: 1,
+      id: "1",
       type: "income",
       user: "PT. Maju Mundur",
       amount: 5000000,
       time: "Hari ini, 13:45",
     },
     {
-      id: 2,
+      id: "2",
       type: "expense",
       user: "Siti Nurbaya",
       amount: 75000,
       time: "Hari ini, 11:20",
     },
     {
-      id: 3,
+      id: "3",
       type: "expense",
       user: "Ahmad Yani",
       amount: 150000,
       time: "Kemarin, 09:30",
     },
     {
-      id: 4,
+      id: "4",
       type: "income",
       user: "Proyek Desain Logo",
       amount: 2550000,

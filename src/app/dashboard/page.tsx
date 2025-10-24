@@ -9,6 +9,9 @@ import LaporanList from "../../components/LaporanList";
 import { Button } from "../../components/ui/button";
 import { useBills } from "../../hooks/useBills";
 import { Bill } from "../../types/bill";
+import { NavLink, Route, Routes, useLocation } from "react-router-dom";
+import ResidentList from "@/components/ResidentList";
+import RequireAuth from "@/components/RequireAuth";
 
 // Dual-tone SVG icons for bottom navigation
 const DualToneDashboard = ({ active }: { active?: boolean }) => (
