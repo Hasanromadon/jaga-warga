@@ -90,17 +90,16 @@ export default function AddFinanceRecordForm({
   return (
     <Card className="max-w-sm mx-auto mt-2 shadow-sm border border-gray-200">
       <CardHeader className="relative">
-        <CardTitle className="text-blue-900 flex items-center text-lg font-bold">
+        <div className="flex items-center space-x-3 justify-start mb-3">
           <Button
-            type="button"
-            variant="ghost"
             onClick={onBack ? onBack : () => navigate.push("/dashboard")}
-            className="text-blue-900 flex items-center w-0 p-0 h-auto"
+            variant="ghost"
+            className="text-slate-700 hover:text-slate-900"
           >
-            <ArrowLeft className="h-10" />
+            <ArrowLeft />
           </Button>
-          <span>Catat Keuangan</span>
-        </CardTitle>
+          <h2 className="text-lg font-bold text-slate-800">Catat Keuangan</h2>
+        </div>
 
         <div className="text-xs text-gray-500 mt-1 text-left">
           Catat transaksi keuangan harian, baik pemasukan maupun pengeluaran.

@@ -10,6 +10,7 @@ import {
   Upload,
   UserPlus,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -35,10 +36,9 @@ type ResidentCSVRow = {
   houseNumber: string;
   phoneNumber?: string;
 };
-import { useRouter } from "next/navigation";
 
 export default function ResidentList({ onBack }: { onBack?: () => void }) {
-  const router = useRouter();
+  const navigate = useRouter();
   const { residentialId } = useAuth();
   const [search, setSearch] = useState("");
   const { data: residents = [], isLoading } = useResidents(
@@ -247,17 +247,18 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
 
   return (
     <div className="w-full max-w-sm mx-auto">
+      <div className="flex items-center space-x-3 justify-start mb-3">
+        <Button
+          onClick={onBack ? onBack : () => navigate.push("/dashboard")}
+          variant="ghost"
+          className="text-slate-700 hover:text-slate-900"
+        >
+          <ArrowLeft />
+        </Button>
+        <h2 className="text-lg font-bold text-slate-800">Data warga</h2>
+      </div>
       <div className="sticky top-0 z-10 bg-gradient-to-b pb-2 pt-2">
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onBack ? onBack : () => router.push("/dashboard")}
-            className="text-blue-700 flex items-center gap-1 text-xs"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-
+        <div className="flex items-center space-x-1 justify-start mb-3">
           <div className="flex-1">
             <SearchInput
               value={search}

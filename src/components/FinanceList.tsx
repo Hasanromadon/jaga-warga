@@ -12,6 +12,7 @@ import {
 import { db } from "../firebaseConfig";
 import { TrendingUp, TrendingDown, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "../components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface Transaction {
   id: string;
@@ -80,7 +81,7 @@ export default function FinanceList({ onBack }: { onBack?: () => void }) {
   const [activeTab, setActiveTab] = useState<"income" | "expense">("income");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useRouter();
   const fetchTransactions = async (tabType: "income" | "expense") => {
     try {
       setLoading(true);
@@ -107,15 +108,15 @@ export default function FinanceList({ onBack }: { onBack?: () => void }) {
   return (
     <section className="max-w-md mx-auto mt-3">
       {/* Header */}
-      <div className="flex items-center justify-start mb-3">
+      <div className="flex items-center space-x-3 justify-start mb-3">
         <Button
-          onClick={onBack}
+          onClick={onBack ? onBack : () => navigate.push("/dashboard")}
           variant="ghost"
           className="text-slate-700 hover:text-slate-900"
         >
           <ArrowLeft />
         </Button>
-        <h2 className="text-lg font-bold text-slate-800">Catatan Keuangan</h2>
+        <h2 className="text-lg font-bold text-slate-800">Keuangan</h2>
       </div>
 
       {/* Tabs */}

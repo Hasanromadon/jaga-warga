@@ -10,17 +10,12 @@ import {
   PhoneCall,
   User,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { Label } from "../components/ui/label";
 import { NumberInputWithSeparator } from "../components/ui/number-input-with-separator";
 import {
@@ -54,7 +49,6 @@ export interface AddBillFormInputs {
 }
 
 export default function AddBillForm({ onBack }: { onBack?: () => void }) {
-  const router = useRouter();
   const {
     handleSubmit,
     control,
@@ -76,7 +70,7 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
   const selectedBlock = watch("block");
   const selectedNumber = watch("houseNumber");
   const HOUSE_NUMBERS = HOUSE_NUMBER_LIST;
-
+  const navigate = useRouter();
   const onSubmit = (data: AddBillFormInputs) => {
     setError(null);
 
@@ -189,17 +183,16 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
   return (
     <Card className="max-w-sm mx-auto mt-2 shadow-sm border border-gray-200">
       <CardHeader className="relative">
-        <CardTitle className="text-blue-900 flex items-center text-lg font-bold">
+        <div className="flex items-center space-x-3 justify-start mb-3">
           <Button
-            type="button"
+            onClick={onBack ? onBack : () => navigate.push("/dashboard")}
             variant="ghost"
-            onClick={onBack ? onBack : () => router.push("/dashboard")}
-            className="text-blue-900 flex items-center w-0 p-0 h-auto"
+            className="text-slate-700 hover:text-slate-900"
           >
-            <ArrowLeft className="h-10" />
+            <ArrowLeft />
           </Button>
-          <span>Tambah Tagihan</span>
-        </CardTitle>
+          <h2 className="text-lg font-bold text-slate-800">Tambah Tagihan</h2>
+        </div>
 
         <div className="text-xs text-gray-500 mt-1 text-left">
           Isi data tagihan IPL untuk warga sesuai periode yang berlaku.

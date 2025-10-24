@@ -1,5 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 export interface DashboardStats {
@@ -39,7 +47,6 @@ export function useDashboardStats(key = "GHI") {
     },
   });
 }
-
 export type Activity = {
   id: string;
   type: "income" | "expense";
@@ -52,7 +59,13 @@ export function useActivities() {
   return useQuery<Activity[]>({
     queryKey: ["activities"],
     queryFn: async () => {
-      const transSnap = await getDocs(collection(db, "general_transactions"));
+      const q = query(
+        collection(db, "general_transactions"),
+        orderBy("created_at", "desc"),
+        limit(4)
+      );
+      const transSnap = await getDocs(q);
+
       const list = transSnap.docs.map((doc) => {
         const t = doc.data();
         return {
@@ -60,7 +73,7 @@ export function useActivities() {
           type: t.type,
           user: t.description,
           amount: t.amount,
-          time: new Date(t.date.seconds * 1000).toLocaleString("id-ID"),
+          time: new Date(t.created_at.seconds * 1000).toLocaleString("id-ID"),
         } as Activity;
       });
 

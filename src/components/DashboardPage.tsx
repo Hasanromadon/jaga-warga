@@ -72,7 +72,7 @@ const FastMenu: React.FC<FastMenuProps> = ({ onSelect }) => {
     {
       id: 2,
       key: "warga",
-      title: "List Warga",
+      title: "Data Warga",
       icon: <Users className="w-5 h-5 text-emerald-600" />,
       bg: "bg-emerald-100",
     },
@@ -280,6 +280,14 @@ function DashboardPage({ user }: DashboardPageProps) {
                   </p>
                 )}
               </div>
+              {activities.length > 0 && (
+                <button
+                  onClick={() => router.push("/dashboard/keuangan")}
+                  className="w-full text-center text-sm font-semibold text-blue-600 mt-4 pt-3 border-t border-slate-100 hover:underline disabled:text-slate-400 disabled:no-underline"
+                >
+                  Lihat Semua
+                </button>
+              )}
             </div>
           </section>
         </div>
