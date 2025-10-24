@@ -1,3 +1,5 @@
+"use client";
+
 import {
   FilePlus2,
   TrendingDown,
@@ -7,7 +9,7 @@ import {
   PlusCircle,
 } from "lucide-react";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useDashboardStats, useActivities } from "@/hooks/useDashboard";
 
 // --- Tipe dan Helper ---
@@ -146,8 +148,8 @@ interface DashboardPageProps {
 }
 
 function DashboardPage({ user }: DashboardPageProps) {
-  // use React Router navigation for FastMenu actions so each view is addressable
-  const navigate = useNavigate();
+  // use Next.js router for FastMenu actions so each view is addressable
+  const router = useRouter();
 
   const {
     data: stats = {
@@ -162,7 +164,7 @@ function DashboardPage({ user }: DashboardPageProps) {
   // when FastMenu calls onSelect, navigate to the corresponding dashboard sub-route
   const handleFastMenuSelect = (menu: ViewType) => {
     // map view keys directly to dashboard routes (tagihan, warga, keuangan, catat-keuangan)
-    navigate(`/dashboard/${menu}`);
+    router.push(`/dashboard/${menu}`);
   };
 
   return (

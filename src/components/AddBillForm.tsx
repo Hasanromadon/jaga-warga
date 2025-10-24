@@ -11,7 +11,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Button } from "../components/ui/button";
@@ -54,7 +54,7 @@ export interface AddBillFormInputs {
 }
 
 export default function AddBillForm({ onBack }: { onBack?: () => void }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const {
     handleSubmit,
     control,
@@ -193,7 +193,7 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
           <Button
             type="button"
             variant="ghost"
-            onClick={onBack ? onBack : () => navigate("/dashboard")}
+            onClick={onBack ? onBack : () => router.push("/dashboard")}
             className="text-blue-900 flex items-center w-0 p-0 h-auto"
           >
             <ArrowLeft className="h-10" />

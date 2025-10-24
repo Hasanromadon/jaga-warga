@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Calendar, Coins, FileText, Repeat } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -51,7 +51,7 @@ export default function AddFinanceRecordForm({
 
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
+  const navigate = useRouter();
 
   // Invalidate dashboard queries on successful submit
   const queryClient = useQueryClient();
@@ -94,7 +94,7 @@ export default function AddFinanceRecordForm({
           <Button
             type="button"
             variant="ghost"
-            onClick={onBack ? onBack : () => navigate("/dashboard")}
+            onClick={onBack ? onBack : () => navigate.push("/dashboard")}
             className="text-blue-900 flex items-center w-0 p-0 h-auto"
           >
             <ArrowLeft className="h-10" />

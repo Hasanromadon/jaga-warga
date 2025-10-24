@@ -35,10 +35,10 @@ type ResidentCSVRow = {
   houseNumber: string;
   phoneNumber?: string;
 };
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 export default function ResidentList({ onBack }: { onBack?: () => void }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { residentialId } = useAuth();
   const [search, setSearch] = useState("");
   const { data: residents = [], isLoading } = useResidents(
@@ -252,7 +252,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
           <Button
             type="button"
             variant="ghost"
-            onClick={onBack ? onBack : () => navigate("/dashboard")}
+            onClick={onBack ? onBack : () => router.push("/dashboard")}
             className="text-blue-700 flex items-center gap-1 text-xs"
           >
             <ArrowLeft className="w-4 h-4" />
