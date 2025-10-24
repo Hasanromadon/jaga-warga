@@ -1,17 +1,14 @@
 "use client";
 
-import { useAuthContext } from "../../context/AuthProvider";
 import ConfirmBillList from "../../components/ConfirmBillList";
+import { useAuthContext } from "../../context/AuthProvider";
 // import AddBillForm from "../../components/AddBillForm";
-import ResidentList from "../../components/ResidentList";
+import DashboardPage from "@/components/DashboardPage";
+import { LogOut, User } from "lucide-react";
 import LaporanList from "../../components/LaporanList";
 import { Button } from "../../components/ui/button";
-import { LogOut, User } from "lucide-react";
 import { useBills } from "../../hooks/useBills";
 import { Bill } from "../../types/bill";
-import DashboardPage from "@/components/DashboardPage";
-import { Routes, Route, NavLink, useLocation } from "react-router-dom";
-import RequireAuth from "@/components/RequireAuth";
 
 // Dual-tone SVG icons for bottom navigation
 const DualToneDashboard = ({ active }: { active?: boolean }) => (
@@ -148,12 +145,12 @@ function AppPage() {
       content: <ConfirmBillList />,
       badge: pendingCount > 0 ? pendingCount : undefined,
     },
-    {
-      key: "warga",
-      label: "Warga",
-      icon: DualToneUsers,
-      content: <ResidentList />,
-    },
+    // {
+    //   key: "warga",
+    //   label: "Warga",
+    //   icon: DualToneUsers,
+    //   content: <ResidentList />,
+    // },
     {
       key: "laporan",
       label: "Laporan",

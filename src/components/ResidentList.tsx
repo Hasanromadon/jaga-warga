@@ -1,6 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowLeft,
   Edit,
   FileDown,
   Phone,
@@ -12,6 +13,7 @@ import {
 import Papa from "papaparse";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useAuth } from "../hooks/useAuth";
 import {
   Resident,
   useAddResident,
@@ -19,7 +21,6 @@ import {
   useEditResident,
   useResidents,
 } from "../hooks/useResidents";
-import { useAuth } from "../hooks/useAuth";
 import { SearchInput } from "./custom/search-input";
 import ResidentForm, { ResidentFormInputs } from "./ResidentForm";
 import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
@@ -34,8 +35,7 @@ type ResidentCSVRow = {
   houseNumber: string;
   phoneNumber?: string;
 };
-
-export default function ResidentList() {
+export default function ResidentList({ onBack }: { onBack?: () => void }) {
   const { residentialId } = useAuth();
   const [search, setSearch] = useState("");
   const { data: residents = [], isLoading } = useResidents(
@@ -245,13 +245,25 @@ export default function ResidentList() {
   return (
     <div className="w-full max-w-sm mx-auto">
       <div className="sticky top-0 z-10 bg-gradient-to-b pb-2 pt-2">
-        <div className="flex flex-col gap-2">
-          <SearchInput
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onBack}
+            className="text-blue-700 flex items-center gap-1 text-xs"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+
+          <div className="flex-1">
+            <SearchInput
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
+
       <div className="space-y-2">
         {isLoading ? (
           <div className="text-center text-gray-400 py-8">Loading...</div>
