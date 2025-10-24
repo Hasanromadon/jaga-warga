@@ -5,7 +5,14 @@ import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { Calendar, Coins, FileText, ArrowLeft, Repeat } from "lucide-react";
+import {
+  Calendar,
+  Coins,
+  FileText,
+  ArrowLeft,
+  Repeat,
+  UserCircle2,
+} from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -16,19 +23,14 @@ import {
 import { Label } from "../components/ui/label";
 import { NumberInputWithSeparator } from "../components/ui/number-input-with-separator";
 import { Textarea } from "../components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
+import { Input } from "../components/ui/input"; // pastikan kamu punya komponen ini
 
 export interface AddFinanceRecordInputs {
   description: string;
   date: string;
   amount: number | string;
   type: "income" | "expense" | "";
+  recorded_by: string;
 }
 
 export default function AddFinanceRecordForm({
@@ -36,7 +38,6 @@ export default function AddFinanceRecordForm({
 }: {
   onBack?: () => void;
 }) {
-  // ✅ tambahkan defaultValues supaya form stabil sejak awal
   const {
     handleSubmit,
     control,
@@ -48,6 +49,7 @@ export default function AddFinanceRecordForm({
       date: "",
       amount: "",
       type: "",
+      recorded_by: "",
     },
   });
 
@@ -62,7 +64,7 @@ export default function AddFinanceRecordForm({
         date: new Date(data.date),
         amount: Number(data.amount),
         type: data.type,
-        recorded_by: "GHI",
+        recorded_by: data.recorded_by,
         created_at: serverTimestamp(),
       });
 
@@ -103,6 +105,37 @@ export default function AddFinanceRecordForm({
 
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Recorded by */}
+          <div>
+            <Label
+              htmlFor="recorded_by"
+              className="text-xs font-semibold text-blue-900 flex items-center gap-1 mb-1"
+            >
+              <UserCircle2 className="w-4 h-4" />
+              Dicatat Oleh
+            </Label>
+            <Controller
+              name="recorded_by"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input
+                  id="recorded_by"
+                  placeholder="Nama pencatat"
+                  className="!text-xs"
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+            {errors.recorded_by && (
+              <span className="text-red-500 text-xs">
+                Nama pencatat wajib diisi
+              </span>
+            )}
+          </div>
+
+          {/* Tanggal */}
           <div>
             <Label
               htmlFor="date"
@@ -130,6 +163,7 @@ export default function AddFinanceRecordForm({
             )}
           </div>
 
+          {/* Jumlah */}
           <div>
             <Label
               htmlFor="amount"
@@ -167,6 +201,7 @@ export default function AddFinanceRecordForm({
             )}
           </div>
 
+          {/* Jenis Transaksi */}
           <div>
             <Label className="text-xs font-semibold text-blue-900 flex items-center gap-1 mb-1">
               <Repeat className="w-4 h-4" />
@@ -244,6 +279,7 @@ export default function AddFinanceRecordForm({
             )}
           </div>
 
+          {/* Deskripsi */}
           <div>
             <Label
               htmlFor="description"

@@ -4,11 +4,13 @@ import {
   TrendingUp,
   Users,
   Wallet,
+  PlusCircle,
 } from "lucide-react";
 import React, { useState } from "react";
 import AddBillForm from "./AddBillForm";
 import ResidentList from "./ResidentList";
 import AddFinanceRecordForm from "./AddFinanceRecordForm";
+import FinanceList from "./FinanceList";
 
 // --- Tipe dan Helper ---
 interface User {
@@ -41,7 +43,12 @@ const formatRupiah = (number: number): string =>
   }).format(number);
 
 // --- Tambahan type untuk view ---
-type ViewType = "dashboard" | "tagihan" | "warga" | "keuangan";
+type ViewType =
+  | "dashboard"
+  | "tagihan"
+  | "warga"
+  | "keuangan"
+  | "catatKeuangan";
 
 // --- Komponen Fast Menu ---
 interface FastMenuProps {
@@ -72,32 +79,40 @@ const FastMenu: React.FC<FastMenuProps> = ({ onSelect }) => {
     {
       id: 3,
       key: "keuangan",
-      title: "Catat Keuangan",
+      title: "Keuangan",
       icon: <Wallet className="w-5 h-5 text-orange-600" />,
       bg: "bg-orange-100",
+    },
+    {
+      id: 4,
+      key: "catatKeuangan",
+      title: "Catat Keuangan",
+      icon: <PlusCircle className="w-5 h-5 text-purple-600" />,
+      bg: "bg-purple-100",
     },
   ];
 
   return (
-    <div className="bg-white rounded-2xl p-3 shadow-sm border border-slate-200/50">
-      <h2 className="text-sm font-semibold text-slate-700 mb-3">Menu</h2>
-
-      {/* Ubah grid jadi flex row */}
+    <div className="bg-white rounded-2xl ">
       <div className="flex items-center justify-between gap-2">
         {menus.map((menu) => (
           <button
             key={menu.id}
             onClick={() => onSelect(menu.key)}
-            className="flex flex-col items-center justify-center flex-1 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 active:scale-95 transition"
+            className="flex flex-col items-center justify-between flex-1 p-2 rounded-xl hover:bg-slate-100 active:scale-95 transition min-h-[90px]"
           >
             <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${menu.bg}`}
+              className={`w-11 h-11 rounded-md flex items-center justify-center ${menu.bg}`}
             >
-              {menu.icon}
+              <div className="w-5 h-5 flex items-center justify-center">
+                {menu.icon}
+              </div>
             </div>
-            <span className="text-[10px] font-medium text-slate-700 text-center">
-              {menu.title}
-            </span>
+            <div className="h-[28px] mt-2 flex items-center justify-center">
+              <span className="text-[11px] font-semibold text-slate-700 text-center leading-tight line-clamp-2">
+                {menu.title}
+              </span>
+            </div>
           </button>
         ))}
       </div>
@@ -112,7 +127,7 @@ const StatCard: React.FC<{
   icon: React.ReactElement;
   color: { bg: string; text: string };
 }> = ({ title, value, icon, color }) => (
-  <div className="bg-white rounded-lg px-2 py-4 shadow-sm border border-slate-200/50 flex items-start gap-3">
+  <div className="bg-white rounded-lg px-2 py-4 flex items-start gap-3">
     <div
       className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${color.bg}`}
     >
@@ -141,8 +156,10 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
   if (currentView === "warga") {
     return <ResidentList onBack={() => setCurrentView("dashboard")} />;
   }
-
   if (currentView === "keuangan") {
+    return <FinanceList onBack={() => setCurrentView("dashboard")} />;
+  }
+  if (currentView === "catatKeuangan") {
     return <AddFinanceRecordForm onBack={() => setCurrentView("dashboard")} />;
   }
 
@@ -153,8 +170,8 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
           {/* Header */}
           <header className="flex items-center gap-4">
             <div>
-              <p className="text-base text-slate-500">Selamat Sore,</p>
-              <h1 className="text-2xl font-bold text-slate-900">
+              <p className="text-xs text-slate-500">Selamat datang,</p>
+              <h1 className="text-xl font-bold text-slate-900">
                 {user.displayName}
               </h1>
             </div>
@@ -175,24 +192,31 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
             </div>
           </div>
 
-          {/* Grid Statistik */}
-          <div className="grid grid-cols-2 gap-2">
-            <StatCard
-              title="Pemasukan"
-              value={formatRupiah(stats.totalIncome)}
-              icon={<TrendingUp className="w-3 h-3 text-green-500" />}
-              color={{ bg: "bg-green-100", text: "text-green-600" }}
-            />
-            <StatCard
-              title="Pengeluaran"
-              value={formatRupiah(stats.totalExpenses)}
-              icon={<TrendingDown className="w-3 h-3 text-red-500" />}
-              color={{ bg: "bg-red-100", text: "text-red-600" }}
-            />
-          </div>
+          <section className="bg-white rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 flex items-center justify-center">
+                <StatCard
+                  title="Pemasukan"
+                  value={formatRupiah(stats.totalIncome)}
+                  icon={<TrendingUp className="w-4 h-4 text-green-500" />}
+                  color={{ bg: "bg-green-100", text: "text-green-600" }}
+                />
+              </div>
 
-          {/* Fast Menu */}
-          <FastMenu onSelect={setCurrentView} />
+              <div className="w-px h-16 bg-slate-100 mx-2" />
+
+              <div className="flex-1 flex items-center justify-center">
+                <StatCard
+                  title="Pengeluaran"
+                  value={formatRupiah(stats.totalExpenses)}
+                  icon={<TrendingDown className="w-4 h-4 text-red-500" />}
+                  color={{ bg: "bg-red-100", text: "text-red-600" }}
+                />
+              </div>
+            </div>
+            <div className="w-full h-px bg-slate-100 mx-2 mb-3" />
+            <FastMenu onSelect={setCurrentView} />
+          </section>
 
           {/* Aktivitas */}
           <section>
@@ -260,7 +284,7 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
 // --- App Utama ---
 export default function App() {
   const sampleUser: User = {
-    displayName: "Budi Doremi",
+    displayName: "Grand Harmoni Indah",
     photoURL: "https://placehold.co/100x100/0ea5e9/ffffff?text=BD",
   };
 
