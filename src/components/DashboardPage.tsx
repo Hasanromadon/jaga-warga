@@ -6,11 +6,13 @@ import {
   Wallet,
   PlusCircle,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AddBillForm from "./AddBillForm";
 import ResidentList from "./ResidentList";
 import AddFinanceRecordForm from "./AddFinanceRecordForm";
 import FinanceList from "./FinanceList";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { db } from "@/firebaseConfig";
 
 // --- Tipe dan Helper ---
 interface User {
@@ -25,7 +27,7 @@ interface Stats {
   pendingBills: number;
 }
 
-type ActivityType = "paid" | "new" | "pending";
+type ActivityType = "income" | "expense";
 
 interface Activity {
   id: number;
@@ -48,7 +50,7 @@ type ViewType =
   | "tagihan"
   | "warga"
   | "keuangan"
-  | "catatKeuangan";
+  | "catat-keuangan";
 
 // --- Komponen Fast Menu ---
 interface FastMenuProps {
@@ -85,7 +87,7 @@ const FastMenu: React.FC<FastMenuProps> = ({ onSelect }) => {
     },
     {
       id: 4,
-      key: "catatKeuangan",
+      key: "catat-keuangan",
       title: "Catat Keuangan",
       icon: <PlusCircle className="w-5 h-5 text-purple-600" />,
       bg: "bg-purple-100",
@@ -127,13 +129,13 @@ const StatCard: React.FC<{
   icon: React.ReactElement;
   color: { bg: string; text: string };
 }> = ({ title, value, icon, color }) => (
-  <div className="bg-white rounded-lg px-2 py-4 flex items-start gap-3">
+  <div className="bg-white rounded-lg py-3 flex justify-between items-center gap-3">
     <div
-      className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${color.bg}`}
+      className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${color.bg}`}
     >
       {icon}
     </div>
-    <div className="min-w-0 flex-1">
+    <div className="min-w-0 items-center flex-1">
       <p className="text-xs text-slate-500 truncate">{title}</p>
       <p className="text-sm font-bold text-slate-800 break-words">{value}</p>
     </div>
@@ -147,8 +149,58 @@ interface DashboardPageProps {
   activities: Activity[];
 }
 
-function DashboardPage({ user, stats, activities }: DashboardPageProps) {
+function DashboardPage({ user }: DashboardPageProps) {
+  const [stats, setStats] = useState<Stats>({
+    totalIncome: 0,
+    totalExpenses: 0,
+    totalBills: 0,
+    pendingBills: 0,
+  });
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+
+  useEffect(() => {
+    const fetchStatsAndActivities = async () => {
+      try {
+        const now = new Date();
+        const year = now.getFullYear().toString();
+        const month = (now.getMonth() + 1).toString().padStart(2, "0");
+
+        const summaryRef = doc(db, "monthly_summaries", "GHI", year, month);
+        const summarySnap = await getDoc(summaryRef);
+
+        if (summarySnap.exists()) {
+          const data = summarySnap.data();
+          setStats({
+            totalIncome: data.total_income || 0,
+            totalExpenses: data.total_expense || 0,
+            totalBills: data.total_bills || 0,
+            pendingBills: data.pending_bills || 0,
+          });
+        }
+
+        const transSnap = await getDocs(collection(db, "general_transactions"));
+
+        const list: Activity[] = transSnap.docs.map((doc) => {
+          const t = doc.data();
+          console.log(t);
+          return {
+            id: doc.id as unknown as number,
+            type: t.type,
+            user: t.description,
+            amount: t.amount,
+            time: new Date(t.date.seconds * 1000).toLocaleString("id-ID"),
+          };
+        });
+
+        setActivities(list);
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      }
+    };
+
+    fetchStatsAndActivities();
+  }, []);
 
   if (currentView === "tagihan") {
     return <AddBillForm onBack={() => setCurrentView("dashboard")} />;
@@ -159,7 +211,7 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
   if (currentView === "keuangan") {
     return <FinanceList onBack={() => setCurrentView("dashboard")} />;
   }
-  if (currentView === "catatKeuangan") {
+  if (currentView === "catat-keuangan") {
     return <AddFinanceRecordForm onBack={() => setCurrentView("dashboard")} />;
   }
 
@@ -192,24 +244,24 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
             </div>
           </div>
 
-          <section className="bg-white rounded-2xl p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 flex items-center justify-center">
+          <section className="bg-white rounded-2xl p-2 shadow-sm">
+            <div className="flex items-center mx-2">
+              <div className="flex-1 flex items-center">
                 <StatCard
                   title="Pemasukan"
                   value={formatRupiah(stats.totalIncome)}
-                  icon={<TrendingUp className="w-4 h-4 text-green-500" />}
+                  icon={<TrendingUp className="w-5 h-5 text-green-500" />}
                   color={{ bg: "bg-green-100", text: "text-green-600" }}
                 />
               </div>
 
               <div className="w-px h-16 bg-slate-100 mx-2" />
 
-              <div className="flex-1 flex items-center justify-center">
+              <div className="flex-1 flex items-center">
                 <StatCard
                   title="Pengeluaran"
                   value={formatRupiah(stats.totalExpenses)}
-                  icon={<TrendingDown className="w-4 h-4 text-red-500" />}
+                  icon={<TrendingDown className="w-5 h-5 text-red-500" />}
                   color={{ bg: "bg-red-100", text: "text-red-600" }}
                 />
               </div>
@@ -231,24 +283,27 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
                       key={activity.id}
                       className="flex items-center gap-3 py-3"
                     >
-                      <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        {activity.type === "paid" ? (
+                      <div
+                        className={`w-10 h-10 ${
+                          activity.type === "income"
+                            ? "bg-green-100"
+                            : "bg-red-100"
+                        } rounded-full flex items-center justify-center flex-shrink-0`}
+                      >
+                        {activity.type === "income" ? (
                           <TrendingUp className="w-5 h-5 text-green-500" />
-                        ) : activity.type === "new" ? (
-                          <FilePlus2 className="w-5 h-5 text-blue-500" />
                         ) : (
-                          <TrendingDown className="w-5 h-5 text-amber-500" />
+                          <TrendingDown className="w-5 h-5 text-red-500" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-slate-800 break-words">
                           <span className="font-semibold">
-                            {activity.type === "paid"
-                              ? "Pembayaran dari"
-                              : activity.type === "new"
-                              ? "Tagihan untuk"
-                              : "Menunggu dari"}
+                            {activity.type === "income"
+                              ? "Pemasukkan"
+                              : "Pengeluaran"}
                           </span>{" "}
+                          <br />
                           {activity.user}
                         </p>
                         <p className="text-xs text-slate-400">
@@ -257,12 +312,12 @@ function DashboardPage({ user, stats, activities }: DashboardPageProps) {
                       </div>
                       <p
                         className={`text-sm font-semibold whitespace-nowrap text-right ${
-                          activity.type === "paid"
+                          activity.type === "income"
                             ? "text-green-600"
                             : "text-slate-700"
                         }`}
                       >
-                        {activity.type === "paid" ? "+" : ""}
+                        {activity.type === "income" ? "+" : ""}
                         {formatRupiah(activity.amount)}
                       </p>
                     </div>
@@ -298,28 +353,28 @@ export default function App() {
   const sampleActivities: Activity[] = [
     {
       id: 1,
-      type: "paid",
+      type: "income",
       user: "PT. Maju Mundur",
       amount: 5000000,
       time: "Hari ini, 13:45",
     },
     {
       id: 2,
-      type: "new",
+      type: "expense",
       user: "Siti Nurbaya",
       amount: 75000,
       time: "Hari ini, 11:20",
     },
     {
       id: 3,
-      type: "pending",
+      type: "expense",
       user: "Ahmad Yani",
       amount: 150000,
       time: "Kemarin, 09:30",
     },
     {
       id: 4,
-      type: "paid",
+      type: "income",
       user: "Proyek Desain Logo",
       amount: 2550000,
       time: "Kemarin, 19:00",

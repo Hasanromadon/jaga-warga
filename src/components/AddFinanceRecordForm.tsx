@@ -1,18 +1,11 @@
 "use client";
 
+import { useAuth } from "@/hooks/useAuth";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { ArrowLeft, Calendar, Coins, FileText, Repeat } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebaseConfig";
-import {
-  Calendar,
-  Coins,
-  FileText,
-  ArrowLeft,
-  Repeat,
-  UserCircle2,
-} from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -23,14 +16,14 @@ import {
 import { Label } from "../components/ui/label";
 import { NumberInputWithSeparator } from "../components/ui/number-input-with-separator";
 import { Textarea } from "../components/ui/textarea";
-import { Input } from "../components/ui/input"; // pastikan kamu punya komponen ini
+import { db } from "../firebaseConfig";
 
 export interface AddFinanceRecordInputs {
   description: string;
   date: string;
   amount: number | string;
   type: "income" | "expense" | "";
-  recorded_by: string;
+  residential_id: string;
 }
 
 export default function AddFinanceRecordForm({
@@ -38,6 +31,7 @@ export default function AddFinanceRecordForm({
 }: {
   onBack?: () => void;
 }) {
+  const { residentialId } = useAuth();
   const {
     handleSubmit,
     control,
@@ -49,7 +43,7 @@ export default function AddFinanceRecordForm({
       date: "",
       amount: "",
       type: "",
-      recorded_by: "",
+      residential_id: "",
     },
   });
 
@@ -58,13 +52,12 @@ export default function AddFinanceRecordForm({
   const onSubmit = async (data: AddFinanceRecordInputs) => {
     try {
       setLoading(true);
-
       await addDoc(collection(db, "general_transactions"), {
         description: data.description,
         date: new Date(data.date),
         amount: Number(data.amount),
         type: data.type,
-        recorded_by: data.recorded_by,
+        residential_id: residentialId,
         created_at: serverTimestamp(),
       });
 
@@ -105,36 +98,6 @@ export default function AddFinanceRecordForm({
 
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Recorded by */}
-          <div>
-            <Label
-              htmlFor="recorded_by"
-              className="text-xs font-semibold text-blue-900 flex items-center gap-1 mb-1"
-            >
-              <UserCircle2 className="w-4 h-4" />
-              Dicatat Oleh
-            </Label>
-            <Controller
-              name="recorded_by"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input
-                  id="recorded_by"
-                  placeholder="Nama pencatat"
-                  className="!text-xs"
-                  value={field.value || ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-            {errors.recorded_by && (
-              <span className="text-red-500 text-xs">
-                Nama pencatat wajib diisi
-              </span>
-            )}
-          </div>
-
           {/* Tanggal */}
           <div>
             <Label
