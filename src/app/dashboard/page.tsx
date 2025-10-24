@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { useAuthContext } from "../../context/AuthProvider";
 import ConfirmBillList from "../../components/ConfirmBillList";
 // import AddBillForm from "../../components/AddBillForm";
 import ResidentList from "../../components/ResidentList";
 import LaporanList from "../../components/LaporanList";
-import { Tabs, TabsContent } from "../../components/ui/tabs";
 import { Button } from "../../components/ui/button";
 import { LogOut, User } from "lucide-react";
-import { withProtectedRoute } from "../../utils/protectedRoute";
 import { useBills } from "../../hooks/useBills";
 import { Bill } from "../../types/bill";
 import DashboardPage from "@/components/DashboardPage";
+import { Routes, Route, NavLink, useLocation } from "react-router-dom";
+import RequireAuth from "@/components/RequireAuth";
 
 // Dual-tone SVG icons for bottom navigation
 const DualToneDashboard = ({ active }: { active?: boolean }) => (
@@ -111,8 +110,8 @@ const DualToneUser = ({ active }: { active?: boolean }) => (
 );
 
 function AppPage() {
-  const [tab, setTab] = useState("dashboard");
   const { user, role, signOut } = useAuthContext();
+  const location = useLocation();
 
   // if (role !== 'admin') {
   //   return (
@@ -207,13 +206,65 @@ function AppPage() {
   return (
     <main className="min-h-screen flex flex-col items-center pb-10">
       <div className="w-full max-w-sm bg-gradient-to-b from-blue-100 to-white p-4 min-h-screen sm:border sm:rounded-md">
-        <Tabs value={tab} onValueChange={setTab} className="w-full">
-          {tabs.map((t) => (
-            <TabsContent key={t.key} value={t.key}>
-              {t.content}
-            </TabsContent>
-          ))}
-        </Tabs>
+        <div className="w-full">
+          <div className="min-h-[200px]">
+            <Routes>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route
+                path="/dashboard/konfirmasi"
+                element={<ConfirmBillList />}
+              />
+              <Route path="/dashboard/warga" element={<ResidentList />} />
+              <Route
+                path="/dashboard/laporan"
+                element={
+                  loadingBills ? (
+                    <div className="text-center text-blue-700 py-8">
+                      Memuat data laporan...
+                    </div>
+                  ) : errorBills ? (
+                    <div className="text-center text-red-600 py-8">
+                      Gagal memuat data laporan
+                    </div>
+                  ) : (
+                    <LaporanList />
+                  )
+                }
+              />
+              <Route
+                path="/dashboard/profil"
+                element={
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 bg-white/80 backdrop-blur rounded-lg p-4 shadow-sm">
+                      <div className="w-12 h-12 bg-blue-800 rounded-full flex items-center justify-center">
+                        <User className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-base font-medium text-blue-900">
+                          {user?.displayName ||
+                            user?.email?.split("@")[0] ||
+                            "Admin"}
+                        </p>
+                        <p className="text-sm text-blue-600 capitalize">
+                          {role}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={signOut}
+                      variant="outline"
+                      className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Keluar
+                    </Button>
+                  </div>
+                }
+              />
+              <Route path="*" element={<DashboardPage />} />
+            </Routes>
+          </div>
+        </div>
         {/* Bottom Navigation Floating Tab - fixed, always at bottom, not affected by scroll */}
         <nav
           className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-2"
@@ -222,19 +273,29 @@ function AppPage() {
           <div className="flex justify-between bg-white/95 shadow-xl rounded-xl border border-blue-100 overflow-hidden backdrop-blur supports-[backdrop-filter]:bg-white/80 animate-fade-in">
             {tabs.map((t) => {
               const Icon = t.icon;
+              const to =
+                t.key === "dashboard" ? "/dashboard" : `/dashboard/${t.key}`;
               return (
-                <button
+                <NavLink
                   key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className={`group flex-1 flex flex-col items-center py-1.5 px-1 transition-all duration-200 border-b-2 ${
-                    tab === t.key
-                      ? "text-blue-700 border-blue-600 font-bold bg-blue-50/60"
-                      : "text-blue-900 border-transparent hover:bg-blue-50/40"
-                  }`}
+                  to={to}
+                  className={({ isActive }) =>
+                    `group flex-1 flex flex-col items-center py-1.5 px-1 transition-all duration-200 border-b-2 ${
+                      isActive
+                        ? "text-blue-700 border-blue-600 font-bold bg-blue-50/60"
+                        : "text-blue-900 border-transparent hover:bg-blue-50/40"
+                    }`
+                  }
                   style={{ minWidth: 0 }}
                 >
                   <span className="relative">
-                    <Icon active={tab === t.key} />
+                    <Icon
+                      active={
+                        location.pathname.endsWith(t.key) ||
+                        (t.key === "dashboard" &&
+                          location.pathname === "/dashboard")
+                      }
+                    />
                     {t.badge && (
                       <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center border border-white shadow">
                         {t.badge}
@@ -242,7 +303,7 @@ function AppPage() {
                     )}
                   </span>
                   <span className="text-xs leading-tight">{t.label}</span>
-                </button>
+                </NavLink>
               );
             })}
           </div>
@@ -255,4 +316,10 @@ function AppPage() {
   );
 }
 
-export default withProtectedRoute(AppPage, ["admin"]);
+export default function Page() {
+  return (
+    <RequireAuth allowedRoles={["admin"]}>
+      <AppPage />
+    </RequireAuth>
+  );
+}
