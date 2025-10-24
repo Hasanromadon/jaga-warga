@@ -25,6 +25,9 @@ export function useAddBillMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bills"] });
+      // Invalidate dashboard-related queries so stats and activities refresh
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
       toast.success("Tagihan berhasil ditambahkan!");
     },
     onError: () => {

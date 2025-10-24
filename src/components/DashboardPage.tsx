@@ -6,11 +6,8 @@ import {
   Wallet,
   PlusCircle,
 } from "lucide-react";
-import React, { useState } from "react";
-import AddBillForm from "./AddBillForm";
-import ResidentList from "./ResidentList";
-import AddFinanceRecordForm from "./AddFinanceRecordForm";
-import FinanceList from "./FinanceList";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useDashboardStats, useActivities } from "@/hooks/useDashboard";
 
 // --- Tipe dan Helper ---
@@ -149,7 +146,8 @@ interface DashboardPageProps {
 }
 
 function DashboardPage({ user }: DashboardPageProps) {
-  const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+  // use React Router navigation for FastMenu actions so each view is addressable
+  const navigate = useNavigate();
 
   const {
     data: stats = {
@@ -161,18 +159,11 @@ function DashboardPage({ user }: DashboardPageProps) {
   } = useDashboardStats();
   const { data: activities = [] } = useActivities();
 
-  if (currentView === "tagihan") {
-    return <AddBillForm onBack={() => setCurrentView("dashboard")} />;
-  }
-  if (currentView === "warga") {
-    return <ResidentList onBack={() => setCurrentView("dashboard")} />;
-  }
-  if (currentView === "keuangan") {
-    return <FinanceList onBack={() => setCurrentView("dashboard")} />;
-  }
-  if (currentView === "catat-keuangan") {
-    return <AddFinanceRecordForm onBack={() => setCurrentView("dashboard")} />;
-  }
+  // when FastMenu calls onSelect, navigate to the corresponding dashboard sub-route
+  const handleFastMenuSelect = (menu: ViewType) => {
+    // map view keys directly to dashboard routes (tagihan, warga, keuangan, catat-keuangan)
+    navigate(`/dashboard/${menu}`);
+  };
 
   return (
     <div className="min-h-screen font-sans text-slate-800">
@@ -226,7 +217,7 @@ function DashboardPage({ user }: DashboardPageProps) {
               </div>
             </div>
             <div className="w-full h-px bg-slate-100 mx-2 mb-3" />
-            <FastMenu onSelect={setCurrentView} />
+            <FastMenu onSelect={handleFastMenuSelect} />
           </section>
 
           {/* Aktivitas */}

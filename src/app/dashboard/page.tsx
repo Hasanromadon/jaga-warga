@@ -1,6 +1,9 @@
 "use client";
 
 import ConfirmBillList from "../../components/ConfirmBillList";
+import AddBillForm from "../../components/AddBillForm";
+import AddFinanceRecordForm from "../../components/AddFinanceRecordForm";
+import FinanceList from "../../components/FinanceList";
 import { useAuthContext } from "../../context/AuthProvider";
 // import AddBillForm from "../../components/AddBillForm";
 import DashboardPage from "@/components/DashboardPage";
@@ -210,6 +213,12 @@ function AppPage() {
           <div className="min-h-[200px]">
             <Routes>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard/tagihan" element={<AddBillForm />} />
+              <Route path="/dashboard/keuangan" element={<FinanceList />} />
+              <Route
+                path="/dashboard/catat-keuangan"
+                element={<AddFinanceRecordForm />}
+              />
               <Route
                 path="/dashboard/konfirmasi"
                 element={<ConfirmBillList />}

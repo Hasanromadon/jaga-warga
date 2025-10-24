@@ -2,6 +2,8 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Coins, FileText, Repeat } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -49,6 +51,11 @@ export default function AddFinanceRecordForm({
 
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
+  // Invalidate dashboard queries on successful submit
+  const queryClient = useQueryClient();
+
   const onSubmit = async (data: AddFinanceRecordInputs) => {
     try {
       setLoading(true);
@@ -60,6 +67,10 @@ export default function AddFinanceRecordForm({
         residential_id: residentialId,
         created_at: serverTimestamp(),
       });
+
+      // invalidate dashboard stats and activities
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
 
       toast.success(
         `Transaksi ${
@@ -83,7 +94,7 @@ export default function AddFinanceRecordForm({
           <Button
             type="button"
             variant="ghost"
-            onClick={onBack}
+            onClick={onBack ? onBack : () => navigate("/dashboard")}
             className="text-blue-900 flex items-center w-0 p-0 h-auto"
           >
             <ArrowLeft className="h-10" />
