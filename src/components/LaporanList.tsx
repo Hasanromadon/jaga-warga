@@ -28,6 +28,29 @@ import { BillStatus } from "./ui/BillStatusBadge";
 import { getMonthName } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 
+interface YearlyReportRow {
+  nama: string;
+  blok: string;
+  total: number;
+  totalLunas: number;
+  totalBelumLunas: number;
+  bulan: Record<string, string>;
+}
+
+const MONTHS = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
 export default function LaporanList({
   residentialId,
 }: {
@@ -36,6 +59,7 @@ export default function LaporanList({
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [month, setMonth] = useState("all");
+  const [year, setYear] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [editLoading, setEditLoading] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
@@ -158,6 +182,119 @@ export default function LaporanList({
     doc.save("laporan_warga.pdf");
   };
 
+  const generateYearlyReport = (year: string): YearlyReportRow[] => {
+    const filtered = allBills.filter((b) => String(b.year) === year);
+    const grouped = new Map<string, YearlyReportRow>();
+
+    filtered.forEach((b) => {
+      const residentName = b.residentName ?? "-";
+      const block = b.block ?? "-";
+      const houseNumber = b.houseNumber ?? "-";
+      const key = `${residentName}_${block}_${houseNumber}`;
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          nama: residentName,
+          blok: `${block} No ${houseNumber}`,
+          totalLunas: 0,
+          totalBelumLunas: 0,
+          total: 0,
+          bulan: Object.fromEntries(MONTHS.map((m) => [m, "-"])),
+        });
+      }
+
+      const data = grouped.get(key)!;
+      const monthName = MONTHS[Number(b.month) - 1];
+      const amount = Number(b.amount);
+
+      // Tandai status per bulan
+      if (b.status === "paid") {
+        data.bulan[monthName] = "✔️";
+        data.totalLunas += amount;
+      } else if (b.status === "unpaid") {
+        data.bulan[monthName] = "❌";
+        data.totalBelumLunas += amount;
+      } else {
+        data.bulan[monthName] = "⏳";
+      }
+
+      // Tambahkan total keseluruhan
+      data.total += amount;
+    });
+
+    return Array.from(grouped.values());
+  };
+
+  // 🔢 Hitung summary global (semua warga)
+  const calculateSummary = (year: string) => {
+    const filtered = allBills.filter((b) => String(b.year) === year);
+    let totalLunas = 0;
+    let totalBelum = 0;
+
+    filtered.forEach((b) => {
+      const amount = Number(b.amount);
+      if (b.status === "paid") totalLunas += amount;
+      else if (b.status === "unpaid") totalBelum += amount;
+    });
+
+    return { totalLunas, totalBelum, totalSemua: totalLunas + totalBelum };
+  };
+
+  // 🟢 Export Excel + Summary di bawah tabel
+  const exportYearlyExcel = (year: string) => {
+    const report = generateYearlyReport(year);
+    if (report.length === 0) {
+      toast.error("Tidak ada data untuk tahun ini!");
+      return;
+    }
+
+    const { totalLunas, totalBelum, totalSemua } = calculateSummary(year);
+
+    // 🔹 Flatten data warga
+    const flat = report.map((r) => ({
+      Nama: r.nama,
+      Blok: r.blok,
+      ...r.bulan,
+      "Total Lunas": r.totalLunas,
+      "Total Belum Lunas": r.totalBelumLunas,
+      "Total Semua": r.total,
+    }));
+
+    // 🔹 Buat worksheet dari data utama
+    const worksheet = XLSX.utils.json_to_sheet(flat);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, `Laporan ${year}`);
+
+    // 🔹 Cari baris terakhir tabel
+    const range = XLSX.utils.decode_range(worksheet["!ref"]!);
+    const lastRow = range.e.r + 3; // beri jarak 3 baris dari tabel utama
+
+    // 🔹 Tambahkan summary di bawah tabel
+    const summaryRows = [
+      ["Total Lunas", totalLunas],
+      ["Total Belum Lunas", totalBelum],
+      ["Total Semua", totalSemua],
+    ];
+
+    summaryRows.forEach((row, i) => {
+      const rowIndex = lastRow + i;
+      worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })] = { v: row[0] };
+      worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 1 })] = {
+        v: row[1],
+        t: "n", // angka (number)
+      };
+    });
+
+    // 🔹 Update referensi range agar Excel tahu sampai mana data
+    const newRange = {
+      s: { r: 0, c: 0 },
+      e: { r: lastRow + summaryRows.length, c: range.e.c },
+    };
+    worksheet["!ref"] = XLSX.utils.encode_range(newRange);
+
+    XLSX.writeFile(workbook, `laporan_warga_${year}.xlsx`);
+  };
+
   // 🔽 Handle pilihan ekspor
   const handleExport = (type: string) => {
     if (allBills.length === 0) {
@@ -167,6 +304,7 @@ export default function LaporanList({
     if (type === "csv") exportCSV();
     if (type === "excel") exportExcel();
     if (type === "pdf") exportPDF();
+    if (type === "yearly") exportYearlyExcel(year);
   };
 
   // This function is triggered by the confirmation modal
@@ -233,51 +371,67 @@ export default function LaporanList({
   return (
     <div className="space-y-4 mt-2">
       {/* 🔹 Row 1: Search, Filter, Export */}
-      <div className="flex flex-wrap items-center gap-2 w-full pb-2 bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-blue-100/50 shadow-sm">
+      <div className="flex flex-col justify-start items-center gap-2 w-full pb-4 bg-white/30 backdrop-blur-sm rounded-lg p-3 border border-blue-100/30">
         {/* Search Input */}
-        <div className="relative flex-1 min-w-[200px] sm:min-w-[280px]">
+        <div className="relative flex-1 w-full">
           <input
             type="text"
             value={search}
             disabled={allBills.length === 0}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nama, blok, nomor rumah..."
-            className="w-full transition-all duration-200 bg-white border border-blue-200 rounded-lg pl-10 pr-4 py-2.5 text-sm placeholder:text-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 outline-none shadow-sm"
+            className="w-full transition-all duration-200 bg-white border border-blue-200 rounded-lg pl-10 pr-4 py-2.5 text-sm placeholder:text-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 outline-none"
           />
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400">
             <Search className="w-4 h-4" />
           </span>
         </div>
+        <div className="flex flex-row w-full gap-1">
+          {/* 🔽 Filter Status */}
+          <Select
+            value={status}
+            onValueChange={setStatus}
+            disabled={allBills.length === 0}
+          >
+            <SelectTrigger className="w-12 h-10 p-0 flex items-center justify-center bg-white border border-blue-200 rounded-lg hover:bg-blue-50">
+              <Filter className="w-4 h-4 text-blue-600" />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        {/* 🔽 Filter Status */}
-        <Select
-          value={status}
-          onValueChange={setStatus}
-          disabled={allBills.length === 0}
-        >
-          <SelectTrigger className="w-12 h-10 p-0 flex items-center justify-center bg-white border border-blue-200 rounded-lg hover:bg-blue-50 shadow-sm">
-            <Filter className="w-4 h-4 text-blue-600" />
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
+          {/*Export Dropdown */}
+          <Select onValueChange={handleExport} disabled={allBills.length === 0}>
+            <SelectTrigger className="w-12 h-10 p-0 flex items-center justify-center bg-white border border-blue-200 rounded-lg hover:bg-blue-50">
+              <FileDown className="w-4 h-4 text-blue-600" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="csv">📄 Ekspor CSV</SelectItem>
+              <SelectItem value="excel">📊 Ekspor Excel</SelectItem>
+              <SelectItem value="pdf">📋 Ekspor PDF</SelectItem>
+              <SelectItem value="yearly" disabled={!year}>
+                🗓️ Laporan Tahunan
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/*Export Dropdown */}
-        <Select onValueChange={handleExport} disabled={allBills.length === 0}>
-          <SelectTrigger className="w-12 h-10 p-0 flex items-center justify-center bg-white border border-blue-200 rounded-lg hover:bg-blue-50 shadow-sm">
-            <FileDown className="w-4 h-4 text-blue-600" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="csv">📄 Ekspor CSV</SelectItem>
-            <SelectItem value="excel">📊 Ekspor Excel</SelectItem>
-            <SelectItem value="pdf">📋 Ekspor PDF</SelectItem>
-          </SelectContent>
-        </Select>
+            </SelectContent>
+            <Select value={year} onValueChange={setYear}>
+              <SelectTrigger className="w-[85px] bg-white border border-blue-200">
+                <SelectValue placeholder="Pilih Tahun" />
+              </SelectTrigger>
+              <SelectContent>
+                {[2024, 2025, 2026].map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Select>
+        </div>
       </div>
 
       {/* 🔹 Row 2: Filter Bulan */}
@@ -287,7 +441,7 @@ export default function LaporanList({
           Filter Bulan
         </span>
         <Select value={month} onValueChange={setMonth}>
-          <SelectTrigger className="bg-white w-[160px] border border-blue-200 shadow-sm">
+          <SelectTrigger className="bg-white w-[160px] border border-blue-200">
             <SelectValue placeholder="Pilih Bulan" />
           </SelectTrigger>
           <SelectContent>
@@ -333,7 +487,7 @@ export default function LaporanList({
           </div>
         ) : (
           <>
-            {allBills.length > 0 && (
+            {/* {allBills.length > 0 && (
               <div className="flex items-center justify-between text-sm text-blue-700 bg-blue-50/50 rounded-lg px-4 py-2 border border-blue-100/50">
                 <span className="font-medium">
                   Menampilkan {allBills.length} tagihan
@@ -345,7 +499,7 @@ export default function LaporanList({
                   )}
                 </span>
               </div>
-            )}
+            )} */}
             {allBills.map((bill) => (
               <BillCard
                 key={bill.id}

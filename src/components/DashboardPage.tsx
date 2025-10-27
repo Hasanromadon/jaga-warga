@@ -127,9 +127,9 @@ const StatCard: React.FC<{
   icon: React.ReactElement;
   color: { bg: string; text: string };
 }> = ({ title, value, icon, color }) => (
-  <div className="bg-white rounded-lg py-3 flex justify-between items-center gap-3">
+  <div className="bg-white rounded-lg py-3 flex justify-between items-center gap-1">
     <div
-      className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${color.bg}`}
+      className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${color.bg}`}
     >
       {icon}
     </div>
@@ -207,7 +207,7 @@ function DashboardPage({ user }: DashboardPageProps) {
                 />
               </div>
 
-              <div className="w-px h-16 bg-slate-100 mx-2" />
+              <div className="w-px h-10 bg-slate-100 mx-2" />
 
               <div className="flex-1 flex items-center">
                 <StatCard

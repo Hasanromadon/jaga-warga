@@ -78,6 +78,8 @@ export default function AddFinanceRecordForm({
         } berhasil disimpan!`
       );
 
+      navigate.push("/dashboard/keuangan");
+
       reset();
     } catch (error) {
       console.error(error);
