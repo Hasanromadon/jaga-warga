@@ -9,7 +9,13 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import { TrendingUp, TrendingDown, Loader2, ArrowLeft } from 'lucide-react';
+import {
+  TrendingUp,
+  TrendingDown,
+  Loader2,
+  ArrowLeft,
+  Plus,
+} from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useRouter } from 'next/navigation';
 
@@ -107,15 +113,24 @@ export default function FinanceList({ onBack }: { onBack?: () => void }) {
   return (
     <section className="max-w-md mx-auto mt-3">
       {/* Header */}
-      <div className="flex items-center space-x-3 justify-start mb-3">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center space-x-3">
+          <Button
+            onClick={onBack ? onBack : () => navigate.push('/dashboard')}
+            variant="ghost"
+            className="text-slate-700 hover:text-slate-900"
+          >
+            <ArrowLeft />
+          </Button>
+          <h2 className="text-lg font-bold text-slate-800">Keuangan</h2>
+        </div>
         <Button
-          onClick={onBack ? onBack : () => navigate.push('/dashboard')}
-          variant="ghost"
-          className="text-slate-700 hover:text-slate-900"
+          onClick={() => navigate.push('/dashboard/catat-keuangan')}
+          className="rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 px-4 h-9 text-xs font-medium flex items-center gap-2"
         >
-          <ArrowLeft />
+          <Plus className="w-4 h-4" />
+          Catat
         </Button>
-        <h2 className="text-lg font-bold text-slate-800">Keuangan</h2>
       </div>
 
       {/* Tabs */}

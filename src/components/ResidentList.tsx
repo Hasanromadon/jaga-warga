@@ -27,7 +27,7 @@ import ResidentForm, { ResidentFormInputs } from './ResidentForm';
 import { EmptyBillIllustration } from './svg/EmptyBillIllustration';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
-import { Dialog, DialogContent } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Input } from './ui/input';
 
 type ResidentCSVRow = {
@@ -277,7 +277,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
             <div className="mt-4 text-base font-semibold">Tidak ada warga.</div>
           </div>
         ) : (
-          filtered.map((r) => (
+          filtered.map((r: Resident) => (
             <Card
               key={r.id}
               className="animate-fade-in border border-gray-200 bg-white/95 shadow-sm rounded-xl px-4 py-2 flex flex-col gap-1"
@@ -325,6 +325,9 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
                   }}
                 >
                   <DialogContent className="p-6  border-none max-w-xs mx-auto rounded-md">
+                    <DialogHeader>
+                      <DialogTitle>Konfirmasi Hapus Warga</DialogTitle>
+                    </DialogHeader>
                     <div className="font-semibold text-lg text-blue-900 mb-2 text-center">
                       Hapus Warga?
                     </div>
@@ -357,6 +360,9 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
       {/* Modal Add Warga */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-sm mx-auto rounded-md">
+          <DialogHeader>
+            <DialogTitle>Tambah Warga</DialogTitle>
+          </DialogHeader>
           <ResidentForm onSave={handleAdd} />
         </DialogContent>
       </Dialog>
@@ -368,6 +374,9 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
         }}
       >
         <DialogContent className="max-w-sm mx-auto rounded-md">
+          <DialogHeader>
+            <DialogTitle>Edit Warga</DialogTitle>
+          </DialogHeader>
           {editData && <ResidentForm initial={editData} onSave={handleEdit} />}
         </DialogContent>
       </Dialog>
@@ -388,11 +397,12 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
         }}
       >
         <DialogContent className="max-w-sm mx-auto rounded-md max-h-[90vh] overflow-y-auto">
-          <div className="flex flex-col items-start gap-3">
-            <h2 className="text-blue-900 font-semibold text-lg">
+          <DialogHeader>
+            <DialogTitle className="text-blue-900 font-semibold text-lg">
               Import Data Warga (CSV)
-            </h2>
-
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-start gap-3">
             {/* File Upload Section */}
             <div className="w-full">
               <Input

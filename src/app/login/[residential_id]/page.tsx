@@ -7,10 +7,13 @@ import { ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import LoginForm from '../../../components/LoginForm';
+import { DEMO_RESIDENTIAL_ID } from '@/constants';
+import { withRedirectIfAuthenticated } from '@/utils/redirectIfAuthenticated';
 
-export default function LoginWithResidencePage() {
+function LoginWithResidencePage() {
   const params = useParams();
-  const residentialId = params?.residential_id as string;
+  const residentialId =
+    DEMO_RESIDENTIAL_ID || (params?.residential_id as string);
   const { data: residentialInfo, isLoading: loading } =
     useResidentialInfo(residentialId);
 
@@ -65,3 +68,5 @@ export default function LoginWithResidencePage() {
     </div>
   );
 }
+
+export default withRedirectIfAuthenticated(LoginWithResidencePage);

@@ -5,7 +5,7 @@ interface ActionButtonProps {
   href: string;
   icon: LucideIcon;
   text: string;
-  color: 'blue' | 'green';
+  color: 'blue' | 'green' | 'yellow' | 'orange';
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
@@ -17,6 +17,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   const colorClasses = {
     blue: 'hover:bg-blue-50 border-blue-100 text-blue-600',
     green: 'hover:bg-green-50 border-green-100 text-green-600',
+    yellow: 'hover:bg-yellow-50 border-yellow-100 text-yellow-600',
+    orange: 'hover:bg-orange-50 border-orange-100 text-orange-600',
   };
 
   return (

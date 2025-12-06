@@ -37,3 +37,5 @@ export const STATUS_LABELS: Record<string, string> = {
 };
 
 export const TAHUN_LIST = ['2024', '2025', '2026'];
+
+export const DEMO_RESIDENTIAL_ID = 'GHI';

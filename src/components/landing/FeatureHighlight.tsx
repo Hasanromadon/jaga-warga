@@ -3,7 +3,7 @@ import { LucideIcon } from 'lucide-react';
 interface FeatureHighlightProps {
   icon: LucideIcon;
   text: string;
-  color: 'blue' | 'green' | 'yellow';
+  color: 'blue' | 'green' | 'yellow' | 'orange';
 }
 
 const FeatureHighlight: React.FC<FeatureHighlightProps> = ({
@@ -15,12 +15,14 @@ const FeatureHighlight: React.FC<FeatureHighlightProps> = ({
     blue: 'bg-blue-50 border-blue-100 text-blue-900',
     green: 'bg-green-50 border-green-100 text-green-900',
     yellow: 'bg-yellow-50 border-yellow-100 text-yellow-900',
+    orange: 'bg-orange-50 border-orange-100 text-orange-900',
   };
 
   const iconColorClasses = {
     blue: 'text-blue-500',
     green: 'text-green-600',
     yellow: 'text-yellow-600',
+    orange: 'text-orange-600',
   };
 
   return (

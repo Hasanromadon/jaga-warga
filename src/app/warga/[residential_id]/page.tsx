@@ -2,8 +2,11 @@
 
 import ResidentialLoading from '@/components/ResidentialLoading';
 import { UserNotFoundIllustration } from '@/components/svg/UserNotFoundIllustration';
-import { useResidentialInfo } from '@/hooks/useResidentialInfo';
-import { useResidents } from '@/hooks/useResidents';
+import {
+  useResidentialInfo,
+  ManagementContact,
+} from '@/hooks/useResidentialInfo';
+import { useResidents, Resident } from '@/hooks/useResidents';
 import {
   collection,
   doc,
@@ -12,7 +15,7 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { uploadBuktiBayar } from '@/utils/uploadToStorage';
 import {
   Calendar,
   ChevronDown,
@@ -41,10 +44,11 @@ import {
 import {
   BLOK_LIST,
   BULAN_LIST,
+  DEMO_RESIDENTIAL_ID,
   HOUSE_NUMBER_LIST,
   TAHUN_LIST,
 } from '../../../constants';
-import { db, storage } from '../../../firebaseConfig';
+import { db } from '../../../firebaseConfig';
 import { Bill } from '../../../types/bill';
 import { HousingNotFoundIllustration } from '@/components/svg/HousingNotFoundIllustration';
 
@@ -52,7 +56,8 @@ import { HousingNotFoundIllustration } from '@/components/svg/HousingNotFoundIll
 
 export default function WargaWithResidencePage() {
   const params = useParams();
-  const residentialId = params?.residential_id as string;
+  const residentialId =
+    DEMO_RESIDENTIAL_ID || (params?.residential_id as string);
   const { data: residentialInfo, isLoading: loadingBranding } =
     useResidentialInfo(residentialId);
 
@@ -126,9 +131,11 @@ export default function WargaWithResidencePage() {
     setError(null);
     // setSuccess(false); // removed, unused
     try {
-      const buktiRef = ref(storage, `bukti-bayar/${bill.id}/${bukti.name}`);
-      await uploadBytes(buktiRef, bukti);
-      const url = await getDownloadURL(buktiRef);
+      const url = await uploadBuktiBayar(bukti, bill.id);
+      if (!url) {
+        throw new Error('Upload failed');
+      }
+
       await updateDoc(doc(db, 'bills', bill.id), {
         proofUrl: url,
         status: 'pending',
@@ -287,7 +294,8 @@ export default function WargaWithResidencePage() {
                     <div className="animate-fade-in">
                       {(() => {
                         const resident = residents.find(
-                          (r) => r.block === blok && r.houseNumber === nomor,
+                          (r: Resident) =>
+                            r.block === blok && r.houseNumber === nomor,
                         );
                         return resident ? (
                           <div className="w-full border text-xs border-blue-100 bg-blue-50/60 rounded-lg p-5 text-blue-900 shadow-sm ">
@@ -396,19 +404,21 @@ export default function WargaWithResidencePage() {
           <br />
           {Array.isArray(residentialInfo.management) &&
           residentialInfo.management.length > 0 ? (
-            residentialInfo.management.map((m, idx) => (
-              <span key={idx} className="block mt-1">
-                <b>{m.name}</b> :{' '}
-                <a
-                  href={`https://wa.me/${m.phone.replace(/[^0-9]/g, '')}`}
-                  className="underline text-blue-700"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {m.phone}
-                </a>
-              </span>
-            ))
+            residentialInfo.management.map(
+              (m: ManagementContact, idx: number) => (
+                <span key={idx} className="block mt-1">
+                  <b>{m.name}</b> :{' '}
+                  <a
+                    href={`https://wa.me/${m.phone.replace(/[^0-9]/g, '')}`}
+                    className="underline text-blue-700"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {m.phone}
+                  </a>
+                </span>
+              ),
+            )
           ) : (
             <>
               <b>Pak Budi</b> :{' '}

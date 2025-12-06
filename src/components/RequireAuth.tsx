@@ -18,19 +18,25 @@ export default function RequireAuth({
   const router = useRouter();
   const pathname = usePathname();
 
+  React.useEffect(() => {
+    if (!initialized || loading) return;
+
+    if (!user) {
+      router.replace(`/login?from=${encodeURIComponent(pathname || '/')}`);
+    } else if (allowedRoles && (!role || !allowedRoles.includes(role))) {
+      router.replace('/dashboard');
+    }
+  }, [user, role, loading, initialized, router, pathname, allowedRoles]);
+
   if (!initialized || loading) {
     return <LoadingOverlay show={true} message="Memuat Data..." />;
   }
 
   if (!user) {
-    // Redirect to login and keep the current path as query param
-    router.replace(`/login?from=${encodeURIComponent(pathname || '/')}`);
     return null;
   }
 
   if (allowedRoles && (!role || !allowedRoles.includes(role))) {
-    // If role not allowed, redirect to dashboard (safe fallback)
-    router.replace('/dashboard');
     return null;
   }
 

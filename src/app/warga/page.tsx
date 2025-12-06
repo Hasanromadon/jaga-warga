@@ -6,7 +6,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { ChevronDown } from 'lucide-react';
 import { BillDetail } from '@/components/custom/bill-detail';
 import { Bill } from '@/types/bill';
-import { db, storage } from '@/firebaseConfig';
+import { db } from '@/firebaseConfig';
 import {
   collection,
   query,
@@ -15,7 +15,7 @@ import {
   doc,
   updateDoc,
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadBuktiBayar } from '@/utils/uploadToStorage';
 import Header from '@/components/landing/Header';
 import Footer from '@/components/landing/Footer';
 import SearchBillForm from '@/components/warga/SearchBillForm';
@@ -77,9 +77,11 @@ export default function WargaPage() {
     if (!bill || !bukti) return;
     setUploading(true);
     try {
-      const buktiRef = ref(storage, `bukti-bayar/${bill.id}/${bukti.name}`);
-      await uploadBytes(buktiRef, bukti);
-      const url = await getDownloadURL(buktiRef);
+      const url = await uploadBuktiBayar(bukti, bill.id);
+      if (!url) {
+        throw new Error('Upload failed');
+      }
+
       await updateDoc(doc(db, 'bills', bill.id), {
         proofUrl: url,
         status: 'pending',

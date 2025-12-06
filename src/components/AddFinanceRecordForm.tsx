@@ -4,12 +4,20 @@ import { useAuth } from '@/hooks/useAuth';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Calendar, Coins, FileText, Repeat } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  Coins,
+  FileText,
+  Loader2,
+  Save,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader } from '../components/ui/card';
 import { Label } from '../components/ui/label';
 import { NumberInputWithSeparator } from '../components/ui/number-input-with-separator';
 import { Textarea } from '../components/ui/textarea';
@@ -85,205 +93,184 @@ export default function AddFinanceRecordForm({
   };
 
   return (
-    <Card className="max-w-sm mx-auto mt-2 shadow-sm border border-gray-200">
-      <CardHeader className="relative">
-        <div className="flex items-center space-x-3 justify-start mb-3">
-          <Button
-            onClick={onBack ? onBack : () => navigate.push('/dashboard')}
-            variant="ghost"
-            className="text-slate-700 hover:text-slate-900"
-          >
-            <ArrowLeft />
-          </Button>
-          <h2 className="text-lg font-bold text-slate-800">Catat Keuangan</h2>
+    <div className="max-w-md mx-auto pb-8">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6 px-1">
+        <Button
+          onClick={onBack ? onBack : () => navigate.push('/dashboard/keuangan')}
+          variant="ghost"
+          size="icon"
+          className="rounded-full hover:bg-slate-100 -ml-2"
+        >
+          <ArrowLeft className="w-6 h-6 text-slate-700" />
+        </Button>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">Catat Transaksi</h1>
+          <p className="text-xs text-slate-500">
+            Kelola pemasukan & pengeluaran
+          </p>
         </div>
+      </div>
 
-        <div className="text-xs text-gray-500 mt-1 text-left">
-          Catat transaksi keuangan harian, baik pemasukan maupun pengeluaran.
-        </div>
-      </CardHeader>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Transaction Type Selector */}
+        <Controller
+          name="type"
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => field.onChange('income')}
+                className={`relative overflow-hidden p-4 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
+                  field.value === 'income'
+                    ? 'bg-emerald-50 border-emerald-500 shadow-md shadow-emerald-500/10'
+                    : 'bg-white border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/50'
+                }`}
+              >
+                <div
+                  className={`p-3 rounded-full ${field.value === 'income' ? 'bg-emerald-500 text-white' : 'bg-emerald-100 text-emerald-600'}`}
+                >
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+                <span
+                  className={`font-semibold text-sm ${field.value === 'income' ? 'text-emerald-700' : 'text-slate-600'}`}
+                >
+                  Pemasukan
+                </span>
+                {field.value === 'income' && (
+                  <div className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                )}
+              </button>
 
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Tanggal */}
-          <div>
-            <Label
-              htmlFor="date"
-              className="text-xs font-semibold text-blue-900 flex items-center gap-1 mb-1"
-            >
-              <Calendar className="w-4 h-4" />
-              Tanggal Transaksi
+              <button
+                type="button"
+                onClick={() => field.onChange('expense')}
+                className={`relative overflow-hidden p-4 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center gap-2 ${
+                  field.value === 'expense'
+                    ? 'bg-rose-50 border-rose-500 shadow-md shadow-rose-500/10'
+                    : 'bg-white border-slate-100 hover:border-rose-200 hover:bg-rose-50/50'
+                }`}
+              >
+                <div
+                  className={`p-3 rounded-full ${field.value === 'expense' ? 'bg-rose-500 text-white' : 'bg-rose-100 text-rose-600'}`}
+                >
+                  <TrendingDown className="w-6 h-6" />
+                </div>
+                <span
+                  className={`font-semibold text-sm ${field.value === 'expense' ? 'text-rose-700' : 'text-slate-600'}`}
+                >
+                  Pengeluaran
+                </span>
+                {field.value === 'expense' && (
+                  <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
+                )}
+              </button>
+            </div>
+          )}
+        />
+        {errors.type && (
+          <p className="text-red-500 text-xs text-center -mt-4">
+            Pilih jenis transaksi terlebih dahulu
+          </p>
+        )}
+
+        {/* Main Form Card */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-5">
+          {/* Date Input */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-slate-500">
+              Tanggal
             </Label>
-            <Controller
-              name="date"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <input
-                  type="date"
-                  id="date"
-                  {...field}
-                  value={field.value || ''}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
-                />
-              )}
-            />
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Controller
+                name="date"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <input
+                    type="date"
+                    {...field}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  />
+                )}
+              />
+            </div>
             {errors.date && (
               <span className="text-red-500 text-xs">Tanggal wajib diisi</span>
             )}
           </div>
 
-          {/* Jumlah */}
-          <div>
-            <Label
-              htmlFor="amount"
-              className="text-xs font-semibold text-blue-900 flex items-center gap-1 mb-0"
-            >
-              <Coins className="w-4 h-4" />
-              Jumlah
+          {/* Amount Input */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-slate-500">
+              Nominal (Rp)
             </Label>
-            <div className="relative mt-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">
-                Rp
-              </span>
+            <div className="relative">
+              <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Controller
                 name="amount"
                 control={control}
-                rules={{
-                  required: true,
-                  validate: (v) => !!v && Number(v) > 0,
-                }}
+                rules={{ required: true, min: 1 }}
                 render={({ field }) => (
                   <NumberInputWithSeparator
-                    id="amount"
-                    value={field.value || ''}
-                    onValueChange={(val) =>
-                      field.onChange(val ? parseInt(val, 10) : '')
-                    }
-                    placeholder="Masukkan jumlah transaksi"
-                    className="pl-8 !text-xs"
+                    value={field.value}
+                    onValueChange={(val) => field.onChange(val)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-900"
+                    placeholder="0"
                   />
                 )}
               />
             </div>
             {errors.amount && (
-              <span className="text-red-500 text-xs">Jumlah wajib diisi</span>
+              <span className="text-red-500 text-xs">Nominal wajib diisi</span>
             )}
           </div>
 
-          {/* Jenis Transaksi */}
-          <div>
-            <Label className="text-xs font-semibold text-blue-900 flex items-center gap-1 mb-1">
-              <Repeat className="w-4 h-4" />
-              Jenis Transaksi
+          {/* Description Input */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-slate-500">
+              Keterangan
             </Label>
-
-            <Controller
-              name="type"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <div className="flex items-center justify-between gap-3 mt-1">
-                  {[
-                    { value: 'income', label: 'Pemasukan', color: 'green' },
-                    { value: 'expense', label: 'Pengeluaran', color: 'red' },
-                  ].map((option) => {
-                    const isActive = field.value === option.value;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => field.onChange(option.value)}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border transition-all text-xs font-medium
-                ${
-                  isActive
-                    ? option.color === 'green'
-                      ? 'bg-emerald-100 border-emerald-400 text-emerald-700 shadow-sm'
-                      : 'bg-rose-100 border-rose-400 text-rose-700 shadow-sm'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
-                      >
-                        {option.value === 'income' ? (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 10l7-7m0 0l7 7m-7-7v18"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                            />
-                          </svg>
-                        )}
-                        {option.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            />
-
-            {errors.type && (
-              <span className="text-red-500 text-xs block mt-1">
-                Jenis wajib dipilih
-              </span>
-            )}
-          </div>
-
-          {/* Deskripsi */}
-          <div>
-            <Label
-              htmlFor="description"
-              className="text-xs font-semibold text-blue-900 flex items-center gap-1 mb-1"
-            >
-              <FileText className="w-4 h-4" />
-              Deskripsi
-            </Label>
-            <Controller
-              name="description"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Textarea
-                  id="description"
-                  placeholder="Tuliskan keterangan transaksi..."
-                  className="resize-y !text-xs"
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                />
-              )}
-            />
+            <div className="relative">
+              <FileText className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+              <Controller
+                name="description"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Textarea
+                    {...field}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all min-h-[100px] resize-none"
+                    placeholder="Contoh: Iuran bulanan, Pembelian alat kebersihan..."
+                  />
+                )}
+              />
+            </div>
             {errors.description && (
               <span className="text-red-500 text-xs">
-                Deskripsi wajib diisi
+                Keterangan wajib diisi
               </span>
             )}
           </div>
+        </div>
 
-          <Button type="submit" disabled={loading} className="w-full mt-2">
-            {loading ? 'Menyimpan...' : 'Simpan Transaksi'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-base font-semibold"
+        >
+          {loading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <Save className="w-5 h-5" />
+          )}
+          {loading ? 'Menyimpan...' : 'Simpan Transaksi'}
+        </Button>
+      </form>
+    </div>
   );
 }

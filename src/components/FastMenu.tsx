@@ -71,26 +71,24 @@ const FastMenu: React.FC<FastMenuProps> = ({ onSelect }) => {
   ];
 
   return (
-    <div className="bg-white rounded-2xl p-2 shadow-sm">
-      <div className="flex items-center justify-between gap-2">
+    <div className="w-full">
+      <div className="grid grid-cols-4 gap-y-4 gap-x-2">
         {menus.map((menu) => (
           <button
             key={menu.id}
             onClick={() => onSelect(menu.key)}
-            className="flex flex-col items-center justify-between flex-1 p-2 rounded-xl hover:bg-slate-100 active:scale-95 transition min-h-[90px]"
+            className="flex flex-col items-center justify-start gap-2 p-1 hover:bg-slate-50 rounded-xl transition active:scale-95"
           >
             <div
-              className={`w-11 h-11 rounded-md flex items-center justify-center ${menu.bg}`}
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${menu.bg}`}
             >
-              <div className="w-5 h-5 flex items-center justify-center">
+              <div className="w-6 h-6 flex items-center justify-center">
                 {menu.icon}
               </div>
             </div>
-            <div className="h-[28px] mt-2 flex items-center justify-center">
-              <span className="text-[11px] font-semibold text-slate-700 text-center leading-tight line-clamp-2">
-                {menu.title}
-              </span>
-            </div>
+            <span className="text-[10px] font-medium text-slate-600 text-center leading-tight w-full px-1">
+              {menu.title}
+            </span>
           </button>
         ))}
       </div>

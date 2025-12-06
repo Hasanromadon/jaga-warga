@@ -8,9 +8,10 @@ import {
   CardTitle,
 } from '../components/ui/card';
 import { useState } from 'react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
-import { storage, db } from '../firebaseConfig';
+import { db } from '../firebaseConfig';
+import { uploadBuktiBayar } from '@/utils/uploadToStorage';
+import toast from 'react-hot-toast';
 
 interface UploadBuktiFormInputs {
   billId: string;
@@ -33,17 +34,22 @@ export default function UploadBuktiForm({ billId }: { billId: string }) {
     setSuccess(false);
     try {
       const file = data.file[0];
-      const storageRef = ref(storage, `bukti-bayar/${billId}/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
+      const url = await uploadBuktiBayar(file, billId);
+
+      if (!url) {
+        throw new Error('Upload failed');
+      }
+
       await updateDoc(doc(db, 'bills', billId), {
         buktiBayarURL: url,
         status: 'pending',
       });
       setSuccess(true);
+      toast.success('Bukti bayar berhasil diupload!');
     } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Terjadi error');
+      const errorMsg = err instanceof Error ? err.message : 'Terjadi error';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

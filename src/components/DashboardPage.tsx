@@ -4,7 +4,7 @@ import { TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useDashboardStats, useActivities } from '@/hooks/useDashboard';
-import { useAdGeneratorModal } from '@/context/AdGeneratorModalProvider';
+import { useAuth } from '@/hooks/useAuth';
 import FastMenu, { ViewType } from '@/components/FastMenu';
 import StatCard from '@/components/StatCard';
 
@@ -19,6 +19,7 @@ interface Stats {
   totalExpenses: number;
   totalBills: number;
   pendingBills: number;
+  closingBalance: number;
 }
 
 type ActivityType = 'income' | 'expense';
@@ -40,14 +41,18 @@ const formatRupiah = (number: number): string =>
 
 // --- Komponen Utama Dashboard ---
 interface DashboardPageProps {
-  user: User;
-  stats: Stats;
-  activities: Activity[];
+  user?: User;
+  stats?: Stats;
+  activities?: Activity[];
 }
 
-function DashboardPage({ user }: DashboardPageProps) {
+function DashboardPage({ user: propUser }: DashboardPageProps) {
   const router = useRouter();
-  const { openModal } = useAdGeneratorModal();
+  const { user: authUser, residentialId } = useAuth();
+
+  // Use propUser if available (for testing/mocking), otherwise use authUser
+  // We cast authUser to User interface to match the component's expected type
+  const user = (propUser || authUser) as User | null;
 
   const {
     data: stats = {
@@ -55,13 +60,14 @@ function DashboardPage({ user }: DashboardPageProps) {
       totalExpenses: 0,
       totalBills: 0,
       pendingBills: 0,
+      closingBalance: 0,
     },
-  } = useDashboardStats();
-  const { data: activities = [] } = useActivities();
+  } = useDashboardStats(residentialId);
+  const { data: activities = [] } = useActivities(residentialId);
 
   const handleFastMenuSelect = (menu: ViewType) => {
     if (menu === 'buat-iklan') {
-      openModal();
+      router.push('/dashboard/iklan');
     } else if (menu === 'promo') {
       router.push('/promo');
     } else {
@@ -78,7 +84,7 @@ function DashboardPage({ user }: DashboardPageProps) {
             <div>
               <p className="text-xs text-slate-500">Selamat datang,</p>
               <h1 className="text-xl font-bold text-slate-900">
-                {user.displayName}
+                {user?.displayName || 'Warga'}
               </h1>
             </div>
           </header>
@@ -90,10 +96,17 @@ function DashboardPage({ user }: DashboardPageProps) {
             <div className="relative z-10">
               <p className="text-sm font-light text-blue-100">Saldo Saat Ini</p>
               <p className="text-2xl font-bold mt-1 break-words">
-                {formatRupiah(stats.totalIncome - stats.totalExpenses)}
+                {formatRupiah(stats.closingBalance)}
               </p>
               <div className="mt-4 text-xs bg-white/20 px-3 py-1 rounded-full inline-block">
-                Diperbarui: 21 Oktober 2025, 15:29
+                Diperbarui:{' '}
+                {new Date().toLocaleDateString('id-ID', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </div>
             </div>
           </div>
@@ -132,7 +145,7 @@ function DashboardPage({ user }: DashboardPageProps) {
             <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/50">
               <div className="divide-y divide-slate-100">
                 {activities.length > 0 ? (
-                  activities.map((activity) => (
+                  activities.map((activity: Activity) => (
                     <div
                       key={activity.id}
                       className="flex items-center gap-3 py-3"
@@ -210,6 +223,7 @@ export default function App() {
     totalExpenses: 2125000,
     totalBills: 12,
     pendingBills: 3,
+    closingBalance: 5425000,
   };
 
   const sampleActivities: Activity[] = [

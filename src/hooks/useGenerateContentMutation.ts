@@ -1,7 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/firebaseConfig';
-import { Resident } from './useResidents';
+import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const marketingSystemInstruction = `
@@ -33,20 +30,24 @@ const createMarketingPrompt = (
   `;
 };
 
-interface GenerateAdVariables {
+interface GenerateContentVariables {
   itemName: string;
   rawDescription: string;
   price: number;
-  resident: Resident;
-  imageUrl: string;
 }
 
-// This would ideally be in a secure backend, but for simplicity, we'll call it from the client.
+export interface GeneratedContent {
+  headline: string;
+  adBody: string;
+  shortTagline: string;
+  suggestedHashtags: string[];
+}
+
 async function generateMarketingContent(
   itemName: string,
   rawDescription: string,
   price: number,
-) {
+): Promise<GeneratedContent> {
   const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
   if (!API_KEY) {
@@ -146,51 +147,23 @@ async function generateMarketingContent(
   }
 }
 
-export function useGenerateAdMutation() {
-  const queryClient = useQueryClient();
-
+export function useGenerateContentMutation() {
   return useMutation({
-    mutationFn: async (variables: GenerateAdVariables) => {
-      const { itemName, rawDescription, price, resident, imageUrl } = variables;
-
-      try {
-        const marketingContent = await generateMarketingContent(
-          itemName,
-          rawDescription,
-          price,
-        );
-
-        await addDoc(collection(db, 'ads'), {
-          ...marketingContent,
-          itemName,
-          price,
-          imageUrl,
-          residentId: resident.id,
-          residentName: resident.name,
-          block: resident.block,
-          houseNumber: resident.houseNumber,
-          createdAt: serverTimestamp(),
-          residential_id: resident.residential_id,
-        });
-      } catch (error) {
-        console.error('Error in generateAd mutation:', error);
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ads'] });
-      toast.success('Iklan berhasil dibuat dan dipublikasikan!');
+    mutationFn: async (variables: GenerateContentVariables) => {
+      return await generateMarketingContent(
+        variables.itemName,
+        variables.rawDescription,
+        variables.price,
+      );
     },
     onError: (error: Error) => {
-      console.error('Generate Ad Error:', error);
-
-      // Display more specific error message
+      console.error('Generate Content Error:', error);
       if (error.message.includes('API Key')) {
         toast.error('API Key tidak ditemukan. Hubungi administrator.');
       } else if (error.message.includes('Gemini')) {
         toast.error(error.message);
       } else {
-        toast.error('Gagal membuat iklan. Coba lagi nanti.');
+        toast.error('Gagal membuat konten. Coba lagi nanti.');
       }
     },
   });

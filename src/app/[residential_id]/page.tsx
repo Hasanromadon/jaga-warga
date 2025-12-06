@@ -2,6 +2,7 @@
 import ResidentialLoading from '@/components/ResidentialLoading';
 import { HousingNotFoundIllustration } from '@/components/svg/HousingNotFoundIllustration';
 import { Button } from '@/components/ui/button';
+import { DEMO_RESIDENTIAL_ID } from '@/constants';
 import { useResidentialInfo } from '@/hooks/useResidentialInfo';
 import {
   ChevronLeft,
@@ -17,10 +18,12 @@ import { useParams } from 'next/navigation';
 
 export default function HomeWithResidencePage() {
   const params = useParams();
-  const residentialId = params?.residential_id as string;
+  const residentialId =
+    DEMO_RESIDENTIAL_ID || (params?.residential_id as string);
   const { data: residentialInfo, isLoading: loading } =
     useResidentialInfo(residentialId);
 
+  console.log('residentialId:', residentialId);
   if (loading) {
     return <ResidentialLoading />;
   }
