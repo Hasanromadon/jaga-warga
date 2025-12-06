@@ -1,7 +1,12 @@
 import { useForm } from 'react-hook-form';
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '../components/ui/card';
 import { useState } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -13,7 +18,11 @@ interface UploadBuktiFormInputs {
 }
 
 export default function UploadBuktiForm({ billId }: { billId: string }) {
-  const { register, handleSubmit, formState: { errors } } = useForm<UploadBuktiFormInputs>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<UploadBuktiFormInputs>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -47,11 +56,23 @@ export default function UploadBuktiForm({ billId }: { billId: string }) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Input type="file" accept="image/*,application/pdf" {...register('file', { required: true })} />
-          {errors.file && <span className="text-red-500 text-xs">File wajib diupload</span>}
+          <Input
+            type="file"
+            accept="image/*,application/pdf"
+            {...register('file', { required: true })}
+          />
+          {errors.file && (
+            <span className="text-red-500 text-xs">File wajib diupload</span>
+          )}
           {error && <div className="text-red-500 text-xs">{error}</div>}
-          {success && <div className="text-green-500 text-xs">Bukti bayar berhasil diupload!</div>}
-          <Button type="submit" disabled={loading} className="w-full">{loading ? 'Loading...' : 'Upload'}</Button>
+          {success && (
+            <div className="text-green-500 text-xs">
+              Bukti bayar berhasil diupload!
+            </div>
+          )}
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? 'Loading...' : 'Upload'}
+          </Button>
         </form>
       </CardContent>
     </Card>

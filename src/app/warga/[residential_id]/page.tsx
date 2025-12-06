@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import ResidentialLoading from "@/components/ResidentialLoading";
-import { UserNotFoundIllustration } from "@/components/svg/UserNotFoundIllustration";
-import { useResidentialInfo } from "@/hooks/useResidentialInfo";
-import { useResidents } from "@/hooks/useResidents";
+import ResidentialLoading from '@/components/ResidentialLoading';
+import { UserNotFoundIllustration } from '@/components/svg/UserNotFoundIllustration';
+import { useResidentialInfo } from '@/hooks/useResidentialInfo';
+import { useResidents } from '@/hooks/useResidents';
 import {
   collection,
   doc,
@@ -11,8 +11,8 @@ import {
   query,
   updateDoc,
   where,
-} from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+} from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import {
   Calendar,
   ChevronDown,
@@ -22,31 +22,31 @@ import {
   PhoneCall,
   Search,
   User,
-} from "lucide-react";
-import Image from "next/image";
-import { useParams } from "next/navigation";
-import { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import { BillDetail } from "../../../components/custom/bill-detail";
-import { Button } from "../../../components/ui/button";
-import { Card, CardContent } from "../../../components/ui/card";
-import { Label } from "../../../components/ui/label";
+} from 'lucide-react';
+import Image from 'next/image';
+import { useParams } from 'next/navigation';
+import { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import { BillDetail } from '../../../components/custom/bill-detail';
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent } from '../../../components/ui/card';
+import { Label } from '../../../components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
+} from '../../../components/ui/select';
 import {
   BLOK_LIST,
   BULAN_LIST,
   HOUSE_NUMBER_LIST,
   TAHUN_LIST,
-} from "../../../constants";
-import { db, storage } from "../../../firebaseConfig";
-import { Bill } from "../../../types/bill";
-import { HousingNotFoundIllustration } from "@/components/svg/HousingNotFoundIllustration";
+} from '../../../constants';
+import { db, storage } from '../../../firebaseConfig';
+import { Bill } from '../../../types/bill';
+import { HousingNotFoundIllustration } from '@/components/svg/HousingNotFoundIllustration';
 
 // ResidentialInfo type provided by hook
 
@@ -57,15 +57,15 @@ export default function WargaWithResidencePage() {
     useResidentialInfo(residentialId);
 
   // Main warga page state
-  const [blok, setBlok] = useState("");
-  const [nomor, setNomor] = useState("");
-  const [bulan, setBulan] = useState("");
-  const [tahun, setTahun] = useState("");
+  const [blok, setBlok] = useState('');
+  const [nomor, setNomor] = useState('');
+  const [bulan, setBulan] = useState('');
+  const [tahun, setTahun] = useState('');
   const [loading, setLoading] = useState(false);
   const [bill, setBill] = useState<Bill | null>(null);
   const [error, setError] = useState<string | null>(null);
   // keep error to show toasts; also output to debug to avoid unused var linter
-  if (error) console.debug("Warga page error:", error);
+  if (error) console.debug('Warga page error:', error);
   const [bukti, setBukti] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   // const [success, setSuccess] = useState(false); // not used
@@ -82,19 +82,19 @@ export default function WargaWithResidencePage() {
     setBill(null);
     // setSuccess(false); // removed, unused
     try {
-      const billsRef = collection(db, "bills");
+      const billsRef = collection(db, 'bills');
       const q = query(
         billsRef,
-        where("block", "==", blok),
-        where("houseNumber", "==", nomor),
-        where("month", "==", bulan),
-        where("year", "==", tahun),
-        where("residential_id", "==", residentialId)
+        where('block', '==', blok),
+        where('houseNumber', '==', nomor),
+        where('month', '==', bulan),
+        where('year', '==', tahun),
+        where('residential_id', '==', residentialId),
       );
       const snap = await getDocs(q);
       if (snap.empty) {
-        setError("Tagihan tidak ditemukan.");
-        toast.error("Tagihan tidak ditemukan.");
+        setError('Tagihan tidak ditemukan.');
+        toast.error('Tagihan tidak ditemukan.');
       } else {
         const data = snap.docs[0].data();
         setBill({
@@ -113,8 +113,8 @@ export default function WargaWithResidencePage() {
         setShowForm(false);
       }
     } catch {
-      setError("Gagal mencari tagihan.");
-      toast.error("Gagal mencari tagihan.");
+      setError('Gagal mencari tagihan.');
+      toast.error('Gagal mencari tagihan.');
     } finally {
       setLoading(false);
     }
@@ -129,16 +129,16 @@ export default function WargaWithResidencePage() {
       const buktiRef = ref(storage, `bukti-bayar/${bill.id}/${bukti.name}`);
       await uploadBytes(buktiRef, bukti);
       const url = await getDownloadURL(buktiRef);
-      await updateDoc(doc(db, "bills", bill.id), {
+      await updateDoc(doc(db, 'bills', bill.id), {
         proofUrl: url,
-        status: "pending",
+        status: 'pending',
       });
       // setSuccess(true); // removed, unused
-      setBill({ ...bill, proofUrl: url, status: "pending" });
-      toast.success("Bukti berhasil diupload, menunggu verifikasi admin.");
+      setBill({ ...bill, proofUrl: url, status: 'pending' });
+      toast.success('Bukti berhasil diupload, menunggu verifikasi admin.');
     } catch {
-      setError("Gagal upload bukti.");
-      toast.error("Gagal upload bukti.");
+      setError('Gagal upload bukti.');
+      toast.error('Gagal upload bukti.');
     } finally {
       setUploading(false);
     }
@@ -157,7 +157,7 @@ export default function WargaWithResidencePage() {
             Data Perumahan tidak ditemukan
           </span>
           <Button
-            onClick={() => window.location.replace("/GHI")}
+            onClick={() => window.location.replace('/GHI')}
             variant="default"
             size="sm"
           >
@@ -223,10 +223,10 @@ export default function WargaWithResidencePage() {
                   type="button"
                   aria-expanded={showForm}
                 >
-                  {showForm ? "Sembunyikan Form" : "Tampilkan Form"}
+                  {showForm ? 'Sembunyikan Form' : 'Tampilkan Form'}
                   <ChevronDown
                     className={`w-5 h-5 transition-transform duration-200 ${
-                      !showForm ? "rotate-180" : ""
+                      !showForm ? 'rotate-180' : ''
                     }`}
                   />
                 </Button>
@@ -252,7 +252,7 @@ export default function WargaWithResidencePage() {
                           value={blok}
                           onValueChange={(value) => {
                             setBlok(value);
-                            setNomor("");
+                            setNomor('');
                           }}
                         >
                           <SelectTrigger className="w-full">
@@ -287,7 +287,7 @@ export default function WargaWithResidencePage() {
                     <div className="animate-fade-in">
                       {(() => {
                         const resident = residents.find(
-                          (r) => r.block === blok && r.houseNumber === nomor
+                          (r) => r.block === blok && r.houseNumber === nomor,
                         );
                         return resident ? (
                           <div className="w-full border text-xs border-blue-100 bg-blue-50/60 rounded-lg p-5 text-blue-900 shadow-sm ">
@@ -300,7 +300,7 @@ export default function WargaWithResidencePage() {
                               <div className="flex items-center gap-2">
                                 <User className="w-4 h-4 text-blue-600" />
                                 <span className="truncate">
-                                  {resident.name || "-"}
+                                  {resident.name || '-'}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -311,7 +311,7 @@ export default function WargaWithResidencePage() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <PhoneCall className="w-4 h-4 text-blue-600" />
-                                <span>{resident.phoneNumber || "-"}</span>
+                                <span>{resident.phoneNumber || '-'}</span>
                               </div>
                             </div>
                           </div>
@@ -373,7 +373,7 @@ export default function WargaWithResidencePage() {
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <Search className="w-5 h-5" />
-                  )}{" "}
+                  )}{' '}
                   Cek Tagihan
                 </Button>
               </form>
@@ -398,9 +398,9 @@ export default function WargaWithResidencePage() {
           residentialInfo.management.length > 0 ? (
             residentialInfo.management.map((m, idx) => (
               <span key={idx} className="block mt-1">
-                <b>{m.name}</b> :{" "}
+                <b>{m.name}</b> :{' '}
                 <a
-                  href={`https://wa.me/${m.phone.replace(/[^0-9]/g, "")}`}
+                  href={`https://wa.me/${m.phone.replace(/[^0-9]/g, '')}`}
                   className="underline text-blue-700"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -411,7 +411,7 @@ export default function WargaWithResidencePage() {
             ))
           ) : (
             <>
-              <b>Pak Budi</b> :{" "}
+              <b>Pak Budi</b> :{' '}
               <a
                 href="https://wa.me/6281234567890"
                 className="underline text-blue-700"

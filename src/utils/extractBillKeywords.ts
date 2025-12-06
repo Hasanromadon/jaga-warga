@@ -2,10 +2,10 @@
  * Utility to extract keywords for Firestore search indexing for bills.
  * Ambil kata kunci dari field penting (blok, nomor rumah, nama, bulan, tahun, dsb).
  */
-import { Bill } from "../types/bill";
+import { Bill } from '../types/bill';
 
 export const extractBillKeywords = (
-  item: Partial<Bill> & Record<string, string | undefined | null>
+  item: Partial<Bill> & Record<string, string | undefined | null>,
 ): string[] => {
   const keywordsSet = new Set<string>();
   // Ambil field penting
@@ -19,13 +19,13 @@ export const extractBillKeywords = (
     item.residentName,
   ];
   fields.forEach((val) => {
-    if (typeof val === "string") {
-      const words = val.split(" ");
+    if (typeof val === 'string') {
+      const words = val.split(' ');
       words.forEach((word) => {
         const cleanedWord = word
-          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
           .toLowerCase();
-        if (cleanedWord !== "" && cleanedWord.length >= 3) {
+        if (cleanedWord !== '' && cleanedWord.length >= 3) {
           keywordsSet.add(cleanedWord);
           for (let i = 3; i <= Math.min(cleanedWord.length, 5); i++) {
             keywordsSet.add(cleanedWord.substring(0, i));

@@ -1,32 +1,32 @@
-"use client";
+'use client';
 import {
   useApproveBillMutation,
   useUpdateBillStatusMutation,
-} from "../hooks/useConfirmBillMutations";
-import { useInfiniteBills } from "../hooks/useBills";
-import toast from "react-hot-toast";
-import { makeWaUrl } from "@/utils/formatPhone";
-import { Calendar, FileDown, Filter, Search, Loader2 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import { BULAN_LIST, STATUS_LABELS, STATUS_OPTIONS } from "../constants";
-import { Bill } from "../types/bill";
-import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
-import { PreviewImageModal } from "./ui/PreviewImageModal";
-import { ModalConfirmation } from "./ui/modal-confirmation";
+} from '../hooks/useConfirmBillMutations';
+import { useInfiniteBills } from '../hooks/useBills';
+import toast from 'react-hot-toast';
+import { makeWaUrl } from '@/utils/formatPhone';
+import { Calendar, FileDown, Filter, Search, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { BULAN_LIST, STATUS_LABELS, STATUS_OPTIONS } from '../constants';
+import { Bill } from '../types/bill';
+import { EmptyBillIllustration } from './svg/EmptyBillIllustration';
+import { PreviewImageModal } from './ui/PreviewImageModal';
+import { ModalConfirmation } from './ui/modal-confirmation';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { BillCard } from "./BIllCard";
-import { BillStatus } from "./ui/BillStatusBadge";
-import { getMonthName } from "@/utils/formatDate";
-import { formatRupiah } from "@/utils/formatRupiah";
+} from './ui/select';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { BillCard } from './BIllCard';
+import { BillStatus } from './ui/BillStatusBadge';
+import { getMonthName } from '@/utils/formatDate';
+import { formatRupiah } from '@/utils/formatRupiah';
 
 interface YearlyReportRow {
   nama: string;
@@ -38,34 +38,33 @@ interface YearlyReportRow {
 }
 
 const MONTHS = [
-  "Januari",
-  "Februari",
-  "Maret",
-  "April",
-  "Mei",
-  "Juni",
-  "Juli",
-  "Agustus",
-  "September",
-  "Oktober",
-  "November",
-  "Desember",
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
 ];
 export default function LaporanList({
   residentialId,
 }: {
   residentialId?: string;
 }) {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-  const [month, setMonth] = useState("all");
-  const [year, setYear] = useState("");
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
+  const [month, setMonth] = useState('all');
+  const [year, setYear] = useState('');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [editLoading, setEditLoading] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     open: boolean;
     bill: Bill | null;
-    action: "markPaid" | "markUnpaid" | null;
+    action: 'markPaid' | 'markUnpaid' | null;
   }>({ open: false, bill: null, action: null });
 
   // Infinite scroll setup
@@ -84,7 +83,7 @@ export default function LaporanList({
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (loadMoreRef.current) {
@@ -101,14 +100,14 @@ export default function LaporanList({
   // 🟢 Ekspor ke CSV
   const exportCSV = () => {
     const header = [
-      "Nama",
-      "Block",
-      "House Number",
-      "Month",
-      "Year",
-      "Amount",
-      "Status",
-      "Remark",
+      'Nama',
+      'Block',
+      'House Number',
+      'Month',
+      'Year',
+      'Amount',
+      'Status',
+      'Remark',
     ];
     const rows = allBills.map((b) => [
       b.residentName,
@@ -118,14 +117,14 @@ export default function LaporanList({
       b.year,
       formatRupiah(Number(b.amount)),
       STATUS_LABELS[b.status] || b.status,
-      b.remark || "",
+      b.remark || '',
     ]);
-    const csv = [header, ...rows].map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    const csv = [header, ...rows].map((r) => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
-    a.download = "laporan_warga.csv";
+    a.download = 'laporan_warga.csv';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -137,49 +136,49 @@ export default function LaporanList({
       allBills.map((b) => ({
         Nama: b.residentName,
         Blok: b.block,
-        "No Rumah": b.houseNumber,
+        'No Rumah': b.houseNumber,
         Bulan: getMonthName(b.month),
         Tahun: b.year,
         Jumlah: formatRupiah(Number(b.amount)),
         Status: STATUS_LABELS[b.status] || b.status,
-        Catatan: b.remark || "",
-      }))
+        Catatan: b.remark || '',
+      })),
     );
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan");
-    XLSX.writeFile(workbook, "laporan_warga.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Laporan');
+    XLSX.writeFile(workbook, 'laporan_warga.xlsx');
   };
 
   // 🔴 Ekspor ke PDF
   const exportPDF = () => {
     const doc = new jsPDF();
-    doc.text("Laporan Pembayaran Warga GHI", 14, 15);
+    doc.text('Laporan Pembayaran Warga GHI', 14, 15);
     autoTable(doc, {
       startY: 25,
       head: [
         [
-          "Nama",
-          "Block",
-          "No Rumah",
-          "Bulan",
-          "Tahun",
-          "Jumlah",
-          "Status",
-          "Catatan",
+          'Nama',
+          'Block',
+          'No Rumah',
+          'Bulan',
+          'Tahun',
+          'Jumlah',
+          'Status',
+          'Catatan',
         ],
       ],
       body: allBills.map((b) => [
-        String(b.residentName ?? ""),
-        String(b.block ?? ""),
-        String(b.houseNumber ?? ""),
-        String(getMonthName(b.month) ?? ""),
-        String(b.year ?? ""),
+        String(b.residentName ?? ''),
+        String(b.block ?? ''),
+        String(b.houseNumber ?? ''),
+        String(getMonthName(b.month) ?? ''),
+        String(b.year ?? ''),
         String(formatRupiah(Number(b.amount))),
-        String(STATUS_LABELS[b.status] ?? b.status ?? ""),
-        String(b.remark ?? ""),
+        String(STATUS_LABELS[b.status] ?? b.status ?? ''),
+        String(b.remark ?? ''),
       ]),
     });
-    doc.save("laporan_warga.pdf");
+    doc.save('laporan_warga.pdf');
   };
 
   const generateYearlyReport = (year: string): YearlyReportRow[] => {
@@ -187,9 +186,9 @@ export default function LaporanList({
     const grouped = new Map<string, YearlyReportRow>();
 
     filtered.forEach((b) => {
-      const residentName = b.residentName ?? "-";
-      const block = b.block ?? "-";
-      const houseNumber = b.houseNumber ?? "-";
+      const residentName = b.residentName ?? '-';
+      const block = b.block ?? '-';
+      const houseNumber = b.houseNumber ?? '-';
       const key = `${residentName}_${block}_${houseNumber}`;
 
       if (!grouped.has(key)) {
@@ -199,7 +198,7 @@ export default function LaporanList({
           totalLunas: 0,
           totalBelumLunas: 0,
           total: 0,
-          bulan: Object.fromEntries(MONTHS.map((m) => [m, "-"])),
+          bulan: Object.fromEntries(MONTHS.map((m) => [m, '-'])),
         });
       }
 
@@ -208,14 +207,14 @@ export default function LaporanList({
       const amount = Number(b.amount);
 
       // Tandai status per bulan
-      if (b.status === "paid") {
-        data.bulan[monthName] = "✔️";
+      if (b.status === 'paid') {
+        data.bulan[monthName] = '✔️';
         data.totalLunas += amount;
-      } else if (b.status === "unpaid") {
-        data.bulan[monthName] = "❌";
+      } else if (b.status === 'unpaid') {
+        data.bulan[monthName] = '❌';
         data.totalBelumLunas += amount;
       } else {
-        data.bulan[monthName] = "⏳";
+        data.bulan[monthName] = '⏳';
       }
 
       // Tambahkan total keseluruhan
@@ -233,8 +232,8 @@ export default function LaporanList({
 
     filtered.forEach((b) => {
       const amount = Number(b.amount);
-      if (b.status === "paid") totalLunas += amount;
-      else if (b.status === "unpaid") totalBelum += amount;
+      if (b.status === 'paid') totalLunas += amount;
+      else if (b.status === 'unpaid') totalBelum += amount;
     });
 
     return { totalLunas, totalBelum, totalSemua: totalLunas + totalBelum };
@@ -244,7 +243,7 @@ export default function LaporanList({
   const exportYearlyExcel = (year: string) => {
     const report = generateYearlyReport(year);
     if (report.length === 0) {
-      toast.error("Tidak ada data untuk tahun ini!");
+      toast.error('Tidak ada data untuk tahun ini!');
       return;
     }
 
@@ -255,9 +254,9 @@ export default function LaporanList({
       Nama: r.nama,
       Blok: r.blok,
       ...r.bulan,
-      "Total Lunas": r.totalLunas,
-      "Total Belum Lunas": r.totalBelumLunas,
-      "Total Semua": r.total,
+      'Total Lunas': r.totalLunas,
+      'Total Belum Lunas': r.totalBelumLunas,
+      'Total Semua': r.total,
     }));
 
     // 🔹 Buat worksheet dari data utama
@@ -266,14 +265,14 @@ export default function LaporanList({
     XLSX.utils.book_append_sheet(workbook, worksheet, `Laporan ${year}`);
 
     // 🔹 Cari baris terakhir tabel
-    const range = XLSX.utils.decode_range(worksheet["!ref"]!);
+    const range = XLSX.utils.decode_range(worksheet['!ref']!);
     const lastRow = range.e.r + 3; // beri jarak 3 baris dari tabel utama
 
     // 🔹 Tambahkan summary di bawah tabel
     const summaryRows = [
-      ["Total Lunas", totalLunas],
-      ["Total Belum Lunas", totalBelum],
-      ["Total Semua", totalSemua],
+      ['Total Lunas', totalLunas],
+      ['Total Belum Lunas', totalBelum],
+      ['Total Semua', totalSemua],
     ];
 
     summaryRows.forEach((row, i) => {
@@ -281,7 +280,7 @@ export default function LaporanList({
       worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })] = { v: row[0] };
       worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: 1 })] = {
         v: row[1],
-        t: "n", // angka (number)
+        t: 'n', // angka (number)
       };
     });
 
@@ -290,7 +289,7 @@ export default function LaporanList({
       s: { r: 0, c: 0 },
       e: { r: lastRow + summaryRows.length, c: range.e.c },
     };
-    worksheet["!ref"] = XLSX.utils.encode_range(newRange);
+    worksheet['!ref'] = XLSX.utils.encode_range(newRange);
 
     XLSX.writeFile(workbook, `laporan_warga_${year}.xlsx`);
   };
@@ -298,34 +297,34 @@ export default function LaporanList({
   // 🔽 Handle pilihan ekspor
   const handleExport = (type: string) => {
     if (allBills.length === 0) {
-      toast.error("Tidak ada data untuk diekspor!");
+      toast.error('Tidak ada data untuk diekspor!');
       return;
     }
-    if (type === "csv") exportCSV();
-    if (type === "excel") exportExcel();
-    if (type === "pdf") exportPDF();
-    if (type === "yearly") exportYearlyExcel(year);
+    if (type === 'csv') exportCSV();
+    if (type === 'excel') exportExcel();
+    if (type === 'pdf') exportPDF();
+    if (type === 'yearly') exportYearlyExcel(year);
   };
 
   // This function is triggered by the confirmation modal
   const handleStatusUpdate = () => {
     if (!confirmModal.bill || !confirmModal.action) return;
-    const billId = confirmModal.bill.id;
-    setEditLoading(billId);
 
     const mutationOptions = {
       onSettled: () => {
-        setEditLoading(null);
         setConfirmModal({ open: false, bill: null, action: null });
       },
     };
 
-    if (confirmModal.action === "markPaid") {
-      markPaidMutation.mutate({ billId }, mutationOptions);
-    } else if (confirmModal.action === "markUnpaid") {
+    if (confirmModal.action === 'markPaid') {
+      markPaidMutation.mutate(
+        { billId: confirmModal.bill.id },
+        mutationOptions,
+      );
+    } else if (confirmModal.action === 'markUnpaid') {
       updateStatusMutation.mutate(
-        { billId, status: "unpaid" },
-        mutationOptions
+        { billId: confirmModal.bill.id, status: 'unpaid' },
+        mutationOptions,
       );
     }
   };
@@ -338,12 +337,12 @@ export default function LaporanList({
    */
   const handleStatusChange = (billToUpdate: Bill, newStatus: BillStatus) => {
     console.log(
-      `Request to change bill ${billToUpdate.id} to status: ${newStatus}`
+      `Request to change bill ${billToUpdate.id} to status: ${newStatus}`,
     );
-    if (newStatus === "paid") {
-      setConfirmModal({ open: true, bill: billToUpdate, action: "markPaid" });
-    } else if (newStatus === "unpaid") {
-      setConfirmModal({ open: true, bill: billToUpdate, action: "markUnpaid" });
+    if (newStatus === 'paid') {
+      setConfirmModal({ open: true, bill: billToUpdate, action: 'markPaid' });
+    } else if (newStatus === 'unpaid') {
+      setConfirmModal({ open: true, bill: billToUpdate, action: 'markUnpaid' });
     }
   };
 
@@ -362,9 +361,9 @@ export default function LaporanList({
   const handleSendWhatsApp = (bill: Bill) => {
     const waUrl = makeWaUrl(bill); // Assumes this utility function exists and works
     if (waUrl) {
-      window.open(waUrl, "_blank", "noopener,noreferrer");
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
     } else {
-      toast.error("Nomor WhatsApp untuk warga ini tidak tersedia.");
+      toast.error('Nomor WhatsApp untuk warga ini tidak tersedia.');
     }
   };
 
@@ -519,29 +518,29 @@ export default function LaporanList({
             <ModalConfirmation
               open={confirmModal.open}
               title={
-                confirmModal.action === "markPaid"
-                  ? "Tandai sebagai Lunas?"
-                  : "Batalkan Status Lunas?"
+                confirmModal.action === 'markPaid'
+                  ? 'Tandai sebagai Lunas?'
+                  : 'Batalkan Status Lunas?'
               }
               description={
                 confirmModal.bill ? (
                   <div className="text-center space-y-2">
                     <p className="text-sm">
-                      {confirmModal.action === "markPaid"
-                        ? "Tagihan akan ditandai sebagai LUNAS"
-                        : "Status tagihan akan dikembalikan ke BELUM LUNAS"}
+                      {confirmModal.action === 'markPaid'
+                        ? 'Tagihan akan ditandai sebagai LUNAS'
+                        : 'Status tagihan akan dikembalikan ke BELUM LUNAS'}
                     </p>
                     <div className="bg-blue-50 p-3 rounded-md text-xs">
                       <div className="font-semibold">
                         {confirmModal.bill?.residentName ||
-                          "Nama tidak tersedia"}
+                          'Nama tidak tersedia'}
                       </div>
                       <div>
-                        Blok {confirmModal.bill.block} No{" "}
+                        Blok {confirmModal.bill.block} No{' '}
                         {confirmModal.bill.houseNumber}
                       </div>
                       <div>
-                        {getMonthName(confirmModal.bill.month)}{" "}
+                        {getMonthName(confirmModal.bill.month)}{' '}
                         {confirmModal.bill.year}
                       </div>
                       <div className="font-bold text-blue-700 mt-1">
@@ -552,9 +551,9 @@ export default function LaporanList({
                 ) : null
               }
               confirmLabel={
-                confirmModal.action === "markPaid"
-                  ? "Ya, Tandai Lunas"
-                  : "Ya, Batalkan"
+                confirmModal.action === 'markPaid'
+                  ? 'Ya, Tandai Lunas'
+                  : 'Ya, Batalkan'
               }
               cancelLabel="Batal"
               onConfirm={handleStatusUpdate}

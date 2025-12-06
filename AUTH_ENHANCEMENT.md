@@ -74,19 +74,19 @@
 ### For Protected Pages (Admin only):
 
 ```tsx
-import { withProtectedRoute } from "../../utils/protectedRoute";
+import { withProtectedRoute } from '../../utils/protectedRoute';
 
 function MyPage() {
   // Component code
 }
 
-export default withProtectedRoute(MyPage, ["admin"]);
+export default withProtectedRoute(MyPage, ['admin']);
 ```
 
 ### For Protected Pages (Any authenticated user):
 
 ```tsx
-import { withProtectedRoute } from "../../utils/protectedRoute";
+import { withProtectedRoute } from '../../utils/protectedRoute';
 
 function MyPage() {
   // Component code
@@ -98,7 +98,7 @@ export default withProtectedRoute(MyPage);
 ### For Login/Public Pages:
 
 ```tsx
-import { withRedirectIfAuthenticated } from "../../utils/redirectIfAuthenticated";
+import { withRedirectIfAuthenticated } from '../../utils/redirectIfAuthenticated';
 
 function LoginPage() {
   // Component code
@@ -110,7 +110,7 @@ export default withRedirectIfAuthenticated(LoginPage);
 ### Using Auth Context:
 
 ```tsx
-import { useAuthContext } from "../../context/AuthProvider";
+import { useAuthContext } from '../../context/AuthProvider';
 
 function MyComponent() {
   const { user, role, loading, initialized, signOut } = useAuthContext();

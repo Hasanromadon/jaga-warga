@@ -1,8 +1,8 @@
-import React from "react";
-import { ResidentialLoadingIllustration } from "./svg/ResidentialLoadingIllustration";
+import React from 'react';
+import { ResidentialLoadingIllustration } from './svg/ResidentialLoadingIllustration';
 
 export default function ResidentialLoading({
-  message = "Memuat data perumahan...",
+  message = 'Memuat data perumahan...',
 }: {
   message?: string;
 }) {

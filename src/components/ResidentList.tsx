@@ -1,5 +1,5 @@
-"use client";
-import { AnimatePresence, motion } from "framer-motion";
+'use client';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
   Edit,
@@ -9,26 +9,26 @@ import {
   Trash2,
   Upload,
   UserPlus,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import Papa from "papaparse";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { useAuth } from "../hooks/useAuth";
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import Papa from 'papaparse';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { useAuth } from '../hooks/useAuth';
 import {
   Resident,
   useAddResident,
   useDeleteResident,
   useEditResident,
   useResidents,
-} from "../hooks/useResidents";
-import { SearchInput } from "./custom/search-input";
-import ResidentForm, { ResidentFormInputs } from "./ResidentForm";
-import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
-import { Button } from "./ui/button";
-import { Card } from "./ui/card";
-import { Dialog, DialogContent } from "./ui/dialog";
-import { Input } from "./ui/input";
+} from '../hooks/useResidents';
+import { SearchInput } from './custom/search-input';
+import ResidentForm, { ResidentFormInputs } from './ResidentForm';
+import { EmptyBillIllustration } from './svg/EmptyBillIllustration';
+import { Button } from './ui/button';
+import { Card } from './ui/card';
+import { Dialog, DialogContent } from './ui/dialog';
+import { Input } from './ui/input';
 
 type ResidentCSVRow = {
   name: string;
@@ -40,10 +40,10 @@ type ResidentCSVRow = {
 export default function ResidentList({ onBack }: { onBack?: () => void }) {
   const navigate = useRouter();
   const { residentialId } = useAuth();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const { data: residents = [], isLoading } = useResidents(
     residentialId ?? undefined,
-    search.trim() ? search.trim().toLowerCase() : undefined
+    search.trim() ? search.trim().toLowerCase() : undefined,
   );
   const residentList = residents;
   const addResident = useAddResident();
@@ -71,7 +71,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
 
     // Validate file size (max 3MB)
     if (file.size > 3 * 1024 * 1024) {
-      toast.error("Ukuran file terlalu besar. Maksimal 3MB");
+      toast.error('Ukuran file terlalu besar. Maksimal 3MB');
       return;
     }
 
@@ -89,9 +89,9 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
         const formatted: ResidentFormInputs[] = [];
 
         results.data.forEach((row, index) => {
-          const name = row.name?.trim() || "";
-          const block = row.block?.trim() || "";
-          const houseNumber = row.houseNumber?.trim() || "";
+          const name = row.name?.trim() || '';
+          const block = row.block?.trim() || '';
+          const houseNumber = row.houseNumber?.trim() || '';
           const phoneNumber = row.phoneNumber?.trim();
 
           // Validation
@@ -99,7 +99,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
             errors.push(
               `Baris ${
                 index + 2
-              }: Data tidak lengkap (nama: "${name}", blok: "${block}", nomor: "${houseNumber}")`
+              }: Data tidak lengkap (nama: "${name}", blok: "${block}", nomor: "${houseNumber}")`,
             );
             return;
           }
@@ -113,7 +113,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
         });
 
         if (formatted.length === 0) {
-          toast.error("Tidak ada data valid untuk diimpor");
+          toast.error('Tidak ada data valid untuk diimpor');
           setImportErrors(errors);
           return;
         }
@@ -123,7 +123,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
 
         if (errors.length > 0) {
           toast.success(
-            `${formatted.length} data valid siap diimpor (${errors.length} baris diabaikan)`
+            `${formatted.length} data valid siap diimpor (${errors.length} baris diabaikan)`,
           );
         } else {
           toast.success(`${formatted.length} data siap diimpor`);
@@ -137,7 +137,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
 
   const handleBulkImport = async () => {
     if (importedData.length === 0) {
-      toast.error("Tidak ada data untuk diimpor");
+      toast.error('Tidak ada data untuk diimpor');
       return;
     }
 
@@ -168,13 +168,13 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
               const errorMsg =
                 error instanceof Error
                   ? error.message
-                  : "Error tidak diketahui";
+                  : 'Error tidak diketahui';
               errors.push(
-                `Baris ${rowNumber} (${data.name}, Blok ${data.block} No.${data.houseNumber}): ${errorMsg}`
+                `Baris ${rowNumber} (${data.name}, Blok ${data.block} No.${data.houseNumber}): ${errorMsg}`,
               );
               throw error;
             }
-          })
+          }),
         );
 
         // Small delay between batches to prevent rate limiting
@@ -191,13 +191,13 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
         setShowImport(false);
       } else {
         toast.error(
-          `${successCount} berhasil, ${errors.length} gagal. Lihat detail di bawah.`
+          `${successCount} berhasil, ${errors.length} gagal. Lihat detail di bawah.`,
         );
         setImportErrors(errors);
       }
     } catch (error) {
-      toast.error("Terjadi kesalahan saat mengimpor data");
-      console.error("Bulk import error:", error);
+      toast.error('Terjadi kesalahan saat mengimpor data');
+      console.error('Bulk import error:', error);
     } finally {
       setIsImporting(false);
       setImportProgress({ current: 0, total: 0 });
@@ -207,10 +207,10 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
   const handleAdd = (data: ResidentFormInputs) => {
     addResident.mutate(data, {
       onSuccess: () => {
-        toast.success("Warga berhasil ditambahkan");
+        toast.success('Warga berhasil ditambahkan');
         setShowForm(false);
       },
-      onError: () => toast.error("Gagal tambah warga"),
+      onError: () => toast.error('Gagal tambah warga'),
     });
   };
 
@@ -220,11 +220,11 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
       { ...editData, ...data },
       {
         onSuccess: () => {
-          toast.success("Warga berhasil diupdate");
+          toast.success('Warga berhasil diupdate');
           setEditData(null);
         },
-        onError: () => toast.error("Gagal update warga"),
-      }
+        onError: () => toast.error('Gagal update warga'),
+      },
     );
   };
 
@@ -235,11 +235,11 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
     if (!deleteId) return;
     deleteResident.mutate(deleteId, {
       onSuccess: () => {
-        toast.success("Warga dihapus");
+        toast.success('Warga dihapus');
         setDeleteId(null);
       },
       onError: () => {
-        toast.error("Gagal hapus warga");
+        toast.error('Gagal hapus warga');
         setDeleteId(null);
       },
     });
@@ -249,7 +249,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
     <div className="w-full max-w-sm mx-auto">
       <div className="flex items-center space-x-3 justify-start mb-3">
         <Button
-          onClick={onBack ? onBack : () => navigate.push("/dashboard")}
+          onClick={onBack ? onBack : () => navigate.push('/dashboard')}
           variant="ghost"
           className="text-slate-700 hover:text-slate-900"
         >
@@ -376,7 +376,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
         open={showImport}
         onOpenChange={(open) => {
           if (!open && isImporting) {
-            toast.error("Tunggu hingga import selesai");
+            toast.error('Tunggu hingga import selesai');
             return;
           }
           setShowImport(open);
@@ -413,7 +413,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
             {isImporting && importProgress.total > 0 && (
               <div className="w-full bg-blue-100 border border-blue-300 rounded-md p-3">
                 <div className="text-xs font-semibold text-blue-900 mb-2">
-                  Sedang mengimpor... {importProgress.current} dari{" "}
+                  Sedang mengimpor... {importProgress.current} dari{' '}
                   {importProgress.total}
                 </div>
                 <div className="w-full bg-blue-200 rounded-full h-2.5">
@@ -428,7 +428,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
                 </div>
                 <div className="text-[11px] text-blue-600 mt-1">
                   {Math.round(
-                    (importProgress.current / importProgress.total) * 100
+                    (importProgress.current / importProgress.total) * 100,
                   )}
                   % selesai
                 </div>
@@ -487,7 +487,7 @@ export default function ResidentList({ onBack }: { onBack?: () => void }) {
               >
                 {isImporting
                   ? `Mengimpor... (${importProgress.current}/${importProgress.total})`
-                  : "Mulai Import"}
+                  : 'Mulai Import'}
               </Button>
               <Button
                 variant="outline"

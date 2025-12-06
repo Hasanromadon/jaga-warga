@@ -1,25 +1,24 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   collection,
   getDocs,
   query,
   where,
-  orderBy,
   Timestamp,
-} from "firebase/firestore";
-import { db } from "../firebaseConfig";
-import { TrendingUp, TrendingDown, Loader2, ArrowLeft } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { useRouter } from "next/navigation";
+} from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import { TrendingUp, TrendingDown, Loader2, ArrowLeft } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { useRouter } from 'next/navigation';
 
 interface Transaction {
   id: string;
   description: string;
   date: Date | Timestamp | { seconds: number; nanoseconds: number };
   amount: number;
-  type: "income" | "expense";
+  type: 'income' | 'expense';
   recorded_by: string;
   created_at?: Date | Timestamp | { seconds: number; nanoseconds: number };
 }
@@ -31,67 +30,67 @@ function getDateString(
     | Timestamp
     | { seconds: number; nanoseconds: number }
     | null
-    | undefined
+    | undefined,
 ): string {
-  if (!date) return "-";
+  if (!date) return '-';
 
   // Plain object Firestore Timestamp (hasil serialisasi)
-  if ("seconds" in date) {
-    return new Date(date.seconds * 1000).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
+  if ('seconds' in date) {
+    return new Date(date.seconds * 1000).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
     });
   }
 
   // Timestamp instance (hasil langsung dari Firestore SDK)
   if (date instanceof Timestamp) {
-    return date.toDate().toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
+    return date.toDate().toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
     });
   }
 
   // Native Date
   if (date instanceof Date) {
-    return date.toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
+    return date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
     });
   }
 
-  return "-";
+  return '-';
 }
 
 /* ✅ Fungsi format Rupiah */
 function formatRupiah(num: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
     minimumFractionDigits: 0,
   })
     .format(num)
-    .replace("Rp", "Rp ");
+    .replace('Rp', 'Rp ');
 }
 
 /* 🧾 Komponen utama */
 export default function FinanceList({ onBack }: { onBack?: () => void }) {
-  const [activeTab, setActiveTab] = useState<"income" | "expense">("income");
+  const [activeTab, setActiveTab] = useState<'income' | 'expense'>('income');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useRouter();
-  const fetchTransactions = async (tabType: "income" | "expense") => {
+  const fetchTransactions = async (tabType: 'income' | 'expense') => {
     try {
       setLoading(true);
       const q = query(
-        collection(db, "general_transactions"),
-        where("type", "==", tabType)
+        collection(db, 'general_transactions'),
+        where('type', '==', tabType),
       );
       const snap = await getDocs(q);
       const data = snap.docs.map(
-        (doc) => ({ id: doc.id, ...doc.data() } as Transaction)
+        (doc) => ({ id: doc.id, ...doc.data() }) as Transaction,
       );
       setTransactions(data);
     } catch (err) {
@@ -110,7 +109,7 @@ export default function FinanceList({ onBack }: { onBack?: () => void }) {
       {/* Header */}
       <div className="flex items-center space-x-3 justify-start mb-3">
         <Button
-          onClick={onBack ? onBack : () => navigate.push("/dashboard")}
+          onClick={onBack ? onBack : () => navigate.push('/dashboard')}
           variant="ghost"
           className="text-slate-700 hover:text-slate-900"
         >
@@ -121,19 +120,19 @@ export default function FinanceList({ onBack }: { onBack?: () => void }) {
 
       {/* Tabs */}
       <div className="flex mb-3 bg-slate-100 rounded-lg p-1">
-        {["income", "expense"].map((tab) => (
+        {['income', 'expense'].map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab as "income" | "expense")}
+            onClick={() => setActiveTab(tab as 'income' | 'expense')}
             className={`flex-1 py-2 text-xs font-medium rounded-md transition-all duration-200 ${
               activeTab === tab
-                ? tab === "income"
-                  ? "bg-emerald-500 text-white shadow-sm"
-                  : "bg-rose-500 text-white shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+                ? tab === 'income'
+                  ? 'bg-emerald-500 text-white shadow-sm'
+                  : 'bg-rose-500 text-white shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            {tab === "income" ? "Pemasukan" : "Pengeluaran"}
+            {tab === 'income' ? 'Pemasukan' : 'Pengeluaran'}
           </button>
         ))}
       </div>
@@ -151,10 +150,10 @@ export default function FinanceList({ onBack }: { onBack?: () => void }) {
                 {/* Icon */}
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    trx.type === "income" ? "bg-emerald-50" : "bg-rose-50"
+                    trx.type === 'income' ? 'bg-emerald-50' : 'bg-rose-50'
                   }`}
                 >
-                  {trx.type === "income" ? (
+                  {trx.type === 'income' ? (
                     <TrendingUp className="w-5 h-5 text-emerald-600" />
                   ) : (
                     <TrendingDown className="w-5 h-5 text-rose-600" />
@@ -165,10 +164,10 @@ export default function FinanceList({ onBack }: { onBack?: () => void }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-slate-800 break-words">
                     <span className="font-semibold">
-                      {trx.type === "income"
-                        ? "Pemasukan dari"
-                        : "Pengeluaran untuk"}
-                    </span>{" "}
+                      {trx.type === 'income'
+                        ? 'Pemasukan dari'
+                        : 'Pengeluaran untuk'}
+                    </span>{' '}
                     {trx.description}
                   </p>
 
@@ -186,10 +185,10 @@ export default function FinanceList({ onBack }: { onBack?: () => void }) {
                 {/* Amount */}
                 <p
                   className={`text-sm font-semibold whitespace-nowrap ${
-                    trx.type === "income" ? "text-emerald-600" : "text-rose-600"
+                    trx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
                   }`}
                 >
-                  {trx.type === "income" ? "+" : "-"}
+                  {trx.type === 'income' ? '+' : '-'}
                   {formatRupiah(trx.amount)}
                 </p>
               </div>
@@ -197,8 +196,8 @@ export default function FinanceList({ onBack }: { onBack?: () => void }) {
           </div>
         ) : (
           <p className="text-center text-sm text-slate-500 py-4">
-            Belum ada catatan{" "}
-            {activeTab === "income" ? "pemasukan" : "pengeluaran"}.
+            Belum ada catatan{' '}
+            {activeTab === 'income' ? 'pemasukan' : 'pengeluaran'}.
           </p>
         )}
       </div>

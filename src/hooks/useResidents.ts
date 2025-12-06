@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   collection,
   getDocs,
@@ -10,10 +10,10 @@ import {
   where,
   Query,
   CollectionReference,
-} from "firebase/firestore";
-import { db } from "../firebaseConfig";
-import { extractKeywords } from "../utils/extractKeywords";
-import { useAuth } from "./useAuth";
+} from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import { extractKeywords } from '../utils/extractKeywords';
+import { useAuth } from './useAuth';
 
 export interface Resident {
   id: string;
@@ -26,19 +26,19 @@ export interface Resident {
 
 export function useResidents(residentialId?: string, search?: string) {
   return useQuery<Resident[]>({
-    queryKey: ["residents", residentialId, search],
+    queryKey: ['residents', residentialId, search],
     queryFn: async () => {
-      let q: Query | CollectionReference = collection(db, "residents");
+      let q: Query | CollectionReference = collection(db, 'residents');
       if (residentialId && search) {
         q = query(
           q,
-          where("residential_id", "==", residentialId),
-          where("keywords", "array-contains", search.toLowerCase())
+          where('residential_id', '==', residentialId),
+          where('keywords', 'array-contains', search.toLowerCase()),
         );
       } else if (residentialId) {
-        q = query(q, where("residential_id", "==", residentialId));
+        q = query(q, where('residential_id', '==', residentialId));
       } else if (search) {
-        q = query(q, where("keywords", "array-contains", search.toLowerCase()));
+        q = query(q, where('keywords', 'array-contains', search.toLowerCase()));
       }
       const snap = await getDocs(q);
       // Map old keys to new keys for backward compatibility (if needed)
@@ -61,16 +61,16 @@ export function useAddResident() {
   const queryClient = useQueryClient();
   const { residentialId } = useAuth();
   return useMutation({
-    mutationFn: async (data: Omit<Resident, "id">) => {
+    mutationFn: async (data: Omit<Resident, 'id'>) => {
       const keywords = extractKeywords(data);
-      await addDoc(collection(db, "residents"), {
+      await addDoc(collection(db, 'residents'), {
         ...data,
         keywords,
         residential_id: residentialId ?? data.residential_id ?? null,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["residents"] });
+      queryClient.invalidateQueries({ queryKey: ['residents'] });
     },
   });
 }
@@ -82,14 +82,14 @@ export function useEditResident() {
     mutationFn: async (data: Resident) => {
       const { id, ...fields } = data;
       const keywords = extractKeywords(fields);
-      await updateDoc(doc(db, "residents", id), {
+      await updateDoc(doc(db, 'residents', id), {
         ...fields,
         keywords,
         residential_id: residentialId ?? fields.residential_id ?? null,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["residents"] });
+      queryClient.invalidateQueries({ queryKey: ['residents'] });
     },
   });
 }
@@ -98,10 +98,10 @@ export function useDeleteResident() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await deleteDoc(doc(db, "residents", id));
+      await deleteDoc(doc(db, 'residents', id));
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["residents"] });
+      queryClient.invalidateQueries({ queryKey: ['residents'] });
     },
   });
 }

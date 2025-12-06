@@ -1,8 +1,8 @@
-"use client";
-import { useAuthContext } from "../context/AuthProvider";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import LoadingOverlay from "./LoadingOverlay";
+'use client';
+import { useAuthContext } from '../context/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import LoadingOverlay from './LoadingOverlay';
 
 interface AuthRedirectProps {
   children: React.ReactNode;
@@ -13,7 +13,7 @@ interface AuthRedirectProps {
 
 export function AuthRedirect({
   children,
-  redirectTo = "/dashboard",
+  redirectTo = '/dashboard',
   redirectIfAuthenticated = false,
   allowedRoles,
 }: AuthRedirectProps) {
@@ -25,9 +25,9 @@ export function AuthRedirect({
       if (redirectIfAuthenticated && user) {
         router.replace(redirectTo);
       } else if (!redirectIfAuthenticated && !user) {
-        router.replace("/login");
+        router.replace('/login');
       } else if (allowedRoles && role && !allowedRoles.includes(role)) {
-        router.replace("/dashboard");
+        router.replace('/dashboard');
       }
     }
   }, [

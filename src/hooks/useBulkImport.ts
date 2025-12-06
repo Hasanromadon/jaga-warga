@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 interface BulkImportProgress {
   current: number;
@@ -69,18 +69,18 @@ export function useBulkImport<T>({
                 const errorMsg =
                   error instanceof Error
                     ? error.message
-                    : "Error tidak diketahui";
+                    : 'Error tidak diketahui';
                 importErrors.push(`Item ${itemIndex + 1}: ${errorMsg}`);
                 failedItems.push(item);
                 throw error;
               }
-            })
+            }),
           );
 
           // Delay between batches to prevent rate limiting
           if (i + batchSize < items.length) {
             await new Promise((resolve) =>
-              setTimeout(resolve, delayBetweenBatches)
+              setTimeout(resolve, delayBetweenBatches),
             );
           }
         }
@@ -97,7 +97,7 @@ export function useBulkImport<T>({
           toast.success(`✅ Semua ${successCount} item berhasil diimpor!`);
         } else {
           toast.error(
-            `${successCount} berhasil, ${importErrors.length} gagal. Lihat detail di bawah.`
+            `${successCount} berhasil, ${importErrors.length} gagal. Lihat detail di bawah.`,
           );
         }
 
@@ -107,8 +107,8 @@ export function useBulkImport<T>({
           failedItems,
         };
       } catch (error) {
-        toast.error("Terjadi kesalahan saat mengimpor data");
-        console.error("Bulk import error:", error);
+        toast.error('Terjadi kesalahan saat mengimpor data');
+        console.error('Bulk import error:', error);
         throw error;
       } finally {
         setProgress({ current: 0, total: 0 });

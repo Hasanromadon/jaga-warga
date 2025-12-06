@@ -1,6 +1,6 @@
-"use client";
-import { useAddBulkBillsMutation } from "@/hooks/useAddBulkBillsMutation";
-import { useResidents } from "@/hooks/useResidents";
+'use client';
+import { useAddBulkBillsMutation } from '@/hooks/useAddBulkBillsMutation';
+import { useResidents } from '@/hooks/useResidents';
 import {
   ArrowLeft,
   Calendar,
@@ -9,32 +9,32 @@ import {
   Home,
   PhoneCall,
   User,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader } from "../components/ui/card";
-import { Label } from "../components/ui/label";
-import { NumberInputWithSeparator } from "../components/ui/number-input-with-separator";
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader } from '../components/ui/card';
+import { Label } from '../components/ui/label';
+import { NumberInputWithSeparator } from '../components/ui/number-input-with-separator';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
-import { Textarea } from "../components/ui/textarea";
+} from '../components/ui/select';
+import { Textarea } from '../components/ui/textarea';
 import {
   BLOK_LIST,
   BULAN_LIST,
   HOUSE_NUMBER_LIST,
   TAHUN_LIST,
-} from "../constants";
-import { useAddBillMutation } from "../hooks/useAddBillMutation";
-import { useAuth } from "../hooks/useAuth";
-import { UserNotFoundIllustration } from "./svg/UserNotFoundIllustration";
+} from '../constants';
+import { useAddBillMutation } from '../hooks/useAddBillMutation';
+import { useAuth } from '../hooks/useAuth';
+import { UserNotFoundIllustration } from './svg/UserNotFoundIllustration';
 
 export interface AddBillFormInputs {
   block: string;
@@ -65,10 +65,10 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
   const addBulkBills = useAddBulkBillsMutation();
   const { residentialId } = useAuth();
   const { data: residents = [], isLoading: loadingResidents } = useResidents(
-    residentialId ?? undefined
+    residentialId ?? undefined,
   );
-  const selectedBlock = watch("block");
-  const selectedNumber = watch("houseNumber");
+  const selectedBlock = watch('block');
+  const selectedNumber = watch('houseNumber');
   const HOUSE_NUMBERS = HOUSE_NUMBER_LIST;
   const navigate = useRouter();
   const onSubmit = (data: AddBillFormInputs) => {
@@ -77,12 +77,12 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
     // ✅ Jika buat untuk semua warga
     if (isAllResidents) {
       if (loadingResidents) {
-        toast.error("Sedang memuat data warga...");
+        toast.error('Sedang memuat data warga...');
         return;
       }
 
       if (residents.length === 0) {
-        toast.error("Belum ada data warga untuk dibuatkan tagihan");
+        toast.error('Belum ada data warga untuk dibuatkan tagihan');
         return;
       }
 
@@ -101,27 +101,27 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
             month: data.month,
             year: data.year,
             amount: data.amount,
-            remark: data.remark || "",
+            remark: data.remark || '',
             residential_id: residentialId ?? undefined,
           },
         },
         {
           onSuccess: () => {
-            toast.success("Tagihan berhasil dibuat untuk seluruh warga!");
+            toast.success('Tagihan berhasil dibuat untuk seluruh warga!');
             reset({
-              block: "",
-              houseNumber: "",
+              block: '',
+              houseNumber: '',
               amount: undefined,
-              month: "",
-              year: "",
-              remark: "",
+              month: '',
+              year: '',
+              remark: '',
             });
             setIsAllResidents(false);
           },
           onError: () => {
-            toast.error("Gagal membuat tagihan untuk semua warga");
+            toast.error('Gagal membuat tagihan untuk semua warga');
           },
-        }
+        },
       );
       return;
     }
@@ -129,12 +129,12 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
     // ✅ Jika untuk 1 warga
     // cari resident berdasarkan blok & nomor rumah
     const resident = residents.find(
-      (r) => r.block === data.block && r.houseNumber === data.houseNumber
+      (r) => r.block === data.block && r.houseNumber === data.houseNumber,
     );
 
     if (!resident) {
-      setError("Warga dengan blok dan nomor rumah tersebut tidak ditemukan.");
-      toast.error("Warga tidak ditemukan.");
+      setError('Warga dengan blok dan nomor rumah tersebut tidak ditemukan.');
+      toast.error('Warga tidak ditemukan.');
       return;
     }
 
@@ -146,37 +146,37 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
       },
       {
         onSuccess: () => {
-          toast.success("Tagihan berhasil ditambahkan!");
+          toast.success('Tagihan berhasil ditambahkan!');
           reset({
-            block: "",
-            houseNumber: "",
+            block: '',
+            houseNumber: '',
             amount: undefined,
-            month: "",
-            year: "",
-            remark: "",
+            month: '',
+            year: '',
+            remark: '',
           });
         },
         onError: (err: unknown) => {
           const message =
-            err && typeof err === "object" && "message" in err
+            err && typeof err === 'object' && 'message' in err
               ? (err as { message?: string }).message
-              : "Terjadi error";
-          setError(message || "Terjadi error");
-          toast.error(message || "Terjadi error");
+              : 'Terjadi error';
+          setError(message || 'Terjadi error');
+          toast.error(message || 'Terjadi error');
         },
-      }
+      },
     );
   };
   const selectedResident = useMemo(() => {
     if (!selectedBlock || !selectedNumber) return null;
     return residents.find(
-      (r) => r.block === selectedBlock && r.houseNumber === selectedNumber
+      (r) => r.block === selectedBlock && r.houseNumber === selectedNumber,
     );
   }, [selectedBlock, selectedNumber, residents]);
 
   useEffect(() => {
     if (selectedResident) {
-      setValue("residentId", selectedResident.id);
+      setValue('residentId', selectedResident.id);
     }
   }, [selectedResident, setValue]);
 
@@ -185,7 +185,7 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
       <CardHeader className="relative">
         <div className="flex items-center space-x-3 justify-start mb-3">
           <Button
-            onClick={onBack ? onBack : () => navigate.push("/dashboard")}
+            onClick={onBack ? onBack : () => navigate.push('/dashboard')}
             variant="ghost"
             className="text-slate-700 hover:text-slate-900"
           >
@@ -223,7 +223,7 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
             <div className="flex flex-col gap-2">
               <Label
                 className={`text-xs font-semibold ${
-                  isAllResidents ? "text-gray-300" : "text-blue-900"
+                  isAllResidents ? 'text-gray-300' : 'text-blue-900'
                 } flex items-center gap-1 mb-0`}
               >
                 <Home className="w-4 h-4" />
@@ -232,10 +232,10 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
               <div className="flex gap-3">
                 <div className="flex-1">
                   <Select
-                    value={watch("block") || ""}
+                    value={watch('block') || ''}
                     onValueChange={(val) => {
-                      setValue("block", val);
-                      setValue("houseNumber", "");
+                      setValue('block', val);
+                      setValue('houseNumber', '');
                     }}
                     disabled={isAllResidents}
                   >
@@ -259,9 +259,9 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
 
                 <div className="flex-1">
                   <Select
-                    value={watch("houseNumber") || ""}
-                    onValueChange={(val) => setValue("houseNumber", val)}
-                    disabled={!watch("block") || isAllResidents}
+                    value={watch('houseNumber') || ''}
+                    onValueChange={(val) => setValue('houseNumber', val)}
+                    disabled={!watch('block') || isAllResidents}
                   >
                     <SelectTrigger className="w-full text-xs" id="houseNumber">
                       <SelectValue placeholder="Pilih Nomor" />
@@ -283,8 +283,8 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
               </div>
               <div className="flex w-full gap-3">
                 {/* Detail Warga */}
-                {watch("block") &&
-                  watch("houseNumber") &&
+                {watch('block') &&
+                  watch('houseNumber') &&
                   (selectedResident ? (
                     <div className="w-full border text-xs border-blue-100 bg-blue-50/60 rounded-lg p-3 text-blue-900 shadow-sm">
                       <div className="flex items-center gap-2 mb-2">
@@ -297,21 +297,21 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-blue-600" />
                           <span className="truncate">
-                            {selectedResident.name || "-"}
+                            {selectedResident.name || '-'}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <Home className="w-4 h-4 text-blue-600" />
                           <span>
-                            Blok {selectedResident.block} /{" "}
+                            Blok {selectedResident.block} /{' '}
                             {selectedResident.houseNumber}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <PhoneCall className="w-4 h-4 text-blue-600" />
-                          <span>{selectedResident.phoneNumber || "-"}</span>
+                          <span>{selectedResident.phoneNumber || '-'}</span>
                         </div>
                       </div>
                     </div>
@@ -413,9 +413,9 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
                 render={({ field }) => (
                   <NumberInputWithSeparator
                     id="amount"
-                    value={field.value || ""}
+                    value={field.value || ''}
                     onValueChange={(val) =>
-                      field.onChange(val ? parseInt(val, 10) : "")
+                      field.onChange(val ? parseInt(val, 10) : '')
                     }
                     placeholder="Masukkan jumlah tagihan"
                     className="pl-8 !text-xs"
@@ -461,10 +461,10 @@ export default function AddBillForm({ onBack }: { onBack?: () => void }) {
             className="w-full mt-2"
           >
             {loadingSingle || addBulkBills.isPending
-              ? "Memproses..."
+              ? 'Memproses...'
               : isAllResidents
-              ? "Buat Tagihan Semua Warga"
-              : "Tambah Tagihan"}
+                ? 'Buat Tagihan Semua Warga'
+                : 'Tambah Tagihan'}
           </Button>
         </form>
       </CardContent>

@@ -1,16 +1,16 @@
-"use client";
+'use client';
 import {
   createContext,
   useContext,
   useEffect,
   useState,
   ReactNode,
-} from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth, db } from "../firebaseConfig";
-import { doc, getDoc } from "firebase/firestore";
+} from 'react';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth, db } from '../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
-export type Role = "admin" | "warga";
+export type Role = 'admin' | 'warga';
 
 interface AuthContextType {
   user: User | null;
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await auth.signOut();
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error('Error signing out:', error);
     }
   };
 
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (firebaseUser) {
           // Fetch user role and residential_id from Firestore
-          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           const data = userDoc.data();
           if (isMounted) {
             setRole((data?.role as Role) || null);
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
       } catch (error) {
-        console.error("Error in auth state change:", error);
+        console.error('Error in auth state change:', error);
         if (isMounted) {
           setRole(null);
         }

@@ -1,12 +1,12 @@
-"use client";
-import ResidentialLoading from "@/components/ResidentialLoading";
-import { HousingNotFoundIllustration } from "@/components/svg/HousingNotFoundIllustration";
-import { Button } from "@/components/ui/button";
-import { useResidentialInfo } from "@/hooks/useResidentialInfo";
-import { ChevronLeft } from "lucide-react";
-import Image from "next/image";
-import { useParams } from "next/navigation";
-import LoginForm from "../../../components/LoginForm";
+'use client';
+import ResidentialLoading from '@/components/ResidentialLoading';
+import { HousingNotFoundIllustration } from '@/components/svg/HousingNotFoundIllustration';
+import { Button } from '@/components/ui/button';
+import { useResidentialInfo } from '@/hooks/useResidentialInfo';
+import { ChevronLeft } from 'lucide-react';
+import Image from 'next/image';
+import { useParams } from 'next/navigation';
+import LoginForm from '../../../components/LoginForm';
 
 export default function LoginWithResidencePage() {
   const params = useParams();
@@ -27,7 +27,7 @@ export default function LoginWithResidencePage() {
             Data Perumahan tidak ditemukan
           </span>
           <Button
-            onClick={() => window.location.replace("/GHI")}
+            onClick={() => window.location.replace('/GHI')}
             variant="default"
             size="sm"
           >

@@ -1,8 +1,8 @@
-"use client";
-import LoginForm from "../../components/LoginForm";
-import Image from "next/image";
-import { ShieldCheck } from "lucide-react";
-import { withRedirectIfAuthenticated } from "../../utils/redirectIfAuthenticated";
+'use client';
+import LoginForm from '../../components/LoginForm';
+import Image from 'next/image';
+import { ShieldCheck } from 'lucide-react';
+import { withRedirectIfAuthenticated } from '../../utils/redirectIfAuthenticated';
 
 function LoginPage() {
   return (

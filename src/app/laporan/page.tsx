@@ -1,9 +1,9 @@
-"use client";
-import LaporanList from "../../components/LaporanList";
-import { Clock } from "lucide-react";
-import { withProtectedRoute } from "../../utils/protectedRoute";
+'use client';
+import LaporanList from '../../components/LaporanList';
+import { Clock } from 'lucide-react';
+import { withProtectedRoute } from '../../utils/protectedRoute';
 
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from '../../hooks/useAuth';
 
 function LaporanPage() {
   const { residentialId } = useAuth();
@@ -21,4 +21,4 @@ function LaporanPage() {
   );
 }
 
-export default withProtectedRoute(LaporanPage, ["admin"]);
+export default withProtectedRoute(LaporanPage, ['admin']);

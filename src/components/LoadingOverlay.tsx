@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
-import React from "react";
+import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
+import React from 'react';
 
 interface LoadingOverlayProps {
   show: boolean;
@@ -21,7 +21,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, message }) => {
     >
       <div className="flex flex-col items-center gap-3 text-center text-gray-800">
         <Loader2 className="h-15 w-15 animate-spin text-blue-500" />
-        <p className="text-sm font-medium">{message || "Loading..."}</p>
+        <p className="text-sm font-medium">{message || 'Loading...'}</p>
       </div>
     </motion.div>
   );

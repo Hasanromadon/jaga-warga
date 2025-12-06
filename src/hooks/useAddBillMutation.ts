@@ -1,10 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebaseConfig";
-import { AddBillFormInputs } from "../components/AddBillForm";
-import { useAuth } from "./useAuth";
-import { extractBillKeywords } from "../utils/extractBillKeywords";
-import toast from "react-hot-toast";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import { AddBillFormInputs } from '../components/AddBillForm';
+import { useAuth } from './useAuth';
+import { extractBillKeywords } from '../utils/extractBillKeywords';
+import toast from 'react-hot-toast';
 
 export function useAddBillMutation() {
   const queryClient = useQueryClient();
@@ -12,26 +12,26 @@ export function useAddBillMutation() {
   return useMutation({
     mutationFn: async (data: AddBillFormInputs) => {
       const keywords = extractBillKeywords(
-        data as unknown as Record<string, string | null | undefined>
+        data as unknown as Record<string, string | null | undefined>,
       );
-      await addDoc(collection(db, "bills"), {
+      await addDoc(collection(db, 'bills'), {
         ...data,
         residential_id: residentialId,
-        status: "unpaid",
-        proofUrl: "",
+        status: 'unpaid',
+        proofUrl: '',
         createdAt: serverTimestamp(),
         keywords,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bills"] });
+      queryClient.invalidateQueries({ queryKey: ['bills'] });
       // Invalidate dashboard-related queries so stats and activities refresh
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["activities"] });
-      toast.success("Tagihan berhasil ditambahkan!");
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      toast.success('Tagihan berhasil ditambahkan!');
     },
     onError: () => {
-      toast.error("Gagal menambahkan tagihan.");
+      toast.error('Gagal menambahkan tagihan.');
     },
   });
 }

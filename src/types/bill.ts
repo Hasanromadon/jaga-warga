@@ -1,4 +1,4 @@
-import type { Timestamp } from "firebase/firestore";
+import type { Timestamp } from 'firebase/firestore';
 export type Bill = {
   id: string;
   amount: number;
@@ -6,7 +6,7 @@ export type Bill = {
   houseNumber: string;
   month: string;
   year: string;
-  status: "unpaid" | "pending" | "paid" | "rejected" | "approved";
+  status: 'unpaid' | 'pending' | 'paid' | 'rejected' | 'approved';
   proofUrl?: string;
   rejectReason?: string;
   createdAt: Timestamp;

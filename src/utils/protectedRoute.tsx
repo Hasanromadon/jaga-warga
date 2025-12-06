@@ -1,11 +1,11 @@
-import LoadingOverlay from "@/components/LoadingOverlay";
-import { useAuthContext } from "../context/AuthProvider";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import LoadingOverlay from '@/components/LoadingOverlay';
+import { useAuthContext } from '../context/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export function withProtectedRoute<P>(
   Component: React.ComponentType<P>,
-  allowedRoles?: string[]
+  allowedRoles?: string[],
 ) {
   return function ProtectedComponent(props: P) {
     const { user, role, loading, initialized } = useAuthContext();
@@ -15,9 +15,9 @@ export function withProtectedRoute<P>(
       // Only redirect after auth is initialized to prevent false redirects
       if (initialized && !loading) {
         if (!user) {
-          router.replace("/login");
+          router.replace('/login');
         } else if (allowedRoles && role && !allowedRoles.includes(role)) {
-          router.replace("/dashboard");
+          router.replace('/dashboard');
         }
       }
     }, [user, role, loading, initialized, router]);

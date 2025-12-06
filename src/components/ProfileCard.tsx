@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { Button } from "./ui/button";
-import { LogOut, User, Hash } from "lucide-react";
-import { useAuthContext } from "@/context/AuthProvider";
-import { doc, getDoc, type Timestamp } from "firebase/firestore";
-import { db } from "@/firebaseConfig";
-import { formatTimestampID } from "@/utils/formatDate";
+import React, { useEffect, useState } from 'react';
+import { Button } from './ui/button';
+import { LogOut, User, Hash } from 'lucide-react';
+import { useAuthContext } from '@/context/AuthProvider';
+import { doc, getDoc, type Timestamp } from 'firebase/firestore';
+import { db } from '@/firebaseConfig';
+import { formatTimestampID } from '@/utils/formatDate';
 
 type UserProfile = {
   name?: string;
@@ -29,11 +29,11 @@ export default function ProfileCard() {
 
       if (mounted) setLoading(true); // Set loading true
       try {
-        const snap = await getDoc(doc(db, "users", user.uid));
+        const snap = await getDoc(doc(db, 'users', user.uid));
         if (!mounted) return;
         setProfile(snap.exists() ? (snap.data() as UserProfile) : null);
       } catch (err) {
-        console.error("Failed to load user profile:", err);
+        console.error('Failed to load user profile:', err);
       } finally {
         if (mounted) setLoading(false); // Set loading false
       }
@@ -65,11 +65,11 @@ export default function ProfileCard() {
           <p className="text-base font-medium text-blue-900 truncate">
             {profile?.name ||
               user?.displayName ||
-              user?.email?.split("@")[0] ||
-              "Admin"}
+              user?.email?.split('@')[0] ||
+              'Admin'}
           </p>
           <p className="text-sm text-blue-600 capitalize truncate">
-            {role || "-"}
+            {role || '-'}
           </p>
         </div>
       </div>
@@ -84,7 +84,7 @@ export default function ProfileCard() {
           <div className="grid grid-cols-2 gap-2 text-xs text-slate-700">
             <div className="flex flex-col">
               <span className="text-[11px] text-slate-400">Email</span>
-              <span className="font-medium truncate">{user?.email || "-"}</span>
+              <span className="font-medium truncate">{user?.email || '-'}</span>
             </div>
 
             <div className="flex flex-col">
@@ -92,14 +92,14 @@ export default function ProfileCard() {
               <span className="font-medium truncate">
                 {(profile?.phoneNumber as string) ||
                   (user?.phoneNumber as string) ||
-                  "-"}
+                  '-'}
               </span>
             </div>
 
             <div className="flex flex-col">
               <span className="text-[11px] text-slate-400">Residensi ID</span>
               <span className="font-medium truncate">
-                {profile?.residential_id || residentialId || "-"}
+                {profile?.residential_id || residentialId || '-'}
               </span>
             </div>
 
@@ -108,7 +108,7 @@ export default function ProfileCard() {
               <span className="font-medium truncate">
                 {profile?.created_at
                   ? formatTimestampID(profile.created_at as Timestamp)
-                  : "-"}
+                  : '-'}
               </span>
             </div>
           </div>

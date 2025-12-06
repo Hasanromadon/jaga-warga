@@ -1,10 +1,10 @@
-import LoadingOverlay from "@/components/LoadingOverlay";
-import { useAuthContext } from "../context/AuthProvider";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import LoadingOverlay from '@/components/LoadingOverlay';
+import { useAuthContext } from '../context/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export function withRedirectIfAuthenticated<P>(
-  Component: React.ComponentType<P>
+  Component: React.ComponentType<P>,
 ) {
   return function RedirectIfAuthenticatedComponent(props: P) {
     const { user, loading, initialized } = useAuthContext();
@@ -13,7 +13,7 @@ export function withRedirectIfAuthenticated<P>(
     useEffect(() => {
       // Only redirect after auth is initialized
       if (initialized && !loading && user) {
-        router.replace("/dashboard");
+        router.replace('/dashboard');
       }
     }, [user, loading, initialized, router]);
 

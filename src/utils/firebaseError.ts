@@ -29,7 +29,7 @@ export function mapFirebaseError(error: unknown): string {
 
       case 'auth/network-request-failed':
         return 'Koneksi jaringan gagal. Periksa koneksi internet Anda.';
-        
+
       case 'auth/requires-recent-login':
         return 'Tindakan ini memerlukan login ulang. Silakan login kembali dan coba lagi.';
 
@@ -45,31 +45,31 @@ export function mapFirebaseError(error: unknown): string {
 
       case 'storage/canceled':
         return 'Aksi dibatalkan oleh pengguna.';
-        
+
       case 'storage/retry-limit-exceeded':
         return 'Waktu unggah habis. Silakan coba lagi.';
 
       // --- FIRESTORE & GENERAL ERRORS ---
       case 'permission-denied':
         return 'Anda tidak memiliki izin untuk melakukan aksi ini.';
-        
+
       case 'unavailable':
         return 'Layanan tidak tersedia saat ini. Coba lagi nanti.';
 
       case 'deadline-exceeded':
         return 'Waktu permintaan habis, periksa koneksi internet Anda.';
-        
+
       case 'not-found':
         return 'Data yang Anda cari tidak ditemukan.';
 
       // --- DEFAULT ---
       default:
-        console.error("Firebase Error Code:", code); // Opsional: log kode error yang tidak tertangani
+        console.error('Firebase Error Code:', code); // Opsional: log kode error yang tidak tertangani
         return 'Terjadi kesalahan yang tidak diketahui. Silakan coba lagi.';
     }
   }
 
   // Fallback untuk error yang tidak terduga
-  console.error("Unknown Error:", error);
+  console.error('Unknown Error:', error);
   return 'Terjadi kesalahan. Silakan coba lagi.';
 }

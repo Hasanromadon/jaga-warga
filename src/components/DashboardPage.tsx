@@ -1,16 +1,12 @@
-"use client";
+'use client';
 
-import {
-  FilePlus2,
-  TrendingDown,
-  TrendingUp,
-  Users,
-  Wallet,
-  PlusCircle,
-} from "lucide-react";
-import React from "react";
-import { useRouter } from "next/navigation";
-import { useDashboardStats, useActivities } from "@/hooks/useDashboard";
+import { TrendingDown, TrendingUp } from 'lucide-react';
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useDashboardStats, useActivities } from '@/hooks/useDashboard';
+import { useAdGeneratorModal } from '@/context/AdGeneratorModalProvider';
+import FastMenu, { ViewType } from '@/components/FastMenu';
+import StatCard from '@/components/StatCard';
 
 // --- Tipe dan Helper ---
 interface User {
@@ -25,7 +21,7 @@ interface Stats {
   pendingBills: number;
 }
 
-type ActivityType = "income" | "expense";
+type ActivityType = 'income' | 'expense';
 
 interface Activity {
   id: string;
@@ -36,109 +32,11 @@ interface Activity {
 }
 
 const formatRupiah = (number: number): string =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
     minimumFractionDigits: 0,
   }).format(number);
-
-// --- Tambahan type untuk view ---
-type ViewType =
-  | "dashboard"
-  | "tagihan"
-  | "warga"
-  | "keuangan"
-  | "catat-keuangan";
-
-// --- Komponen Fast Menu ---
-interface FastMenuProps {
-  onSelect: (menu: ViewType) => void;
-}
-const FastMenu: React.FC<FastMenuProps> = ({ onSelect }) => {
-  const menus: {
-    id: number;
-    key: ViewType;
-    title: string;
-    icon: React.ReactNode;
-    bg: string;
-  }[] = [
-    {
-      id: 1,
-      key: "tagihan",
-      title: "Tambah Tagihan",
-      icon: <FilePlus2 className="w-5 h-5 text-blue-600" />,
-      bg: "bg-blue-100",
-    },
-    {
-      id: 2,
-      key: "warga",
-      title: "Data Warga",
-      icon: <Users className="w-5 h-5 text-emerald-600" />,
-      bg: "bg-emerald-100",
-    },
-    {
-      id: 3,
-      key: "keuangan",
-      title: "Keuangan",
-      icon: <Wallet className="w-5 h-5 text-orange-600" />,
-      bg: "bg-orange-100",
-    },
-    {
-      id: 4,
-      key: "catat-keuangan",
-      title: "Catat Keuangan",
-      icon: <PlusCircle className="w-5 h-5 text-purple-600" />,
-      bg: "bg-purple-100",
-    },
-  ];
-
-  return (
-    <div className="bg-white rounded-2xl ">
-      <div className="flex items-center justify-between gap-2">
-        {menus.map((menu) => (
-          <button
-            key={menu.id}
-            onClick={() => onSelect(menu.key)}
-            className="flex flex-col items-center justify-between flex-1 p-2 rounded-xl hover:bg-slate-100 active:scale-95 transition min-h-[90px]"
-          >
-            <div
-              className={`w-11 h-11 rounded-md flex items-center justify-center ${menu.bg}`}
-            >
-              <div className="w-5 h-5 flex items-center justify-center">
-                {menu.icon}
-              </div>
-            </div>
-            <div className="h-[28px] mt-2 flex items-center justify-center">
-              <span className="text-[11px] font-semibold text-slate-700 text-center leading-tight line-clamp-2">
-                {menu.title}
-              </span>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// --- Komponen StatCard ---
-const StatCard: React.FC<{
-  title: string;
-  value: string | number;
-  icon: React.ReactElement;
-  color: { bg: string; text: string };
-}> = ({ title, value, icon, color }) => (
-  <div className="bg-white rounded-lg py-3 flex justify-between items-center gap-1">
-    <div
-      className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${color.bg}`}
-    >
-      {icon}
-    </div>
-    <div className="min-w-0 items-center flex-1">
-      <p className="text-xs text-slate-500 truncate">{title}</p>
-      <p className="text-sm font-bold text-slate-800 break-words">{value}</p>
-    </div>
-  </div>
-);
 
 // --- Komponen Utama Dashboard ---
 interface DashboardPageProps {
@@ -148,8 +46,8 @@ interface DashboardPageProps {
 }
 
 function DashboardPage({ user }: DashboardPageProps) {
-  // use Next.js router for FastMenu actions so each view is addressable
   const router = useRouter();
+  const { openModal } = useAdGeneratorModal();
 
   const {
     data: stats = {
@@ -161,10 +59,14 @@ function DashboardPage({ user }: DashboardPageProps) {
   } = useDashboardStats();
   const { data: activities = [] } = useActivities();
 
-  // when FastMenu calls onSelect, navigate to the corresponding dashboard sub-route
   const handleFastMenuSelect = (menu: ViewType) => {
-    // map view keys directly to dashboard routes (tagihan, warga, keuangan, catat-keuangan)
-    router.push(`/dashboard/${menu}`);
+    if (menu === 'buat-iklan') {
+      openModal();
+    } else if (menu === 'promo') {
+      router.push('/promo');
+    } else {
+      router.push(`/dashboard/${menu}`);
+    }
   };
 
   return (
@@ -203,7 +105,7 @@ function DashboardPage({ user }: DashboardPageProps) {
                   title="Pemasukan"
                   value={formatRupiah(stats.totalIncome)}
                   icon={<TrendingUp className="w-5 h-5 text-green-500" />}
-                  color={{ bg: "bg-green-100", text: "text-green-600" }}
+                  color={{ bg: 'bg-green-100', text: 'text-green-600' }}
                 />
               </div>
 
@@ -214,7 +116,7 @@ function DashboardPage({ user }: DashboardPageProps) {
                   title="Pengeluaran"
                   value={formatRupiah(stats.totalExpenses)}
                   icon={<TrendingDown className="w-5 h-5 text-red-500" />}
-                  color={{ bg: "bg-red-100", text: "text-red-600" }}
+                  color={{ bg: 'bg-red-100', text: 'text-red-600' }}
                 />
               </div>
             </div>
@@ -237,12 +139,12 @@ function DashboardPage({ user }: DashboardPageProps) {
                     >
                       <div
                         className={`w-10 h-10 ${
-                          activity.type === "income"
-                            ? "bg-green-100"
-                            : "bg-red-100"
+                          activity.type === 'income'
+                            ? 'bg-green-100'
+                            : 'bg-red-100'
                         } rounded-full flex items-center justify-center flex-shrink-0`}
                       >
-                        {activity.type === "income" ? (
+                        {activity.type === 'income' ? (
                           <TrendingUp className="w-5 h-5 text-green-500" />
                         ) : (
                           <TrendingDown className="w-5 h-5 text-red-500" />
@@ -251,10 +153,10 @@ function DashboardPage({ user }: DashboardPageProps) {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-slate-800 break-words">
                           <span className="font-semibold">
-                            {activity.type === "income"
-                              ? "Pemasukkan"
-                              : "Pengeluaran"}
-                          </span>{" "}
+                            {activity.type === 'income'
+                              ? 'Pemasukkan'
+                              : 'Pengeluaran'}
+                          </span>{' '}
                           <br />
                           {activity.user}
                         </p>
@@ -264,12 +166,12 @@ function DashboardPage({ user }: DashboardPageProps) {
                       </div>
                       <p
                         className={`text-sm font-semibold whitespace-nowrap text-right ${
-                          activity.type === "income"
-                            ? "text-green-600"
-                            : "text-slate-700"
+                          activity.type === 'income'
+                            ? 'text-green-600'
+                            : 'text-slate-700'
                         }`}
                       >
-                        {activity.type === "income" ? "+" : ""}
+                        {activity.type === 'income' ? '+' : ''}
                         {formatRupiah(activity.amount)}
                       </p>
                     </div>
@@ -282,7 +184,7 @@ function DashboardPage({ user }: DashboardPageProps) {
               </div>
               {activities.length > 0 && (
                 <button
-                  onClick={() => router.push("/dashboard/keuangan")}
+                  onClick={() => router.push('/dashboard/keuangan')}
                   className="w-full text-center text-sm font-semibold text-blue-600 mt-4 pt-3 border-t border-slate-100 hover:underline disabled:text-slate-400 disabled:no-underline"
                 >
                   Lihat Semua
@@ -299,8 +201,8 @@ function DashboardPage({ user }: DashboardPageProps) {
 // --- App Utama ---
 export default function App() {
   const sampleUser: User = {
-    displayName: "Grand Harmoni Indah",
-    photoURL: "https://placehold.co/100x100/0ea5e9/ffffff?text=BD",
+    displayName: 'Grand Harmoni Indah',
+    photoURL: 'https://placehold.co/100x100/0ea5e9/ffffff?text=BD',
   };
 
   const sampleStats: Stats = {
@@ -312,32 +214,32 @@ export default function App() {
 
   const sampleActivities: Activity[] = [
     {
-      id: "1",
-      type: "income",
-      user: "PT. Maju Mundur",
+      id: '1',
+      type: 'income',
+      user: 'PT. Maju Mundur',
       amount: 5000000,
-      time: "Hari ini, 13:45",
+      time: 'Hari ini, 13:45',
     },
     {
-      id: "2",
-      type: "expense",
-      user: "Siti Nurbaya",
+      id: '2',
+      type: 'expense',
+      user: 'Siti Nurbaya',
       amount: 75000,
-      time: "Hari ini, 11:20",
+      time: 'Hari ini, 11:20',
     },
     {
-      id: "3",
-      type: "expense",
-      user: "Ahmad Yani",
+      id: '3',
+      type: 'expense',
+      user: 'Ahmad Yani',
       amount: 150000,
-      time: "Kemarin, 09:30",
+      time: 'Kemarin, 09:30',
     },
     {
-      id: "4",
-      type: "income",
-      user: "Proyek Desain Logo",
+      id: '4',
+      type: 'income',
+      user: 'Proyek Desain Logo',
       amount: 2550000,
-      time: "Kemarin, 19:00",
+      time: 'Kemarin, 19:00',
     },
   ];
 

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useRouter, usePathname } from "next/navigation";
-import LoadingOverlay from "@/components/LoadingOverlay";
-import { useAuth } from "@/hooks/useAuth";
+import React from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import LoadingOverlay from '@/components/LoadingOverlay';
+import { useAuth } from '@/hooks/useAuth';
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -24,13 +24,13 @@ export default function RequireAuth({
 
   if (!user) {
     // Redirect to login and keep the current path as query param
-    router.replace(`/login?from=${encodeURIComponent(pathname || "/")}`);
+    router.replace(`/login?from=${encodeURIComponent(pathname || '/')}`);
     return null;
   }
 
   if (allowedRoles && (!role || !allowedRoles.includes(role))) {
     // If role not allowed, redirect to dashboard (safe fallback)
-    router.replace("/dashboard");
+    router.replace('/dashboard');
     return null;
   }
 

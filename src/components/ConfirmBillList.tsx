@@ -1,25 +1,25 @@
-"use client";
-import { useBills } from "../hooks/useBills";
+'use client';
+import { useBills } from '../hooks/useBills';
 import {
   useApproveBillMutation,
   useRejectBillMutation,
-} from "../hooks/useConfirmBillMutations";
-import { BadgeCheck, XCircle } from "lucide-react";
-import { EmptyBillIllustration } from "./svg/EmptyBillIllustration";
-import { Button } from "./ui/button";
-import { Card } from "./ui/card";
-import { ModalConfirmation } from "./ui/modal-confirmation";
-import { SearchInput } from "./custom/search-input";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { PreviewImageModal } from "./ui/PreviewImageModal";
-import { formatTimestampID, getMonthName } from "../utils/formatDate";
-import { useAuthContext } from "../context/AuthProvider";
+} from '../hooks/useConfirmBillMutations';
+import { BadgeCheck, XCircle } from 'lucide-react';
+import { EmptyBillIllustration } from './svg/EmptyBillIllustration';
+import { Button } from './ui/button';
+import { Card } from './ui/card';
+import { ModalConfirmation } from './ui/modal-confirmation';
+import { SearchInput } from './custom/search-input';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { PreviewImageModal } from './ui/PreviewImageModal';
+import { formatTimestampID, getMonthName } from '../utils/formatDate';
+import { useAuthContext } from '../context/AuthProvider';
 
 export default function ConfirmBillList() {
   const { residentialId } = useAuthContext();
-  const [rejectReason, setRejectReason] = useState("");
-  const [search, setSearch] = useState("");
+  const [rejectReason, setRejectReason] = useState('');
+  const [search, setSearch] = useState('');
   const {
     data: bills,
     isLoading,
@@ -29,13 +29,13 @@ export default function ConfirmBillList() {
   const rejectMutation = useRejectBillMutation();
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [modal, setModal] = useState<null | {
-    type: "approve" | "reject";
+    type: 'approve' | 'reject';
     billId: string;
   }>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const pendingBills = (bills || []).filter(
-    (bill) => bill.status === "pending"
+    (bill) => bill.status === 'pending',
   );
 
   if (isLoading)
@@ -88,7 +88,7 @@ export default function ConfirmBillList() {
               <div className="flex flex-col mb-2 space-y-1">
                 <div className="flex flex-row space-x-2">
                   <span className="text-md font-bold">
-                    {bill.residentName || "Nama tidak tersedia"}
+                    {bill.residentName || 'Nama tidak tersedia'}
                   </span>
                 </div>
                 <span className="inline-flex bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold w-fit whitespace-nowrap shrink-0">
@@ -102,7 +102,7 @@ export default function ConfirmBillList() {
               <div className="flex items-center gap-2 text-xs mb-0">
                 <span className="text-gray-700">Jumlah :</span>
                 <span className="font-bold text-blue-700 text-base">
-                  Rp{Number(bill.amount).toLocaleString("id-ID")}
+                  Rp{Number(bill.amount).toLocaleString('id-ID')}
                 </span>
               </div>
               {bill.proofUrl && (
@@ -118,7 +118,7 @@ export default function ConfirmBillList() {
                 <Button
                   size="sm"
                   disabled={loadingId === bill.id}
-                  onClick={() => setModal({ type: "approve", billId: bill.id })}
+                  onClick={() => setModal({ type: 'approve', billId: bill.id })}
                   className="flex items-center gap-1"
                 >
                   <BadgeCheck className="w-4 h-4" /> Approve
@@ -127,8 +127,8 @@ export default function ConfirmBillList() {
                   size="sm"
                   variant="destructive"
                   onClick={() => {
-                    setModal({ type: "reject", billId: bill.id });
-                    setRejectReason("");
+                    setModal({ type: 'reject', billId: bill.id });
+                    setRejectReason('');
                   }}
                   className="flex items-center gap-1"
                 >
@@ -140,9 +140,9 @@ export default function ConfirmBillList() {
             <ModalConfirmation
               open={!!modal}
               title={
-                modal?.type === "approve"
-                  ? "Konfirmasi Approve Pembayaran"
-                  : "Konfirmasi Penolakan Pembayaran"
+                modal?.type === 'approve'
+                  ? 'Konfirmasi Approve Pembayaran'
+                  : 'Konfirmasi Penolakan Pembayaran'
               }
               description={(() => {
                 if (!modal) return undefined;
@@ -151,19 +151,19 @@ export default function ConfirmBillList() {
                 return (
                   <div className="text-left space-y-2">
                     <div className="grid grid-cols-[120px_1fr] gap-x-4 gap-y-1 text-sm items-center">
-                      <span className="text-gray-500">Blok/No</span>{" "}
+                      <span className="text-gray-500">Blok/No</span>{' '}
                       <span>
                         {bill.block}/{bill.houseNumber}
                       </span>
-                      <span className="text-gray-500">Month/Year</span>{" "}
+                      <span className="text-gray-500">Month/Year</span>{' '}
                       <span>
                         {bill.month}/{bill.year}
                       </span>
-                      <span className="text-gray-500">Created At</span>{" "}
+                      <span className="text-gray-500">Created At</span>{' '}
                       <span>{formatTimestampID(bill.createdAt)}</span>
-                      <span className="text-gray-500">Amount</span>{" "}
+                      <span className="text-gray-500">Amount</span>{' '}
                       <span className="font-bold text-blue-700">
-                        Rp{Number(bill.amount).toLocaleString("id-ID")}
+                        Rp{Number(bill.amount).toLocaleString('id-ID')}
                       </span>
                       {bill.proofUrl && (
                         <>
@@ -184,21 +184,21 @@ export default function ConfirmBillList() {
                       )}
                     </div>
                     <div className="mt-2 text-sm text-gray-600">
-                      {modal.type === "approve"
-                        ? "Apakah Anda yakin ingin menyetujui pembayaran tagihan ini? Data akan tercatat sebagai sudah lunas."
-                        : "Apakah Anda yakin ingin menolak pembayaran tagihan ini? Data akan tercatat sebagai ditolak."}
+                      {modal.type === 'approve'
+                        ? 'Apakah Anda yakin ingin menyetujui pembayaran tagihan ini? Data akan tercatat sebagai sudah lunas.'
+                        : 'Apakah Anda yakin ingin menolak pembayaran tagihan ini? Data akan tercatat sebagai ditolak.'}
                     </div>
                   </div>
                 );
               })()}
               confirmLabel={
-                modal?.type === "approve" ? "Ya, Setujui" : "Ya, Tolak"
+                modal?.type === 'approve' ? 'Ya, Setujui' : 'Ya, Tolak'
               }
               cancelLabel="Batal"
               loading={!!loadingId}
-              rejectReason={modal?.type === "reject" ? rejectReason : undefined}
+              rejectReason={modal?.type === 'reject' ? rejectReason : undefined}
               onRejectReasonChange={
-                modal?.type === "reject" ? setRejectReason : undefined
+                modal?.type === 'reject' ? setRejectReason : undefined
               }
               onCancel={() => {
                 setModal(null);
@@ -206,37 +206,37 @@ export default function ConfirmBillList() {
               onConfirm={async () => {
                 if (!modal) return;
                 setLoadingId(modal.billId);
-                if (modal.type === "approve") {
+                if (modal.type === 'approve') {
                   approveMutation.mutate(
                     { billId: modal.billId },
                     {
                       onSuccess: () => {
-                        toast.success("Tagihan berhasil dikonfirmasi.");
+                        toast.success('Tagihan berhasil dikonfirmasi.');
                         setLoadingId(null);
                         setModal(null);
                       },
                       onError: () => {
-                        toast.error("Gagal mengkonfirmasi tagihan.");
+                        toast.error('Gagal mengkonfirmasi tagihan.');
                         setLoadingId(null);
                       },
-                    }
+                    },
                   );
                 } else {
                   rejectMutation.mutate(
                     { billId: modal.billId, reason: rejectReason },
                     {
                       onSuccess: () => {
-                        toast.success("Tagihan berhasil ditolak.");
+                        toast.success('Tagihan berhasil ditolak.');
                         // removed setRejectingId(null); not needed
-                        setRejectReason("");
+                        setRejectReason('');
                         setLoadingId(null);
                         setModal(null);
                       },
                       onError: () => {
-                        toast.error("Gagal menolak tagihan.");
+                        toast.error('Gagal menolak tagihan.');
                         setLoadingId(null);
                       },
-                    }
+                    },
                   );
                 }
               }}

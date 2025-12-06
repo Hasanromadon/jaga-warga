@@ -1,12 +1,12 @@
-import React from "react";
-import { Calendar, Home, FileDown, MessageSquare, Check } from "lucide-react";
-import { Bill } from "@/types/bill";
-import { getMonthName } from "@/utils/formatDate";
-import { formatRupiah } from "@/utils/formatRupiah";
-import { STATUS_LABELS } from "@/constants";
+import React from 'react';
+import { Calendar, FileDown, MessageSquare, Check } from 'lucide-react';
+import { Bill } from '@/types/bill';
+import { getMonthName } from '@/utils/formatDate';
+import { formatRupiah } from '@/utils/formatRupiah';
+import { STATUS_LABELS } from '@/constants';
 
 // Tipe dan Properti tetap sama
-type BillStatus = "paid" | "approved" | "pending" | "rejected" | "unpaid";
+type BillStatus = 'paid' | 'approved' | 'pending' | 'rejected' | 'unpaid';
 
 interface BillCardProps {
   bill: Bill;
@@ -19,26 +19,26 @@ interface BillCardProps {
 const STATUS_CONFIG: Record<BillStatus, { badge: string; text: string }> = {
   paid: {
     badge:
-      "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300",
-    text: "text-green-600",
+      'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+    text: 'text-green-600',
   },
   approved: {
-    badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
-    text: "text-blue-600",
+    badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+    text: 'text-blue-600',
   },
   pending: {
     badge:
-      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
-    text: "text-yellow-600",
+      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+    text: 'text-yellow-600',
   },
   rejected: {
-    badge: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
-    text: "text-red-600",
+    badge: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+    text: 'text-red-600',
   },
   unpaid: {
     badge:
-      "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300",
-    text: "text-orange-600",
+      'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300',
+    text: 'text-orange-600',
   },
 };
 
@@ -56,7 +56,7 @@ export const BillCard: React.FC<BillCardProps> = ({
       <div className="flex items-start justify-between p-4">
         <div>
           <h3 className="text-base font-bold text-gray-900 dark:text-white">
-            {bill.residentName || "Nama Penghuni"}
+            {bill.residentName || 'Nama Penghuni'}
           </h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Blok {bill.block} No {bill.houseNumber}
@@ -92,7 +92,7 @@ export const BillCard: React.FC<BillCardProps> = ({
       </div>
 
       {/* Aksi Sekunder (jika ada) */}
-      {(bill.proofUrl || bill.status === "unpaid") && (
+      {(bill.proofUrl || bill.status === 'unpaid') && (
         <div className="flex justify-center gap-4 border-t border-gray-200 px-4 py-3 dark:border-gray-700">
           {bill.proofUrl && (
             <SecondaryButton onClick={() => onShowProof(bill.proofUrl!)}>
@@ -100,7 +100,7 @@ export const BillCard: React.FC<BillCardProps> = ({
               Lihat Bukti
             </SecondaryButton>
           )}
-          {bill.status === "unpaid" && (
+          {bill.status === 'unpaid' && (
             <SecondaryButton onClick={() => onSendWhatsApp(bill)}>
               <MessageSquare size={16} />
               Kirim Pengingat
@@ -111,18 +111,18 @@ export const BillCard: React.FC<BillCardProps> = ({
 
       {/* Bagian Footer: Tombol Aksi Utama */}
       <div className="bg-gray-50 p-3 dark:bg-gray-800/50">
-        {bill.status !== "paid" && bill.status !== "approved" && (
+        {bill.status !== 'paid' && bill.status !== 'approved' && (
           <ActionButton
-            onClick={() => onStatusChange(bill, "paid")}
+            onClick={() => onStatusChange(bill, 'paid')}
             className="w-full bg-blue-600 text-white hover:bg-blue-700"
           >
             <Check size={20} className="mr-2" />
             Tandai Lunas
           </ActionButton>
         )}
-        {bill.status === "paid" && (
+        {bill.status === 'paid' && (
           <ActionButton
-            onClick={() => onStatusChange(bill, "unpaid")}
+            onClick={() => onStatusChange(bill, 'unpaid')}
             className="w-full bg-red-600 text-white hover:bg-red-700"
           >
             Batalkan Pembayaran

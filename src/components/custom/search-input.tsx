@@ -1,5 +1,5 @@
-import { Input } from "../ui/input";
-import { Search as SearchIcon } from "lucide-react";
+import { Input } from '../ui/input';
+import { Search as SearchIcon } from 'lucide-react';
 
 // Reusable search input component
 export function SearchInput({

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 import {
   collection,
   doc,
@@ -7,8 +7,8 @@ import {
   limit,
   orderBy,
   query,
-} from "firebase/firestore";
-import { db } from "../firebaseConfig";
+} from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
 export interface DashboardStats {
   totalIncome: number;
@@ -17,15 +17,15 @@ export interface DashboardStats {
   pendingBills: number;
 }
 
-export function useDashboardStats(key = "GHI") {
+export function useDashboardStats(key = 'GHI') {
   return useQuery<DashboardStats>({
-    queryKey: ["dashboard-stats", key],
+    queryKey: ['dashboard-stats', key],
     queryFn: async () => {
       const now = new Date();
       const year = now.getFullYear().toString();
-      const month = (now.getMonth() + 1).toString().padStart(2, "0");
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
 
-      const summaryRef = doc(db, "monthly_summaries", key, year, month);
+      const summaryRef = doc(db, 'monthly_summaries', key, year, month);
       const summarySnap = await getDoc(summaryRef);
 
       if (summarySnap.exists()) {
@@ -49,7 +49,7 @@ export function useDashboardStats(key = "GHI") {
 }
 export type Activity = {
   id: string;
-  type: "income" | "expense";
+  type: 'income' | 'expense';
   user: string;
   amount: number;
   time: string;
@@ -57,12 +57,12 @@ export type Activity = {
 
 export function useActivities() {
   return useQuery<Activity[]>({
-    queryKey: ["activities"],
+    queryKey: ['activities'],
     queryFn: async () => {
       const q = query(
-        collection(db, "general_transactions"),
-        orderBy("created_at", "desc"),
-        limit(4)
+        collection(db, 'general_transactions'),
+        orderBy('created_at', 'desc'),
+        limit(4),
       );
       const transSnap = await getDocs(q);
 
@@ -73,7 +73,7 @@ export function useActivities() {
           type: t.type,
           user: t.description,
           amount: t.amount,
-          time: new Date(t.created_at.seconds * 1000).toLocaleString("id-ID"),
+          time: new Date(t.created_at.seconds * 1000).toLocaleString('id-ID'),
         } as Activity;
       });
 

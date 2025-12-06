@@ -1,5 +1,5 @@
-import { Bill } from "../types/bill";
-import { useBills } from "../hooks/useBills";
+import { Bill } from '../types/bill';
+import { useBills } from '../hooks/useBills';
 
 export default function BillsList({ userId }: { userId?: string }) {
   const { data: bills, isLoading, error } = useBills(userId);
@@ -21,7 +21,7 @@ export default function BillsList({ userId }: { userId?: string }) {
             <span>
               Blok/No: {bill.block}/{bill.houseNumber}
             </span>
-            <span>Jumlah: Rp{Number(bill.amount).toLocaleString("id-ID")}</span>
+            <span>Jumlah: Rp{Number(bill.amount).toLocaleString('id-ID')}</span>
             <span>Status: {bill.status}</span>
             {bill.remark && <span>Catatan: {bill.remark}</span>}
           </div>

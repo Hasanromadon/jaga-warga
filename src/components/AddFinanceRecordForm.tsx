@@ -1,30 +1,25 @@
-"use client";
+'use client';
 
-import { useAuth } from "@/hooks/useAuth";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, Coins, FileText, Repeat } from "lucide-react";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
-import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Label } from "../components/ui/label";
-import { NumberInputWithSeparator } from "../components/ui/number-input-with-separator";
-import { Textarea } from "../components/ui/textarea";
-import { db } from "../firebaseConfig";
+import { useAuth } from '@/hooks/useAuth';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Calendar, Coins, FileText, Repeat } from 'lucide-react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader } from '../components/ui/card';
+import { Label } from '../components/ui/label';
+import { NumberInputWithSeparator } from '../components/ui/number-input-with-separator';
+import { Textarea } from '../components/ui/textarea';
+import { db } from '../firebaseConfig';
 
 export interface AddFinanceRecordInputs {
   description: string;
   date: string;
   amount: number | string;
-  type: "income" | "expense" | "";
+  type: 'income' | 'expense' | '';
   residential_id: string;
 }
 
@@ -41,11 +36,11 @@ export default function AddFinanceRecordForm({
     formState: { errors },
   } = useForm<AddFinanceRecordInputs>({
     defaultValues: {
-      description: "",
-      date: "",
-      amount: "",
-      type: "",
-      residential_id: "",
+      description: '',
+      date: '',
+      amount: '',
+      type: '',
+      residential_id: '',
     },
   });
 
@@ -59,7 +54,7 @@ export default function AddFinanceRecordForm({
   const onSubmit = async (data: AddFinanceRecordInputs) => {
     try {
       setLoading(true);
-      await addDoc(collection(db, "general_transactions"), {
+      await addDoc(collection(db, 'general_transactions'), {
         description: data.description,
         date: new Date(data.date),
         amount: Number(data.amount),
@@ -69,21 +64,21 @@ export default function AddFinanceRecordForm({
       });
 
       // invalidate dashboard stats and activities
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
 
       toast.success(
         `Transaksi ${
-          data.type === "income" ? "pemasukan" : "pengeluaran"
-        } berhasil disimpan!`
+          data.type === 'income' ? 'pemasukan' : 'pengeluaran'
+        } berhasil disimpan!`,
       );
 
-      navigate.push("/dashboard/keuangan");
+      navigate.push('/dashboard/keuangan');
 
       reset();
     } catch (error) {
       console.error(error);
-      toast.error("Gagal menyimpan transaksi!");
+      toast.error('Gagal menyimpan transaksi!');
     } finally {
       setLoading(false);
     }
@@ -94,7 +89,7 @@ export default function AddFinanceRecordForm({
       <CardHeader className="relative">
         <div className="flex items-center space-x-3 justify-start mb-3">
           <Button
-            onClick={onBack ? onBack : () => navigate.push("/dashboard")}
+            onClick={onBack ? onBack : () => navigate.push('/dashboard')}
             variant="ghost"
             className="text-slate-700 hover:text-slate-900"
           >
@@ -128,7 +123,7 @@ export default function AddFinanceRecordForm({
                   type="date"
                   id="date"
                   {...field}
-                  value={field.value || ""}
+                  value={field.value || ''}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
                 />
               )}
@@ -161,9 +156,9 @@ export default function AddFinanceRecordForm({
                 render={({ field }) => (
                   <NumberInputWithSeparator
                     id="amount"
-                    value={field.value || ""}
+                    value={field.value || ''}
                     onValueChange={(val) =>
-                      field.onChange(val ? parseInt(val, 10) : "")
+                      field.onChange(val ? parseInt(val, 10) : '')
                     }
                     placeholder="Masukkan jumlah transaksi"
                     className="pl-8 !text-xs"
@@ -190,8 +185,8 @@ export default function AddFinanceRecordForm({
               render={({ field }) => (
                 <div className="flex items-center justify-between gap-3 mt-1">
                   {[
-                    { value: "income", label: "Pemasukan", color: "green" },
-                    { value: "expense", label: "Pengeluaran", color: "red" },
+                    { value: 'income', label: 'Pemasukan', color: 'green' },
+                    { value: 'expense', label: 'Pengeluaran', color: 'red' },
                   ].map((option) => {
                     const isActive = field.value === option.value;
                     return (
@@ -202,13 +197,13 @@ export default function AddFinanceRecordForm({
                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border transition-all text-xs font-medium
                 ${
                   isActive
-                    ? option.color === "green"
-                      ? "bg-emerald-100 border-emerald-400 text-emerald-700 shadow-sm"
-                      : "bg-rose-100 border-rose-400 text-rose-700 shadow-sm"
-                    : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                    ? option.color === 'green'
+                      ? 'bg-emerald-100 border-emerald-400 text-emerald-700 shadow-sm'
+                      : 'bg-rose-100 border-rose-400 text-rose-700 shadow-sm'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                 }`}
                       >
-                        {option.value === "income" ? (
+                        {option.value === 'income' ? (
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-4 w-4"
@@ -272,7 +267,7 @@ export default function AddFinanceRecordForm({
                   id="description"
                   placeholder="Tuliskan keterangan transaksi..."
                   className="resize-y !text-xs"
-                  value={field.value || ""}
+                  value={field.value || ''}
                   onChange={field.onChange}
                 />
               )}
@@ -285,7 +280,7 @@ export default function AddFinanceRecordForm({
           </div>
 
           <Button type="submit" disabled={loading} className="w-full mt-2">
-            {loading ? "Menyimpan..." : "Simpan Transaksi"}
+            {loading ? 'Menyimpan...' : 'Simpan Transaksi'}
           </Button>
         </form>
       </CardContent>

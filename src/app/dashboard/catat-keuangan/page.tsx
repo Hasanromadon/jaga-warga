@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React from "react";
-import AddFinanceRecordForm from "@/components/AddFinanceRecordForm";
+import React from 'react';
+import AddFinanceRecordForm from '@/components/AddFinanceRecordForm';
 
 export default function Page() {
   return <AddFinanceRecordForm />;

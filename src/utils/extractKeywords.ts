@@ -16,20 +16,20 @@
  * @returns Array string keyword unik hasil ekstraksi
  */
 export const extractKeywords = (
-  item: Record<string, string | undefined | null>
+  item: Record<string, string | undefined | null>,
 ): string[] => {
   const keywordsSet = new Set<string>();
 
   for (const key in item) {
     if (Object.prototype.hasOwnProperty.call(item, key)) {
-      if (typeof item[key] === "string") {
-        const words = item[key].split(" ");
+      if (typeof item[key] === 'string') {
+        const words = item[key].split(' ');
         words.forEach((word) => {
           // Remove punctuation and convert to lowercase
           const cleanedWord = word
-            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
             .toLowerCase();
-          if (cleanedWord !== "" && cleanedWord.length >= 3) {
+          if (cleanedWord !== '' && cleanedWord.length >= 3) {
             // Only add the full word and 3-5 char prefixes
             keywordsSet.add(cleanedWord);
             for (let i = 3; i <= Math.min(cleanedWord.length, 5); i++) {

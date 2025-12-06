@@ -1,18 +1,18 @@
-"use client";
-import { useForm, Controller } from "react-hook-form";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+'use client';
+import { useForm, Controller } from 'react-hook-form';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 import {
   Select,
   SelectTrigger,
   SelectContent,
   SelectItem,
   SelectValue,
-} from "./ui/select";
-import { Home, User, Phone } from "lucide-react";
-import { BLOK_LIST } from "../constants";
-import { useState } from "react";
+} from './ui/select';
+import { Home, User, Phone } from 'lucide-react';
+import { BLOK_LIST } from '../constants';
+import { useState } from 'react';
 
 export interface ResidentFormInputs {
   block: string;
@@ -29,7 +29,7 @@ interface ResidentFormProps {
   subtitle?: string;
 }
 
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from '../hooks/useAuth';
 
 export default function ResidentForm({
   initial,
@@ -51,12 +51,12 @@ export default function ResidentForm({
     initial &&
     (initial.name || initial.block || initial.houseNumber)
   );
-  const displayTitle = title ?? (isEdit ? "Edit Warga" : "Tambah Warga");
+  const displayTitle = title ?? (isEdit ? 'Edit Warga' : 'Tambah Warga');
   const displaySubtitle =
     subtitle ??
     (isEdit
-      ? "Perbarui informasi warga di bawah ini."
-      : "Isi data warga dengan lengkap dan benar.");
+      ? 'Perbarui informasi warga di bawah ini.'
+      : 'Isi data warga dengan lengkap dan benar.');
 
   const onSubmit = (data: ResidentFormInputs) => {
     setLoading(true);
@@ -84,9 +84,9 @@ export default function ResidentForm({
                 rules={{ required: true }}
                 render={({ field }) => (
                   <Select
-                    value={field.value || ""}
+                    value={field.value || ''}
                     onValueChange={field.onChange}
-                    defaultValue={field.value || ""}
+                    defaultValue={field.value || ''}
                   >
                     <SelectTrigger className="w-full" id="block">
                       <SelectValue placeholder="Pilih Blok" />
@@ -112,9 +112,9 @@ export default function ResidentForm({
                 rules={{ required: true }}
                 render={({ field }) => (
                   <Select
-                    value={field.value || ""}
+                    value={field.value || ''}
                     onValueChange={field.onChange}
-                    defaultValue={field.value || ""}
+                    defaultValue={field.value || ''}
                   >
                     <SelectTrigger className="w-full" id="houseNumber">
                       <SelectValue placeholder="Pilih Nomor" />
@@ -125,7 +125,7 @@ export default function ResidentForm({
                           <SelectItem key={no} value={no}>
                             {no}
                           </SelectItem>
-                        )
+                        ),
                       )}
                     </SelectContent>
                   </Select>
@@ -151,7 +151,7 @@ export default function ResidentForm({
             id="name"
             maxLength={20}
             placeholder="Nama Warga"
-            {...register("name", { required: true })}
+            {...register('name', { required: true })}
             className="text-sm w-full"
           />
           {errors.name && (
@@ -164,13 +164,13 @@ export default function ResidentForm({
             className="mb-1 text-xs font-semibold text-blue-900 flex items-center gap-1"
           >
             <Phone className="w-4 h-4" />
-            Nomor Telepon{" "}
+            Nomor Telepon{' '}
             <span className="text-xs text-blue-500">(opsional)</span>
           </Label>
           <Input
             id="phoneNumber"
             placeholder="08xxxxxxxxxx"
-            {...register("phoneNumber")}
+            {...register('phoneNumber')}
             className="text-sm w-full"
           />
         </div>
@@ -180,7 +180,7 @@ export default function ResidentForm({
           disabled={loading}
           className="w-full text-base mt-2"
         >
-          {loading ? "Loading..." : "Simpan"}
+          {loading ? 'Loading...' : 'Simpan'}
         </Button>
       </form>
     </div>

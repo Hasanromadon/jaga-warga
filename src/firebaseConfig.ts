@@ -1,12 +1,12 @@
 // Firebase config and initialization
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
   getAuth,
   setPersistence,
   browserLocalPersistence,
-} from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+} from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -24,8 +24,8 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 // Set auth persistence to LOCAL to persist auth state across browser sessions
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   setPersistence(auth, browserLocalPersistence).catch((error) => {
-    console.error("Error setting auth persistence:", error);
+    console.error('Error setting auth persistence:', error);
   });
 }
