@@ -70,6 +70,10 @@ function DashboardPage({ user: propUser }: DashboardPageProps) {
       router.push('/dashboard/iklan');
     } else if (menu === 'promo') {
       router.push('/promo');
+    } else if (menu === 'laporan') {
+      router.push('/dashboard/laporan');
+    } else if (menu === 'konfirmasi') {
+      router.push('/dashboard/konfirmasi');
     } else {
       router.push(`/dashboard/${menu}`);
     }
